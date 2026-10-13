@@ -1,0 +1,28 @@
+{
+	"extends": "$app/tsconfig",
+	"compilerOptions": {
+		"moduleResolution": "bundler",
+		"module": "esnext",
+		"target": "es2022",
+		"strict": true,
+		"allowJs": true,
+		"checkJs": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true,
+		"paths": {
+			"$lib": ["./src/lib"],
+			"$lib/*": ["./src/lib/*"],
+			"#lib": ["./src/lib"],
+			"#lib/*": ["./src/lib/*"]
+		}
+	},
+	"include": [
+		"src",
+		"test",
+		"*"
+	],
+	"exclude": [
+		"src/service-worker"
+	]
+}
