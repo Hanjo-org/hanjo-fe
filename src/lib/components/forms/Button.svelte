@@ -5,6 +5,8 @@
 		variant?: 'primary' | 'secondary' | 'danger' | 'outline' | 'ghost';
 		size?: 'sm' | 'md' | 'lg';
 		type?: 'button' | 'submit' | 'reset';
+		href?: string;
+		target?: string;
 		disabled?: boolean;
 		loading?: boolean;
 		onclick?: (event: MouseEvent) => void;
@@ -16,6 +18,8 @@
 		variant = 'primary',
 		size = 'md',
 		type = 'button',
+		href,
+		target,
 		disabled = false,
 		loading = false,
 		onclick,
@@ -24,19 +28,35 @@
 	}: Props = $props();
 </script>
 
-<button
-	{type}
-	class="btn btn-{variant} size-{size} {className}"
-	disabled={disabled || loading}
-	{onclick}
->
-	{#if loading}
-		<span class="btn-spinner"></span>
-	{/if}
-	{#if children}
-		{@render children()}
-	{/if}
-</button>
+{#if href}
+	<a
+		{href}
+		{target}
+		class="btn btn-{variant} size-{size} {className}"
+		{onclick}
+	>
+		{#if loading}
+			<span class="btn-spinner"></span>
+		{/if}
+		{#if children}
+			{@render children()}
+		{/if}
+	</a>
+{:else}
+	<button
+		{type}
+		class="btn btn-{variant} size-{size} {className}"
+		disabled={disabled || loading}
+		{onclick}
+	>
+		{#if loading}
+			<span class="btn-spinner"></span>
+		{/if}
+		{#if children}
+			{@render children()}
+		{/if}
+	</button>
+{/if}
 
 <style>
 	.btn {

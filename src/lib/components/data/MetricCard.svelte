@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import Badge from '../ui/Badge.svelte';
+	import Badge from './Badge.svelte';
 
 	interface Props {
 		title: string;
@@ -27,33 +27,41 @@
 	}: Props = $props();
 </script>
 
-<div class="panel-card metric-card {className}">
-	<div class="metric-top">
-		<span class="metric-title">{title}</span>
-		<div class="metric-top-right">
+<div class="stat-card {className}">
+	<div class="card-header">
+		<span class="card-title">{title}</span>
+		<div class="card-badges">
 			{#if badgeText}
 				<Badge variant={badgeVariant} text={badgeText} size="sm" />
 			{/if}
 			{#if icon}
-				<div class="metric-icon-box">
+				<div class="card-icon">
 					{@render icon()}
 				</div>
 			{/if}
 		</div>
 	</div>
 
-	<div class="metric-body">
-		<h2 class="metric-value">{value}</h2>
-		{#if subtext || trendValue}
-			<div class="metric-footer">
-				{#if trendValue}
-					<span class="metric-trend trend-{trend || 'neutral'}">
-						{#if trend === 'up'}↑{:else if trend === 'down'}↓{/if}
+	<div class="card-body">
+		<div class="card-value">{value}</div>
+		{#if subtext || trend}
+			<div class="card-sub-row">
+				{#if trend && trendValue}
+					<span class="trend-indicator trend-{trend}">
+						{#if trend === 'up'}
+							<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5">
+								<polyline points="18 15 12 9 6 15"></polyline>
+							</svg>
+						{:else if trend === 'down'}
+							<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5">
+								<polyline points="6 9 12 15 18 9"></polyline>
+							</svg>
+						{/if}
 						{trendValue}
 					</span>
 				{/if}
 				{#if subtext}
-					<span class="metric-subtext">{subtext}</span>
+					<span class="card-subtext">{subtext}</span>
 				{/if}
 			</div>
 		{/if}
@@ -61,98 +69,98 @@
 </div>
 
 <style>
-	.metric-card {
-		padding: 18px 20px;
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		gap: 12px;
+	.stat-card {
 		background: var(--bg-panel);
 		border: 1px solid var(--border-panel);
 		border-radius: var(--radius-lg);
-		box-shadow: var(--shadow-card);
-		transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+		padding: 16px 18px;
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		transition: border-color 0.2s, box-shadow 0.2s;
 	}
 
-	.metric-card:hover {
-		border-color: var(--brand-primary);
-		transform: translateY(-2px);
-		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+	.stat-card:hover {
+		border-color: var(--border-panel-hover, var(--border-panel));
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 	}
 
-	.metric-top {
+	.card-header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 8px;
 	}
 
-	.metric-title {
-		font-size: 12.5px;
+	.card-title {
+		font-size: 12px;
 		font-weight: 600;
 		color: var(--text-muted);
 		text-transform: uppercase;
-		letter-spacing: 0.4px;
+		letter-spacing: 0.04em;
 	}
 
-	.metric-top-right {
+	.card-badges {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: 6px;
 	}
 
-	.metric-icon-box {
-		width: 32px;
-		height: 32px;
-		border-radius: var(--radius-md);
-		background: var(--brand-primary-dim);
-		color: var(--brand-primary);
+	.card-icon {
+		color: var(--text-subtle);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 	}
 
-	.metric-body {
+	.card-body {
 		display: flex;
 		flex-direction: column;
 		gap: 4px;
 	}
 
-	.metric-value {
-		font-size: 26px;
+	.card-value {
+		font-size: 24px;
 		font-weight: 800;
 		color: var(--text-main);
-		line-height: 1.1;
-		font-family: var(--font-heading);
+		line-height: 1.15;
+		font-family: var(--font-mono, inherit);
+		letter-spacing: -0.02em;
 	}
 
-	.metric-footer {
+	.card-sub-row {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: 6px;
 		font-size: 11.5px;
+		flex-wrap: wrap;
 	}
 
-	.metric-trend {
-		font-weight: 700;
+	.card-subtext {
+		color: var(--text-subtle);
+	}
+
+	.trend-indicator {
 		display: inline-flex;
 		align-items: center;
 		gap: 2px;
+		font-weight: 700;
+		border-radius: var(--radius-sm);
+		padding: 1px 4px;
 	}
 
 	.trend-up {
-		color: #10b981;
+		color: var(--pill-success-text);
+		background-color: var(--pill-success-bg);
 	}
 
 	.trend-down {
-		color: #ef4444;
+		color: var(--pill-danger-text);
+		background-color: var(--pill-danger-bg);
 	}
 
 	.trend-neutral {
-		color: var(--text-subtle);
-	}
-
-	.metric-subtext {
-		color: var(--text-subtle);
+		color: var(--text-muted);
+		background-color: var(--bg-panel-sub);
 	}
 </style>

@@ -1,6 +1,159 @@
-// Hanjo ERP & POS API Client
+/**
+ * Hanjo API Client & Driver Dispatcher
+ * Referensi: MILESTONE.md §3.1, §3.3, §3.4
+ *
+ * Mengatur pemanggilan API melalui antarmuka seragam `request()`.
+ * Memilih driver (`mockDriver` atau `httpDriver`) secara dinamis berdasarkan konfigurasi
+ * `PUBLIC_DATA_SOURCE` atau override per awalan path (mode hibrida).
+ */
 
-const API_BASE = 'http://localhost:8080/api/v1';
+import type { ApiRequest, ApiResponse, DataDriver, Envelope } from './contract/types.js';
+import { AppError } from './contract/errors.js';
+import { mockDriver } from './drivers/mock/driver.js';
+import { httpDriver } from './drivers/http/driver.js';
+
+export type DataSourceType = 'mock' | 'api';
+
+export interface ClientOptions {
+	defaultDataSource?: DataSourceType;
+	pathOverrides?: Record<string, DataSourceType>;
+}
+
+export class ApiClient {
+	private defaultDataSource: DataSourceType;
+	private pathOverrides: Map<string, DataSourceType>;
+	private mockDriver: DataDriver;
+	private httpDriver: DataDriver;
+
+	constructor(options: ClientOptions = {}) {
+		// Default sumber data: baca dari Vite env jika ada, fallback ke 'mock'
+		const envSource = typeof import.meta !== 'undefined' && (import.meta as any).env?.PUBLIC_DATA_SOURCE;
+		this.defaultDataSource = options.defaultDataSource || (envSource === 'api' ? 'api' : 'mock');
+		this.pathOverrides = new Map(Object.entries(options.pathOverrides || {}));
+		this.mockDriver = mockDriver;
+		this.httpDriver = httpDriver;
+	}
+
+	/**
+	 * Menentukan sumber data default secara runtime (dipakai oleh Panel Sumber Data MS-13)
+	 */
+	setDataSource(source: DataSourceType): void {
+		this.defaultDataSource = source;
+	}
+
+	getDataSource(): DataSourceType {
+		return this.defaultDataSource;
+	}
+
+	/**
+	 * Menyetel override driver per awalan path (mode hibrida, mis. /inventory -> api)
+	 */
+	setPathOverride(pathPrefix: string, source: DataSourceType): void {
+		this.pathOverrides.set(pathPrefix, source);
+	}
+
+	removePathOverride(pathPrefix: string): void {
+		this.pathOverrides.delete(pathPrefix);
+	}
+
+	getPathOverrides(): Record<string, DataSourceType> {
+		return Object.fromEntries(this.pathOverrides.entries());
+	}
+
+	/**
+	 * Memilih driver yang tepat berdasarkan path request
+	 */
+	private resolveDriver(path: string): DataDriver {
+		// Cari override terpanjang yang cocok dengan awalan path
+		let matchedPrefix = '';
+		let chosenSource: DataSourceType | undefined;
+
+		for (const [prefix, source] of this.pathOverrides.entries()) {
+			if (path.startsWith(prefix) && prefix.length > matchedPrefix.length) {
+				matchedPrefix = prefix;
+				chosenSource = source;
+			}
+		}
+
+		const source = chosenSource || this.defaultDataSource;
+		return source === 'api' ? this.httpDriver : this.mockDriver;
+	}
+
+	/**
+	 * Menjalankan request API melalui driver terpilih dengan dukungan retry aman untuk GET
+	 */
+	async request<T>(req: ApiRequest): Promise<ApiResponse<T>> {
+		const driver = this.resolveDriver(req.path);
+		const maxRetries = req.method.toUpperCase() === 'GET' ? 2 : 0;
+		let attempts = 0;
+
+		while (true) {
+			try {
+				const response = await driver.request<T>(req);
+
+				// Jika server error 500/502/503/504 pada request GET, lakukan retry
+				if (response.status >= 500 && attempts < maxRetries) {
+					attempts++;
+					await new Promise((res) => setTimeout(res, 200 * attempts));
+					continue;
+				}
+
+				return response;
+			} catch (error: any) {
+				// Retry hanya untuk network drop pada method GET
+				if (attempts < maxRetries && error.name !== 'AbortError') {
+					attempts++;
+					await new Promise((res) => setTimeout(res, 200 * attempts));
+					continue;
+				}
+				throw error;
+			}
+		}
+	}
+
+	/**
+	 * Helper eksekusi request dan langsung mengembalikan payload data (unwrap)
+	 * Melempar AppError jika status bukan 2xx.
+	 */
+	async execute<T>(req: ApiRequest): Promise<T> {
+		const res = await this.request<T>(req);
+		if (res.status >= 400 || ('error' in res.body && res.body.error)) {
+			const err = (res.body as any).error;
+			throw new AppError(err?.code || 'server_error', err?.message || 'Permintaan gagal', err?.details);
+		}
+
+		return (res.body as any).data as T;
+	}
+
+	// Shorthand helpers
+	async get<T>(path: string, options?: Partial<ApiRequest>): Promise<T> {
+		return this.execute<T>({ method: 'GET', path, ...options });
+	}
+
+	async post<T>(path: string, body?: unknown, options?: Partial<ApiRequest>): Promise<T> {
+		return this.execute<T>({ method: 'POST', path, body, ...options });
+	}
+
+	async put<T>(path: string, body?: unknown, options?: Partial<ApiRequest>): Promise<T> {
+		return this.execute<T>({ method: 'PUT', path, body, ...options });
+	}
+
+	async delete<T>(path: string, options?: Partial<ApiRequest>): Promise<T> {
+		return this.execute<T>({ method: 'DELETE', path, ...options });
+	}
+}
+
+export const apiClient = new ApiClient();
+
+// Re-export request singleton
+export const request = apiClient.request.bind(apiClient);
+
+// Re-export utility format Rupiah
+export { formatRupiah } from '../utils/format.js';
+
+// ============================================================================
+// TRANSITIONAL PROTOTYPE TYPES & MOCKS (Untuk menjaga kompatibilitas halaman prototipe)
+// ============================================================================
 
 export interface Category {
 	id: string;
@@ -150,7 +303,6 @@ export interface TransactionResponse {
 	payments: any[];
 }
 
-// Fallback Mock Data for standalone demonstration
 export const MOCK_OUTLET: Outlet = {
 	id: '01927364-0001-7000-8000-000000000001',
 	name: 'Hanjo Senopati',
@@ -158,15 +310,15 @@ export const MOCK_OUTLET: Outlet = {
 	street: 'Jl. Senopati No. 42',
 	city: 'Jakarta Selatan',
 	status: 'open',
-	tax_rate: 0.10, // 10% PB1
-	service_charge: 0.05, // 5% Service Charge
+	tax_rate: 0.1,
+	service_charge: 0.05
 };
 
 export const MOCK_CATEGORIES: Category[] = [
 	{ id: 'cat-1', name: 'Signature Coffee', slug: 'signature-coffee', description: 'Kopi kreasi barista khas Hanjo', sort_order: 1, is_active: true },
 	{ id: 'cat-2', name: 'Espresso Based', slug: 'espresso-based', description: 'Klasik espresso murni dan kopi susu', sort_order: 2, is_active: true },
 	{ id: 'cat-3', name: 'Non-Coffee', slug: 'non-coffee', description: 'Matcha, cokelat artisan, dan teh', sort_order: 3, is_active: true },
-	{ id: 'cat-4', name: 'Pastry & Bakery', slug: 'pastry-bakery', description: 'Freshly baked croissant & toast', sort_order: 4, is_active: true },
+	{ id: 'cat-4', name: 'Pastry & Bakery', slug: 'pastry-bakery', description: 'Freshly baked croissant & toast', sort_order: 4, is_active: true }
 ];
 
 export const MOCK_INGREDIENTS: Ingredient[] = [
@@ -175,7 +327,7 @@ export const MOCK_INGREDIENTS: Ingredient[] = [
 	{ id: 'ing-3', name: 'Gula Aren Organik Cair', sku: 'ING-AREN-01', unit: 'liter', minimum_stock: 10, reorder_point: 20, cost_per_unit: 35000, status: 'active' },
 	{ id: 'ing-4', name: 'Pure Uji Matcha Powder', sku: 'ING-MATCHA-01', unit: 'gram', minimum_stock: 150, reorder_point: 300, cost_per_unit: 850, status: 'active' },
 	{ id: 'ing-5', name: 'Cup Plastik 16oz + Straw', sku: 'ING-CUP-16', unit: 'pcs', minimum_stock: 100, reorder_point: 250, cost_per_unit: 850, status: 'active' },
-	{ id: 'ing-6', name: 'Butter Croissant Dough', sku: 'ING-CROIS-01', unit: 'pcs', minimum_stock: 15, reorder_point: 30, cost_per_unit: 11000, status: 'active' },
+	{ id: 'ing-6', name: 'Butter Croissant Dough', sku: 'ING-CROIS-01', unit: 'pcs', minimum_stock: 15, reorder_point: 30, cost_per_unit: 11000, status: 'active' }
 ];
 
 export const MOCK_STOCK: StockLevel[] = [
@@ -183,7 +335,7 @@ export const MOCK_STOCK: StockLevel[] = [
 	{ id: 'stk-2', outlet_id: MOCK_OUTLET.id, ingredient_id: 'ing-2', ingredient_name: 'Susu Fresh Milk Greenfield', current_qty: 18.2, unit: 'liter', last_updated: '2026-10-12T10:00:00Z' },
 	{ id: 'stk-3', outlet_id: MOCK_OUTLET.id, ingredient_id: 'ing-3', ingredient_name: 'Gula Aren Organik Cair', current_qty: 28.0, unit: 'liter', last_updated: '2026-10-12T10:00:00Z' },
 	{ id: 'stk-4', outlet_id: MOCK_OUTLET.id, ingredient_id: 'ing-4', ingredient_name: 'Pure Uji Matcha Powder', current_qty: 120.0, unit: 'gram', last_updated: '2026-10-12T10:00:00Z' },
-	{ id: 'stk-5', outlet_id: MOCK_OUTLET.id, ingredient_id: 'ing-5', ingredient_name: 'Cup Plastik 16oz + Straw', current_qty: 480.0, unit: 'pcs', last_updated: '2026-10-12T10:00:00Z' },
+	{ id: 'stk-5', outlet_id: MOCK_OUTLET.id, ingredient_id: 'ing-5', ingredient_name: 'Cup Plastik 16oz + Straw', current_qty: 480.0, unit: 'pcs', last_updated: '2026-10-12T10:00:00Z' }
 ];
 
 export const MOCK_PRODUCTS: Product[] = [
@@ -199,161 +351,18 @@ export const MOCK_PRODUCTS: Product[] = [
 		image_url: '☕',
 		variants: [
 			{
-				id: 'var-aren-iced',
-				name: 'Iced - Regular',
-				sku: 'COF-AREN-ICED',
-				price: 24000,
-				cost: 7500,
-				is_default: true,
-				sort_order: 1,
-				recipes: [
-					{ ingredient_id: 'ing-1', ingredient_name: 'Biji Kopi Gayo', quantity: 0.018, unit: 'kg' },
-					{ ingredient_id: 'ing-2', ingredient_name: 'Fresh Milk', quantity: 0.120, unit: 'liter' },
-					{ ingredient_id: 'ing-3', ingredient_name: 'Gula Aren', quantity: 0.025, unit: 'liter' },
-					{ ingredient_id: 'ing-5', ingredient_name: 'Cup 16oz', quantity: 1, unit: 'pcs' },
-				]
-			},
-			{
-				id: 'var-aren-hot',
-				name: 'Hot - Regular',
-				sku: 'COF-AREN-HOT',
-				price: 22000,
-				cost: 6800,
-				is_default: false,
-				sort_order: 2,
-				recipes: [
-					{ ingredient_id: 'ing-1', ingredient_name: 'Biji Kopi Gayo', quantity: 0.018, unit: 'kg' },
-					{ ingredient_id: 'ing-2', ingredient_name: 'Fresh Milk', quantity: 0.150, unit: 'liter' },
-					{ ingredient_id: 'ing-3', ingredient_name: 'Gula Aren', quantity: 0.020, unit: 'liter' },
-				]
-			}
-		],
-		modifier_groups: [
-			{
-				id: 'mg-sugar',
-				name: 'Sugar Level',
-				is_required: false,
-				max_select: 1,
-				sort_order: 1,
-				options: [
-					{ id: 'opt-s100', name: 'Normal Sugar (100%)', price_adjustment: 0, sort_order: 1 },
-					{ id: 'opt-s50', name: 'Less Sugar (50%)', price_adjustment: 0, sort_order: 2 },
-					{ id: 'opt-s0', name: 'No Sugar (0%)', price_adjustment: 0, sort_order: 3 },
-				]
-			},
-			{
-				id: 'mg-extra',
-				name: 'Add-on Extra',
-				is_required: false,
-				max_select: 2,
-				sort_order: 2,
-				options: [
-					{ id: 'opt-shot', name: 'Extra Espresso Shot', price_adjustment: 5000, sort_order: 1 },
-					{ id: 'opt-oat', name: 'Swap Oat Milk (Oatside)', price_adjustment: 6000, sort_order: 2 },
-				]
-			}
-		]
-	},
-	{
-		id: 'prod-2',
-		category_id: 'cat-2',
-		category_name: 'Espresso Based',
-		sku: 'COF-AME-01',
-		name: 'Americano',
-		description: 'Double shot espresso murni dengan air mineral segar. Body clean dengan hint citrus dan dark chocolate.',
-		product_type: 'single',
-		status: 'active',
-		image_url: '🧊',
-		variants: [
-			{
-				id: 'var-ame-iced',
-				name: 'Iced',
-				sku: 'COF-AME-ICED',
-				price: 20000,
-				cost: 4800,
-				is_default: true,
-				sort_order: 1,
-				recipes: [
-					{ ingredient_id: 'ing-1', ingredient_name: 'Biji Kopi Gayo', quantity: 0.018, unit: 'kg' },
-					{ ingredient_id: 'ing-5', ingredient_name: 'Cup 16oz', quantity: 1, unit: 'pcs' },
-				]
-			},
-			{
-				id: 'var-ame-hot',
-				name: 'Hot',
-				sku: 'COF-AME-HOT',
-				price: 18000,
-				cost: 4200,
-				is_default: false,
-				sort_order: 2,
-				recipes: [
-					{ ingredient_id: 'ing-1', ingredient_name: 'Biji Kopi Gayo', quantity: 0.018, unit: 'kg' },
-				]
-			}
-		],
-		modifier_groups: []
-	},
-	{
-		id: 'prod-3',
-		category_id: 'cat-3',
-		category_name: 'Non-Coffee',
-		sku: 'NC-MAT-01',
-		name: 'Kyoto Matcha Latte',
-		description: 'Matcha grade seremonial Jepang dipadukan dengan steamed fresh milk gurih dan seimbang.',
-		product_type: 'single',
-		status: 'active',
-		image_url: '🍵',
-		variants: [
-			{
-				id: 'var-mat-iced',
-				name: 'Iced',
-				sku: 'NC-MAT-ICED',
+				id: 'var-aren-reg',
+				name: 'Regular 16oz',
+				sku: 'COF-AREN-01-REG',
 				price: 28000,
-				cost: 9200,
+				cost: 9140,
 				is_default: true,
 				sort_order: 1,
 				recipes: [
-					{ ingredient_id: 'ing-4', ingredient_name: 'Uji Matcha Powder', quantity: 15, unit: 'gram' },
-					{ ingredient_id: 'ing-2', ingredient_name: 'Fresh Milk', quantity: 0.150, unit: 'liter' },
-					{ ingredient_id: 'ing-5', ingredient_name: 'Cup 16oz', quantity: 1, unit: 'pcs' },
-				]
-			}
-		],
-		modifier_groups: [
-			{
-				id: 'mg-mat-sugar',
-				name: 'Tingkat Manis',
-				is_required: false,
-				max_select: 1,
-				sort_order: 1,
-				options: [
-					{ id: 'm-s1', name: 'Normal', price_adjustment: 0, sort_order: 1 },
-					{ id: 'm-s2', name: 'Less Sweet', price_adjustment: 0, sort_order: 2 },
-				]
-			}
-		]
-	},
-	{
-		id: 'prod-4',
-		category_id: 'cat-4',
-		category_name: 'Pastry & Bakery',
-		sku: 'PAS-CROIS-01',
-		name: 'Butter Croissant Flaky',
-		description: 'French style golden croissant dengan 100% butter Prancis asli. Renyah di luar dan lembut di dalam.',
-		product_type: 'single',
-		status: 'active',
-		image_url: '🥐',
-		variants: [
-			{
-				id: 'var-crois',
-				name: 'Warm Baked',
-				sku: 'PAS-CROIS-01',
-				price: 22000,
-				cost: 11000,
-				is_default: true,
-				sort_order: 1,
-				recipes: [
-					{ ingredient_id: 'ing-6', ingredient_name: 'Butter Croissant Dough', quantity: 1, unit: 'pcs' },
+					{ ingredient_id: 'ing-1', ingredient_name: 'Biji Kopi Arabica Aceh Gayo', quantity: 0.018, unit: 'kg' },
+					{ ingredient_id: 'ing-2', ingredient_name: 'Susu Fresh Milk Greenfield', quantity: 0.15, unit: 'liter' },
+					{ ingredient_id: 'ing-3', ingredient_name: 'Gula Aren Organik Cair', quantity: 0.02, unit: 'liter' },
+					{ ingredient_id: 'ing-5', ingredient_name: 'Cup Plastik 16oz + Straw', quantity: 1, unit: 'pcs' }
 				]
 			}
 		],
@@ -362,31 +371,9 @@ export const MOCK_PRODUCTS: Product[] = [
 ];
 
 export async function fetchCategories(): Promise<Category[]> {
-	try {
-		const res = await fetch(`${API_BASE}/categories`);
-		if (res.ok) {
-			const json = await res.json();
-			return json.data || json;
-		}
-	} catch (e) {
-		console.warn('Backend offline, using mock categories', e);
-	}
 	return MOCK_CATEGORIES;
 }
 
 export async function fetchProducts(): Promise<Product[]> {
-	try {
-		const res = await fetch(`${API_BASE}/products`);
-		if (res.ok) {
-			const json = await res.json();
-			return json.data || json;
-		}
-	} catch (e) {
-		console.warn('Backend offline, using mock products', e);
-	}
 	return MOCK_PRODUCTS;
-}
-
-export function formatRupiah(amount: number): string {
-	return 'Rp ' + amount.toLocaleString('id-ID');
 }

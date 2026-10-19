@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root,
 [data-theme='light'] {
 	/* Background Palette (Clean Professional Light Theme - PRD 13.1) */

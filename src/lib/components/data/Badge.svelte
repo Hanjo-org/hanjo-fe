@@ -26,7 +26,8 @@
 	{/if}
 	{#if children}
 		{@render children()}
-	{:else}
+	{/if}
+	{#if !children && text}
 		{text}
 	{/if}
 </span>
