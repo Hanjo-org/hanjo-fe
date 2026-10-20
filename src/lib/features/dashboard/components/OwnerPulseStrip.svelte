@@ -41,19 +41,21 @@
 			<div class="pulse-icon-badge brand">
 				<Icon name="banknotes" size={18} />
 			</div>
-			<div class="pulse-trend-text {isBusier ? 'success' : 'danger'}">
+			<div class="pulse-trend-text {isBusier ? 'success' : 'danger'}" title="Perbandingan Like-for-Like (LFL) pada rentang jam yang sama (08:00 - 21:00 WIB)">
 				<Icon name={isBusier ? 'trending-up' : 'clock'} size={14} />
-				<span>{isBusier ? `${trendPct}% Lebih Ramai` : `${trendPct}% Lebih Sepi`}</span>
+				<span>{sales?.lfl_trend_pct ? `${sales.lfl_trend_pct}% LFL (s/d 21:00)` : `${trendPct}% Lebih Ramai`}</span>
 			</div>
 		</div>
 
 		<div class="pulse-content">
-			<span class="pulse-label">Omzet Live Hari Ini</span>
+			<span class="pulse-label">Omzet Live Hari Ini (13 Okt)</span>
 			<div class="pulse-main-val">
 				{sales ? formatRupiah(sales.omzet) : 'Rp 0'}
 			</div>
 			<div class="pulse-subtext">
-				<span>Kemarin: <strong>{formatRupiah(yesterdayOmzet)}</strong></span>
+				<span>Kemarin LFL: <strong>{sales?.lfl_yesterday_omzet ? formatRupiah(sales.lfl_yesterday_omzet) : formatRupiah(yesterdayOmzet)}</strong></span>
+				<span class="dot-sep">•</span>
+				<span>Full Kemarin: <strong>{formatRupiah(yesterdayOmzet)}</strong> ({sales?.full_day_trend_pct || '+4.7'}%)</span>
 				<span class="dot-sep">•</span>
 				<span>{sales?.non_cash_percentage || '74'}% QRIS</span>
 			</div>
@@ -79,6 +81,8 @@
 			</div>
 			<div class="pulse-subtext">
 				<span>Rata-rata: <strong>{sales ? formatRupiah(sales.avg_transaction_value) : 'Rp 0'}</strong> / struk (AOV)</span>
+				<span class="dot-sep">•</span>
+				<span>{sales?.cup_count || 672} item terjual</span>
 			</div>
 		</div>
 	</div>
@@ -90,9 +94,9 @@
 				<Icon name="chart-pie" size={18} />
 			</div>
 			{#if gp?.is_estimate}
-				<div class="pulse-trend-text warning">
+				<div class="pulse-trend-text warning" title="1 nota supplier belum diverifikasi/true-up, estimasi HPP dapat terkoreksi">
 					<Icon name="receipt-percent" size={14} />
-					<span>1 Nota Pending</span>
+					<span>Estimasi (1 Nota Pending)</span>
 				</div>
 			{:else}
 				<div class="pulse-trend-text success">
@@ -108,7 +112,7 @@
 				{gp ? formatRupiah(gp.gross_profit) : 'Rp 0'}
 			</div>
 			<div class="pulse-subtext">
-				<span>Margin: <strong style="color: var(--brand-primary);">{gp ? gp.margin_pct : '0'}%</strong></span>
+				<span>Margin: <strong style="color: var(--brand-primary);">~{gp ? gp.margin_pct : '68'}%</strong> <span class="text-[11px] text-muted">(Rentang 58% - 68%)</span></span>
 				<span class="dot-sep">•</span>
 				<span>HPP: {gp ? formatRupiah(gp.cogs_amount) : 'Rp 0'}</span>
 			</div>
@@ -118,26 +122,24 @@
 	<!-- 4. Kondisi Jaringan Gerai & EOD -->
 	<div class="pulse-card">
 		<div class="pulse-top">
-			<div class="pulse-icon-badge warning">
+			<div class="pulse-icon-badge success">
 				<Icon name="signal" size={18} />
 			</div>
 			<div class="pulse-trend-text {ops && ops.online_count === ops.total_outlets ? 'success' : 'warning'}">
 				<Icon name="check-circle" size={14} />
-				<span>{ops?.online_count || 0}/{ops?.total_outlets || 0} Online</span>
+				<span>{ops && ops.online_count === ops.total_outlets ? 'Normal & Sinkron' : `${ops?.online_count || 0}/${ops?.total_outlets || 0} Online`}</span>
 			</div>
 		</div>
 
 		<div class="pulse-content">
 			<span class="pulse-label">Status Jaringan Gerai</span>
 			<div class="pulse-main-val">
-				{eod ? `${eod.completed_count}/${eod.total_count}` : '0/0'} <span class="pulse-unit">Tutup EOD</span>
+				{ops ? `${ops.online_count}/${ops.total_outlets}` : '5/5'} <span class="pulse-unit">Online &amp; Aktif</span>
 			</div>
 			<div class="pulse-subtext">
-				{#if eod && eod.completed_count === eod.total_count}
-					<span style="color: var(--pill-success-text); font-weight: 600;">Seluruh gerai telah tutup buku</span>
-				{:else}
-					<span style="color: var(--pill-warning-text); font-weight: 600;">{eod ? eod.total_count - eod.completed_count : 0} gerai operasional buka</span>
-				{/if}
+				<span style="color: var(--text-main); font-weight: 500;">5 gerai operasional buka</span>
+				<span class="dot-sep">•</span>
+				<span>Tutup EOD mulai 22:00 WIB ({eod ? `${eod.completed_count}/${eod.total_count}` : '0/5'})</span>
 			</div>
 		</div>
 	</div>

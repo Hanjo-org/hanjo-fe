@@ -7,7 +7,7 @@
  */
 
 class MockClock {
-	private frozenTimeMs: number | null = null;
+	private frozenTimeMs: number | null = new Date('2026-10-13T14:00:00.000Z').getTime();
 	private timeOffsetMs: number = 0;
 
 	/**
@@ -87,7 +87,7 @@ class MockClock {
 	 * Reset clock ke waktu nyata sistem
 	 */
 	reset(): void {
-		this.frozenTimeMs = null;
+		this.frozenTimeMs = new Date('2026-10-13T14:00:00.000Z').getTime();
 		this.timeOffsetMs = 0;
 	}
 

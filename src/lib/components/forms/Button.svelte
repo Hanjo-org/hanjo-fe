@@ -80,18 +80,18 @@
 	}
 
 	.size-sm {
-		font-size: 11.5px;
-		padding: 5px 10px;
+		font-size: 12px;
+		padding: 6px 14px;
 	}
 
 	.size-md {
-		font-size: 13px;
-		padding: 8px 14px;
+		font-size: 13.5px;
+		padding: 9px 18px;
 	}
 
 	.size-lg {
-		font-size: 14px;
-		padding: 10px 18px;
+		font-size: 14.5px;
+		padding: 12px 22px;
 	}
 
 	.btn-primary {

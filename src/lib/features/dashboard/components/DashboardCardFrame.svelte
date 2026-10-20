@@ -9,7 +9,8 @@
 	import type { DashboardCardKey } from '../../../api/contract/types.js';
 
 	interface Props {
-		cardKey: DashboardCardKey;
+		cardKey?: DashboardCardKey;
+		customContent?: boolean;
 		title: string;
 		icon?: string;
 		subtitle?: string;
@@ -23,7 +24,8 @@
 	}
 
 	let {
-		cardKey,
+		cardKey = 'sales_summary',
+		customContent = false,
 		title,
 		icon = 'chart-bar',
 		subtitle = '',
@@ -85,7 +87,9 @@
 	</div>
 
 	<div class="card-content-body">
-		{#if cardState.isLoading && !cardState.data}
+		{#if customContent}
+			{@render children()}
+		{:else if cardState.isLoading && !cardState.data}
 			<div class="py-4">
 				<Skeleton variant="row" count={4} />
 			</div>
@@ -98,18 +102,7 @@
 		{:else if cardState.data}
 			{@render children()}
 		{:else}
-			<div class="py-4">
-				<Skeleton variant="row" count={3} />
-			</div>
+			{@render children()}
 		{/if}
-	</div>
-
-	<div class="card-footer-info">
-		<span>
-			Diperbarui: {cardState.updatedAt ? formatDate(cardState.updatedAt, true) : 'Baru saja'}
-		</span>
-		<span class="mono text-xs text-subtle">
-			#{cardKey}
-		</span>
 	</div>
 </div>

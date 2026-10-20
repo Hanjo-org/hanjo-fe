@@ -123,8 +123,8 @@ async function runTests() {
 	const hasEodAct = smAct.data.items.some((i: any) => i.id === 'act-sm-eod');
 	assert(hasEodAct, 'Store Manager menerima item tindakan "Tutup Hari Belum Selesai" jika EOD pending (AC-01.12)');
 
-	// Sales summary
-	const salesRes = await dashboardService.getCard<any>('sales_summary', { outlet_id: '*' });
+	// Sales summary (Konsolidasi Organisasi Jodi)
+	const salesRes = await dashboardService.getCard<any>('sales_summary', { organization_id: 'org-jodi', outlet_id: '*' });
 	assert(salesRes.data.omzet === '8450000.00', 'Omzet konsolidasi tepat: Rp 8.450.000');
 	assert(salesRes.data.cup_count === 412, 'Total cup konsolidasi tepat: 412 cup');
 	assert(salesRes.data.daily_trends.length === 7, 'Tren harian memuat 7 hari untuk grafik garis (T-01.10)');
@@ -136,14 +136,14 @@ async function runTests() {
 	assert(jktSales.data.cup_count === 238, 'Cup outlet Senopati tepat: 238 cup');
 
 	// Gross profit & Estimasi badge (AC-01.5)
-	const gpRes = await dashboardService.getCard<any>('gross_profit');
+	const gpRes = await dashboardService.getCard<any>('gross_profit', { organization_id: 'org-jodi' });
 	assert(gpRes.data.gross_profit === '5762900.00', 'Laba kotor konsolidasi: Rp 5.762.900');
 	assert(gpRes.data.margin_pct === '68.20', 'Margin laba kotor: 68.20%');
 	assert(gpRes.data.is_estimate === true, 'is_estimate bernilai true karena ada nota pending');
 	assert(gpRes.data.estimate_badge === 'Estimasi · 1 nota belum masuk', 'Lencana Estimasi · 1 nota belum masuk tampil (AC-01.5)');
 
 	// Outlet comparison modes
-	const compOwner = await dashboardService.getCard<any>('outlet_comparison', { role: 'owner' });
+	const compOwner = await dashboardService.getCard<any>('outlet_comparison', { role: 'owner', organization_id: 'org-jodi' });
 	assert(compOwner.data.mode === 'full', 'Owner menerima mode perbandingan full (finansial)');
 	assert(compOwner.data.rows.length === 3, 'Memuat 3 baris outlet');
 
@@ -171,11 +171,11 @@ async function runTests() {
 	assert(payablesRes.data.aging.days_1_30 !== undefined, 'Aging bucket tersedia');
 
 	// Petty cash
-	const pettyRes = await dashboardService.getCard<any>('petty_cash');
+	const pettyRes = await dashboardService.getCard<any>('petty_cash', { organization_id: 'org-jodi' });
 	assert(pettyRes.data.outlets.length === 3, 'Kas kecil memuat baris untuk 3 outlet');
 
 	// Ops status
-	const opsRes = await dashboardService.getCard<any>('outlet_ops_status');
+	const opsRes = await dashboardService.getCard<any>('outlet_ops_status', { organization_id: 'org-jodi' });
 	assert(opsRes.data.online_count === 3, 'Seluruh 3 outlet berstatus online');
 
 	// Payment reconciliation

@@ -43,10 +43,10 @@ export function registerDashboardHandlers(): void {
 		const date = (ctx.req.query?.date as string) || clock.businessDate();
 
 		// Pembatasan Cakupan Outlet (RBAC & Scope §7):
-		// Store Manager tidak boleh mengakses kartu perbandingan outlet atau data lintas outlet
+		// Brand Manager tidak boleh mengakses kartu rekonsiliasi bank, hutang pusat, atau true-up nota supplier
 		if (role === 'store_manager') {
-			if (key === 'outlet_comparison' || key === 'petty_cash' || key === 'payment_reconciliation' || key === 'true_up_pending') {
-				throw ApiErrors.forbidden(`Kartu ${key} tidak diizinkan untuk peran Store Manager`);
+			if (key === 'payment_reconciliation' || key === 'true_up_pending' || key === 'hq_payables') {
+				throw ApiErrors.forbidden(`Kartu ${key} tidak diizinkan untuk peran Brand / Area Manager (khusus Finance)`);
 			}
 		}
 
@@ -168,27 +168,39 @@ function generateActionCenterData(role: string, outletId: string, date: string):
 				actionUrl: '/approvals',
 				actionLabel: 'Tinjau Persetujuan',
 				badge: 'Persetujuan Tertunda',
-				badgeColor: 'warning'
+				badgeColor: 'warning',
+				amount: '350000.00',
+				requester: 'Budi Santoso - Store Manager',
+				outlet_name: 'Jodi Senopati',
+				reason: 'Penggantian darurat karet seal mesin espresso Synesso untuk menghindari bocor tekanan uap saat jam sibuk.'
 			},
 			{
 				id: 'act-own-2',
 				type: 'PERIOD_REOPEN',
-				title: 'Permintaan Buka Ulang Periode Fiskal',
-				desc: 'Tim Finance mengajukan pembukaan audit fiskal bulan September untuk penyesuaian True-Up.',
+				title: 'Permintaan Buka Ulang Periode Fiskal (Bulan September 2026)',
+				desc: 'Audit penyesuaian True-Up 3 nota supplier susu segar & biji kopi yang terlambat diterima.',
 				actionUrl: '/approvals',
 				actionLabel: 'Tinjau Permintaan',
 				badge: 'Izin Sensitif',
-				badgeColor: 'danger'
+				badgeColor: 'danger',
+				amount: '0.00',
+				requester: 'Maya Septiani - Finance HQ',
+				outlet_name: 'Kantor Pusat (HQ)',
+				reason: 'Faktur resmi dari PT Kemasan Prima & Dairy Farm baru tiba. Butuh buka ulang jurnal September selama 24 jam untuk pencatatan HPP akrual yang presisi.'
 			},
 			{
 				id: 'act-own-3',
 				type: 'PROCUREMENT_OVER_LIMIT',
-				title: 'Pembelian Darurat Luar Jaringan',
-				desc: 'Outlet Senopati memesan Cup 16oz ke CV Kemasan Nusantara karena lonjakan akhir pekan.',
+				title: 'Pembelian Darurat Luar Jaringan (CV Kemasan Nusantara)',
+				desc: 'Outlet Senopati memesan Cup 16oz (Rp 2.450.000) karena lonjakan volume akhir pekan.',
 				actionUrl: '/approvals',
 				actionLabel: 'Setujui PO',
 				badge: 'Persetujuan Tertunda',
-				badgeColor: 'warning'
+				badgeColor: 'warning',
+				amount: '2450000.00',
+				requester: 'Budi Santoso - Store Manager',
+				outlet_name: 'Jodi Senopati',
+				reason: 'Buffer cup reguler menipis di bawah stok kritis 2 hari akibat event komunitas lari Sabtu lalu.'
 			}
 		];
 	} else if (role === 'hq_admin') {
@@ -274,50 +286,65 @@ function generateActionCenterData(role: string, outletId: string, date: string):
 
 		items = [
 			{
-				id: 'act-sm-1',
-				type: 'PR_DRAFT',
-				title: 'Draft Permintaan Barang Belum Dikirim',
-				desc: 'Pengadaan mingguan biji kopi House Blend belum di-submit ke tim logistik pusat.',
-				actionUrl: '/procurement',
-				actionLabel: 'Kirim ke Pusat',
-				badge: 'Draft PO',
-				badgeColor: 'warning'
+				id: 'act-bm-1',
+				type: 'STOCK_TRANSFER_RECOMMENDATION',
+				title: 'Rekomendasi Transfer Stok Antar Gerai',
+				desc: 'Jodi Dago surplus Fresh Milk (+15L), Jodi Gubeng diprediksi kehabisan pukul 15:00 WIB.',
+				actionUrl: '/inventory#transfer',
+				actionLabel: 'Buat Transfer Stok',
+				badge: 'Optimasi Stok',
+				badgeColor: 'warning',
+				outlet_name: 'Jodi Dago ➔ Jodi Gubeng',
+				requester: 'Sistem Prediksi ERP'
 			},
 			{
-				id: 'act-sm-2',
-				type: 'RECEIPT_AWAITING_INVOICE',
-				title: 'Penerimaan Menunggu Foto Nota Supplier',
-				desc: 'Barang tiba Fresh Milk 80L (RCV-JKT-01) membutuhkan upload foto nota asli.',
-				actionUrl: '/procurement#receipts',
-				actionLabel: 'Unggah Nota',
-				badge: 'Butuh Tindakan',
-				badgeColor: 'danger'
+				id: 'act-bm-2',
+				type: 'MENU_PROPOSAL',
+				title: 'Usulan Menu Baru (Avocado Cold Brew)',
+				desc: 'Store Manager Senopati mengajukan varian seasonal summer. Butuh kurasi Brand Manager sebelum diteruskan ke HQ.',
+				actionUrl: '/catalog#proposals',
+				actionLabel: 'Kurasi Resep',
+				badge: 'Kurasi Resep',
+				badgeColor: 'info',
+				outlet_name: 'Jodi Senopati',
+				requester: 'Budi Santoso (SM Senopati)'
 			},
 			{
-				id: 'act-sm-3',
+				id: 'act-bm-3',
+				type: 'PETTY_CASH_EXPENSE',
+				title: 'Otorisasi Belanja Luar Kas Kecil (Rp 85.000)',
+				desc: 'Pembelian emergency es kristal di Jodi Senopati melebihi batas harian kasir.',
+				actionUrl: '/petty-cash',
+				actionLabel: 'Setujui Pengeluaran',
+				badge: 'Otorisasi Biaya',
+				badgeColor: 'warning',
+				amount: '85000.00',
+				outlet_name: 'Jodi Senopati',
+				requester: 'Budi Santoso'
+			},
+			{
+				id: 'act-bm-4',
+				type: 'EOD_PENDING',
+				title: 'Laporan Tutup Hari (EOD) Belum Masuk',
+				desc: 'Jodi Gubeng belum menyelesaikan checklist kas laci dan sinkronisasi POS shift malam.',
+				actionUrl: '#health-matrix',
+				actionLabel: 'Pantau Gerai',
+				badge: 'Tutup Hari',
+				badgeColor: 'danger',
+				outlet_name: 'Jodi Gubeng'
+			},
+			{
+				id: 'act-bm-5',
 				type: 'STOCK_COUNT_SCHEDULED',
-				title: 'Jadwal Opname Harian Bahan Kritis',
-				desc: 'Hitung sisa fisik Susu Fresh Milk dan Biji Kopi sebelum shift malam berakhir.',
+				title: 'Jadwal Stock Opname Terjadwal Malam Ini',
+				desc: 'Audit fisik Biji Kopi House Blend & Sirup di Jodi Dago dan Jodi Senopati.',
 				actionUrl: '/inventory',
-				actionLabel: 'Mulai Hitung',
-				badge: 'Opname Terjadwal',
-				badgeColor: 'info'
+				actionLabel: 'Lihat Jadwal',
+				badge: 'Opname Audit',
+				badgeColor: 'info',
+				outlet_name: 'Jodi Dago'
 			}
 		];
-
-		// Item EOD khusus Store Manager jika belum selesai (AC-01.12 & T-01.14)
-		if (!eodRecord?.is_completed) {
-			items.push({
-				id: 'act-sm-eod',
-				type: 'EOD_PENDING',
-				title: 'Tutup Hari Operasional Belum Selesai',
-				desc: 'Hitung kas laci, pastikan transaksi POS sinkron, dan catat waste harian sebelum toko tutup.',
-				actionUrl: '#eod-status-card',
-				actionLabel: 'Selesaikan Tutup Hari',
-				badge: 'Tutup Hari',
-				badgeColor: 'danger'
-			});
-		}
 	}
 
 	return {
@@ -522,15 +549,24 @@ function generateSalesSummaryData(organizationId: string, outletId: string): Sal
 			yesterday_cup_count: 395,
 			is_busier_than_yesterday: true,
 			busier_label: 'Lebih Ramai (+18.4% vs Kemarin)',
+			lfl_trend_pct: '+18.2',
+			full_day_trend_pct: '+4.3',
+			lfl_yesterday_omzet: '7150000.00',
 			hourly_traffic: [
-				{ hour: '08:00', count: 34, omzet: '670000.00', yesterday_count: 28, yesterday_omzet: '560000.00' },
-				{ hour: '09:00', count: 42, omzet: '840000.00', yesterday_count: 35, yesterday_omzet: '700000.00' },
-				{ hour: '10:00', count: 45, omzet: '920000.00', yesterday_count: 40, yesterday_omzet: '810000.00' },
-				{ hour: '11:00', count: 58, omzet: '1190000.00', yesterday_count: 52, yesterday_omzet: '1040000.00' },
-				{ hour: '12:00', count: 94, omzet: '1940000.00', yesterday_count: 82, yesterday_omzet: '1680000.00' },
-				{ hour: '13:00', count: 80, omzet: '1620000.00', yesterday_count: 72, yesterday_omzet: '1460000.00' },
-				{ hour: '14:00', count: 64, omzet: '1320000.00', yesterday_count: 56, yesterday_omzet: '1150000.00' },
-				{ hour: '15:00', count: 40, omzet: '850000.00', yesterday_count: 30, yesterday_omzet: '700000.00' }
+				{ hour: '08:00', count: 9, omzet: '320000.00', yesterday_count: 8, yesterday_omzet: '270000.00' },
+				{ hour: '09:00', count: 11, omzet: '420000.00', yesterday_count: 9, yesterday_omzet: '350000.00' },
+				{ hour: '10:00', count: 13, omzet: '510000.00', yesterday_count: 12, yesterday_omzet: '450000.00' },
+				{ hour: '11:00', count: 18, omzet: '700000.00', yesterday_count: 15, yesterday_omzet: '600000.00' },
+				{ hour: '12:00', count: 28, omzet: '1080000.00', yesterday_count: 23, yesterday_omzet: '880000.00' },
+				{ hour: '13:00', count: 23, omzet: '900000.00', yesterday_count: 19, yesterday_omzet: '750000.00' },
+				{ hour: '14:00', count: 12, omzet: '480000.00', yesterday_count: 15, yesterday_omzet: '580000.00' },
+				{ hour: '15:00', count: 10, omzet: '370000.00', yesterday_count: 13, yesterday_omzet: '510000.00' },
+				{ hour: '16:00', count: 15, omzet: '570000.00', yesterday_count: 12, yesterday_omzet: '470000.00' },
+				{ hour: '17:00', count: 13, omzet: '520000.00', yesterday_count: 14, yesterday_omzet: '570000.00' },
+				{ hour: '18:00', count: 20, omzet: '760000.00', yesterday_count: 15, yesterday_omzet: '590000.00' },
+				{ hour: '19:00', count: 25, omzet: '940000.00', yesterday_count: 18, yesterday_omzet: '720000.00' },
+				{ hour: '20:00', count: 16, omzet: '620000.00', yesterday_count: 14, yesterday_omzet: '560000.00' },
+				{ hour: '21:00', count: 7, omzet: '260000.00', yesterday_count: 11, yesterday_omzet: '430000.00' }
 			],
 			daily_trends: [
 				{ date: '2026-10-07', omzet: '7250000.00', cup_count: 355 },
@@ -558,19 +594,28 @@ function generateSalesSummaryData(organizationId: string, outletId: string): Sal
 		void_refund_count: 1,
 		void_refund_amount: '38500.00',
 		trend_vs_previous_pct: '+17.2',
+		lfl_trend_pct: '+17.2',
+		full_day_trend_pct: '+4.7',
 		yesterday_omzet: '13850000.00',
+		lfl_yesterday_omzet: '12370000.00',
 		yesterday_cup_count: 641,
 		is_busier_than_yesterday: true,
-		busier_label: 'Lebih Ramai (+17.2% vs Kemarin)',
+		busier_label: 'Lebih Ramai (+17.2% LFL s/d 21:00 WIB)',
 		hourly_traffic: [
-			{ hour: '08:00', count: 54, omzet: '1090000.00', yesterday_count: 46, yesterday_omzet: '920000.00' },
-			{ hour: '09:00', count: 68, omzet: '1380000.00', yesterday_count: 58, yesterday_omzet: '1160000.00' },
-			{ hour: '10:00', count: 75, omzet: '1520000.00', yesterday_count: 66, yesterday_omzet: '1350000.00' },
-			{ hour: '11:00', count: 96, omzet: '1980000.00', yesterday_count: 85, yesterday_omzet: '1720000.00' },
-			{ hour: '12:00', count: 157, omzet: '3280000.00', yesterday_count: 140, yesterday_omzet: '2860000.00' },
-			{ hour: '13:00', count: 136, omzet: '2760000.00', yesterday_count: 122, yesterday_omzet: '2480000.00' },
-			{ hour: '14:00', count: 104, omzet: '2140000.00', yesterday_count: 92, yesterday_omzet: '1860000.00' },
-			{ hour: '15:00', count: 66, omzet: '1350000.00', yesterday_count: 52, yesterday_omzet: '1150000.00' }
+			{ hour: '08:00', count: 14, omzet: '560000.00', yesterday_count: 12, yesterday_omzet: '480000.00' },
+			{ hour: '09:00', count: 18, omzet: '720000.00', yesterday_count: 15, yesterday_omzet: '600000.00' },
+			{ hour: '10:00', count: 22, omzet: '880000.00', yesterday_count: 20, yesterday_omzet: '780000.00' },
+			{ hour: '11:00', count: 30, omzet: '1200000.00', yesterday_count: 26, yesterday_omzet: '1040000.00' },
+			{ hour: '12:00', count: 46, omzet: '1860000.00', yesterday_count: 38, yesterday_omzet: '1520000.00' },
+			{ hour: '13:00', count: 38, omzet: '1540000.00', yesterday_count: 32, yesterday_omzet: '1300000.00' },
+			{ hour: '14:00', count: 20, omzet: '820000.00', yesterday_count: 25, yesterday_omzet: '1000000.00' },
+			{ hour: '15:00', count: 16, omzet: '640000.00', yesterday_count: 22, yesterday_omzet: '880000.00' },
+			{ hour: '16:00', count: 24, omzet: '980000.00', yesterday_count: 20, yesterday_omzet: '820000.00' },
+			{ hour: '17:00', count: 22, omzet: '900000.00', yesterday_count: 24, yesterday_omzet: '980000.00' },
+			{ hour: '18:00', count: 32, omzet: '1300000.00', yesterday_count: 25, yesterday_omzet: '1020000.00' },
+			{ hour: '19:00', count: 40, omzet: '1620000.00', yesterday_count: 30, yesterday_omzet: '1250000.00' },
+			{ hour: '20:00', count: 26, omzet: '1060000.00', yesterday_count: 24, yesterday_omzet: '960000.00' },
+			{ hour: '21:00', count: 12, omzet: '420000.00', yesterday_count: 15, yesterday_omzet: '740000.00' }
 		],
 		daily_trends: [
 			{ date: '2026-10-07', omzet: '12550000.00', cup_count: 580 },
@@ -852,14 +897,14 @@ function generateHqPayablesData(role: string): HqPayablesCardData {
 		},
 		{
 			id: 'bill-003',
-			invoice_number: 'INV-KPA-2610-098',
-			supplier_name: 'PT Kemasan Prima Abadi',
-			category: 'Paper Cup & Sedotan',
+			invoice_number: 'INV-CKN-2610-098',
+			supplier_name: 'CV Kemasan Nusantara',
+			category: 'Paper Cup & Kemasan',
 			due_date: '2026-10-18',
 			due_date_formatted: '18 Okt 2026',
 			days_left: 5,
 			days_left_label: '5 hari lagi',
-			amount: '1500000.00',
+			amount: '1250000.00',
 			status: 'due_soon'
 		},
 		{
@@ -871,7 +916,7 @@ function generateHqPayablesData(role: string): HqPayablesCardData {
 			due_date_formatted: '20 Okt 2026',
 			days_left: 7,
 			days_left_label: '7 hari lagi',
-			amount: '1050000.00',
+			amount: '1300000.00',
 			status: 'due_soon'
 		}
 	];
@@ -901,6 +946,7 @@ function generatePettyCashData(organizationId: string): PettyCashCardData {
 			organization_id: 'org-jodi',
 			organization_name: 'Seduhan Kopi Jodi',
 			current_balance: '1500000.00',
+			imprest_ceiling: '2000000.00',
 			daily_spent: '85000.00',
 			daily_limit: '300000.00',
 			pending_verification_count: 1,
@@ -912,6 +958,7 @@ function generatePettyCashData(organizationId: string): PettyCashCardData {
 			organization_id: 'org-jodi',
 			organization_name: 'Seduhan Kopi Jodi',
 			current_balance: '1750000.00',
+			imprest_ceiling: '2000000.00',
 			daily_spent: '150000.00',
 			daily_limit: '300000.00',
 			pending_verification_count: 1,
@@ -923,6 +970,7 @@ function generatePettyCashData(organizationId: string): PettyCashCardData {
 			organization_id: 'org-jodi',
 			organization_name: 'Seduhan Kopi Jodi',
 			current_balance: '1000000.00',
+			imprest_ceiling: '1500000.00',
 			daily_spent: '50000.00',
 			daily_limit: '200000.00',
 			pending_verification_count: 0,
@@ -934,6 +982,7 @@ function generatePettyCashData(organizationId: string): PettyCashCardData {
 			organization_id: 'org-kaveloka',
 			organization_name: 'Kaveloka',
 			current_balance: '1200000.00',
+			imprest_ceiling: '1500000.00',
 			daily_spent: '60000.00',
 			daily_limit: '250000.00',
 			pending_verification_count: 0,
@@ -945,6 +994,7 @@ function generatePettyCashData(organizationId: string): PettyCashCardData {
 			organization_id: 'org-plaga',
 			organization_name: 'Plaga',
 			current_balance: '1100000.00',
+			imprest_ceiling: '1500000.00',
 			daily_spent: '75000.00',
 			daily_limit: '250000.00',
 			pending_verification_count: 0,
@@ -957,11 +1007,17 @@ function generatePettyCashData(organizationId: string): PettyCashCardData {
 		: allOutlets;
 
 	const totalBal = filtered.reduce((acc, curr) => acc + parseFloat(curr.current_balance), 0);
+	const totalCeiling = filtered.reduce((acc, curr) => acc + parseFloat(curr.imprest_ceiling), 0);
+	const totalSpent = filtered.reduce((acc, curr) => acc + parseFloat(curr.daily_spent), 0);
+	const totalLimit = filtered.reduce((acc, curr) => acc + parseFloat(curr.daily_limit), 0);
 	const totalPending = filtered.reduce((acc, curr) => acc + curr.pending_verification_count, 0);
 	const totalPendingAmt = filtered.reduce((acc, curr) => acc + parseFloat(curr.pending_verification_amount), 0);
 
 	return {
 		total_balance: totalBal.toFixed(2),
+		total_imprest_ceiling: totalCeiling.toFixed(2),
+		total_daily_spent: totalSpent.toFixed(2),
+		total_daily_limit: totalLimit.toFixed(2),
 		pending_verification_count: totalPending,
 		pending_verification_amount: totalPendingAmt.toFixed(2),
 		outlets: filtered
@@ -1084,19 +1140,19 @@ function generateTrueUpPendingData(): TrueUpPendingCardData {
 				supplier_name: 'CV Sumber Pangan',
 				outlet_name: 'Outlet Senopati',
 				provisional_total: '1800000.00',
-				age_days: 2
-			},
-			{
-				id: 'inv-up-2',
-				receipt_number: 'RCV-BDG-01-20261013-01',
-				supplier_name: 'PT Susu Nusantara',
-				outlet_name: 'Outlet Dago',
-				provisional_total: '950000.00',
 				age_days: 1
 			},
 			{
+				id: 'inv-up-2',
+				receipt_number: 'RCV-BDG-01-20261011-01',
+				supplier_name: 'PT Susu Nusantara',
+				outlet_name: 'Outlet Dago',
+				provisional_total: '950000.00',
+				age_days: 2
+			},
+			{
 				id: 'inv-up-3',
-				receipt_number: 'RCV-JKT-01-20261011-02',
+				receipt_number: 'RCV-JKT-01-20261010-02',
 				supplier_name: 'CV Biji Makmur',
 				outlet_name: 'Outlet Senopati',
 				provisional_total: '700000.00',

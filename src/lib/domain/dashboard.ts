@@ -19,6 +19,7 @@ export const ROLE_DASHBOARD_CARDS: Record<UserRole, DashboardCardKey[]> = {
 		'outlet_comparison',
 		'stock_issues',
 		'hq_payables',
+		'petty_cash',
 		'outlet_ops_status',
 		'outlet_eod_status'
 	],
@@ -29,6 +30,7 @@ export const ROLE_DASHBOARD_CARDS: Record<UserRole, DashboardCardKey[]> = {
 		'outlet_comparison',
 		'stock_issues',
 		'hq_payables',
+		'petty_cash',
 		'outlet_ops_status',
 		'outlet_eod_status'
 	],
@@ -43,6 +45,12 @@ export const ROLE_DASHBOARD_CARDS: Record<UserRole, DashboardCardKey[]> = {
 	],
 	store_manager: [
 		'action_center',
+		'sales_summary',
+		'gross_profit',
+		'outlet_comparison',
+		'stock_issues',
+		'petty_cash',
+		'outlet_eod_status',
 		'sm_stock_min',
 		'sm_count_schedule',
 		'sm_petty_cash',

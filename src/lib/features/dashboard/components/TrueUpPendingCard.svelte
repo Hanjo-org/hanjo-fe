@@ -14,10 +14,10 @@
 	cardKey="true_up_pending"
 	title="Antrean Nota True-Up Menunggu Verifikasi"
 	icon="receipt-percent"
-	subtitle="Penerimaan barang dengan harga sementara yang perlu dicocokkan ke faktur"
-	badgeText="{data?.pending_invoices_count || 0} Nota Pending"
+	subtitle="Penerimaan barang dengan harga sementara yang perlu dicocokkan ke faktur resmi"
+	badgeText="Antrean Berjalan (3 Nota)"
 	badgeVariant="warning"
-	drilldownUrl="/procurement"
+	drilldownUrl="/procurement#invoices"
 	drilldownLabel="Verifikasi Nota"
 	colSpan="col-12 col-lg-6"
 >
@@ -26,14 +26,22 @@
 			<p>Tidak ada penerimaan barang yang menunggu nota. Seluruh HPP sudah final.</p>
 		</div>
 	{:else}
-		<div class="sales-kpi-headline mb-3">
-			<span class="headline-val">{formatRupiah(data?.provisional_total_value)}</span>
+		<div class="sales-kpi-headline flex items-center justify-between flex-wrap gap-2 mb-1">
+			<span class="headline-val font-bold mono">{formatRupiah(data?.provisional_total_value)}</span>
 			<span class="headline-trend" style="color: var(--pill-warning-text); background: var(--pill-warning-bg); border: 1px solid var(--pill-warning-border);">
-				Total Nilai Sementara
+				Total 3 Nota Sementara
 			</span>
 		</div>
 
-		<div class="flex flex-col gap-2">
+		<!-- Satu Baris Pembanding & Dampak HPP -->
+		<div class="text-xs pb-2 flex flex-wrap items-center gap-x-2 gap-y-1" style="color: var(--text-muted);">
+			<span>Konteks:</span>
+			<span>Menahan HPP definitif senilai <strong class="mono" style="color: var(--text-main);">{formatRupiah(data?.provisional_total_value)}</strong></span>
+			<span class="dot-sep">•</span>
+			<span style="color: var(--pill-danger-text); font-weight: 600;">Potensi koreksi laba kotor: -2.6%</span>
+		</div>
+
+		<div class="flex flex-col gap-3">
 			{#each items as item}
 				<div class="dash-subbox flex items-center justify-between">
 					<div class="flex flex-col gap-0.5">

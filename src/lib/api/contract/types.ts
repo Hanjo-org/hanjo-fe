@@ -336,6 +336,10 @@ export interface ActionCenterItem {
   actionLabel: string;
   badge: string;
   badgeColor: 'warning' | 'danger' | 'info' | 'success';
+  amount?: DecimalString;
+  requester?: string;
+  reason?: string;
+  outlet_name?: string;
 }
 
 export interface ActionCenterCardData {
@@ -357,7 +361,10 @@ export interface SalesSummaryCardData {
   void_refund_count: number;
   void_refund_amount: DecimalString;
   trend_vs_previous_pct: DecimalString;
+  lfl_trend_pct?: DecimalString;
+  full_day_trend_pct?: DecimalString;
   yesterday_omzet?: DecimalString;
+  lfl_yesterday_omzet?: DecimalString;
   yesterday_cup_count?: number;
   is_busier_than_yesterday?: boolean;
   busier_label?: string;
@@ -466,6 +473,7 @@ export interface PettyCashOutletRow {
   organization_id?: string;
   organization_name?: string;
   current_balance: DecimalString;
+  imprest_ceiling: DecimalString;
   daily_spent: DecimalString;
   daily_limit: DecimalString;
   pending_verification_count: number;
@@ -474,6 +482,9 @@ export interface PettyCashOutletRow {
 
 export interface PettyCashCardData {
   total_balance: DecimalString;
+  total_imprest_ceiling: DecimalString;
+  total_daily_spent: DecimalString;
+  total_daily_limit: DecimalString;
   pending_verification_count: number;
   pending_verification_amount: DecimalString;
   outlets: PettyCashOutletRow[];

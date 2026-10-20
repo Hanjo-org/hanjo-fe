@@ -379,6 +379,8 @@
 	padding: 12px 10px;
 	border-top: 1px solid var(--border-subtle, #f1f5f9);
 	background: var(--bg-sidebar, #ffffff);
+	flex-shrink: 0;
+	z-index: 20;
 }
 
 .user-pill {

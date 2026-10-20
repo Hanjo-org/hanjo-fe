@@ -36,22 +36,23 @@
 	.pill-badge {
 		display: inline-flex;
 		align-items: center;
-		gap: 5px;
+		gap: 6px;
 		font-weight: 600;
-		border-radius: var(--radius-full);
+		border-radius: var(--radius-full, 9999px);
 		white-space: nowrap;
-		line-height: 1.2;
+		line-height: 1.35;
 		transition: all 0.15s;
+		box-sizing: border-box;
 	}
 
 	.size-sm {
-		font-size: 10px;
-		padding: 1.5px 6px;
+		font-size: 11px;
+		padding: 3px 10px;
 	}
 
 	.size-md {
-		font-size: 11px;
-		padding: 2.5px 8.5px;
+		font-size: 12px;
+		padding: 4.5px 12px;
 	}
 
 	.pill-neutral {

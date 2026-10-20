@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { session } from '#lib/auth/session.svelte.js';
 	import { dashboardStore } from '#lib/features/dashboard/stores/dashboard.svelte.js';
-	import { DEMO_OUTLETS } from '#lib/auth/scope.js';
+	import { DEMO_ORGANIZATIONS, DEMO_OUTLETS } from '#lib/auth/scope.js';
 	import '#lib/features/dashboard/dashboard.css';
 
 	// Kartu-kartu Proyeksi Dashboard (Component-First)
@@ -27,11 +27,24 @@
 	import OwnerPulseStrip from '#lib/features/dashboard/components/OwnerPulseStrip.svelte';
 	import OwnerLiveTrafficCard from '#lib/features/dashboard/components/OwnerLiveTrafficCard.svelte';
 	import OwnerAlertRadarCard from '#lib/features/dashboard/components/OwnerAlertRadarCard.svelte';
+	import OwnerOutletRankCard from '#lib/features/dashboard/components/OwnerOutletRankCard.svelte';
+	import OwnerTopProductsCard from '#lib/features/dashboard/components/OwnerTopProductsCard.svelte';
+	import OwnerCashRiskCard from '#lib/features/dashboard/components/OwnerCashRiskCard.svelte';
 	import OwnerQuickLinksBar from '#lib/features/dashboard/components/OwnerQuickLinksBar.svelte';
 
 	// Komponen Khusus Cockpit Finansial
 	import FinancePulseStrip from '#lib/features/dashboard/components/FinancePulseStrip.svelte';
 	import FinanceQuickLinksBar from '#lib/features/dashboard/components/FinanceQuickLinksBar.svelte';
+
+	// Komponen Khusus Cockpit Brand & Area Manager
+	import BrandPulseStrip from '#lib/features/dashboard/components/BrandPulseStrip.svelte';
+	import BrandOutletHealthMatrixCard, { type OutletHealthData } from '#lib/features/dashboard/components/BrandOutletHealthMatrixCard.svelte';
+	import BrandTaskActionRadarCard from '#lib/features/dashboard/components/BrandTaskActionRadarCard.svelte';
+	import BrandMenuPerformanceCard from '#lib/features/dashboard/components/BrandMenuPerformanceCard.svelte';
+	import BrandPromoConsistencyCard from '#lib/features/dashboard/components/BrandPromoConsistencyCard.svelte';
+	import BrandOutletComparisonCard from '#lib/features/dashboard/components/BrandOutletComparisonCard.svelte';
+	import BrandOutletDetailModal from '#lib/features/dashboard/components/BrandOutletDetailModal.svelte';
+
 	import Icon from '#lib/components/data/Icon.svelte';
 
 	// Label Peran Pengguna
@@ -39,9 +52,11 @@
 		owner: 'Owner & Pimpinan',
 		hq_admin: 'Admin Pusat (HQ)',
 		finance: 'Finance & Akuntansi',
-		store_manager: 'Store Manager Gerai',
+		store_manager: 'Brand & Organisasi Manager',
 		cashier: 'Kasir POS'
 	};
+
+	let selectedOutletDetail = $state<OutletHealthData | null>(null);
 
 	const currentRole = $derived(session.role || 'owner');
 	const roleTitle = $derived(roleLabels[currentRole] || 'Pengguna');
@@ -49,24 +64,25 @@
 
 	const isStoreManager = $derived(session.role === 'store_manager' || session.role === 'cashier');
 
-	// Daftar outlet yang boleh dipilih pengguna (disaring per organisasi terpilih)
-	const selectableOutlets = $derived.by(() => {
-		if (isStoreManager) {
-			const assignedIds = session.user?.outlet_ids || [];
-			return DEMO_OUTLETS.filter((o) => assignedIds.includes(o.id));
+	const currentScopeDisplay = $derived.by(() => {
+		if (session.activeOutletId && session.activeOutletId !== '*' && session.activeOutletId !== 'all') {
+			const outlet = DEMO_OUTLETS.find((o) => o.id === session.activeOutletId);
+			return outlet ? `Gerai ${outlet.name}` : 'Gerai Terpilih';
 		}
-		if (dashboardStore.organizationId && dashboardStore.organizationId !== '*') {
-			return DEMO_OUTLETS.filter((o) => o.organization_id === dashboardStore.organizationId);
+		if (session.activeOrganizationId && session.activeOrganizationId !== '*' && session.activeOrganizationId !== 'all') {
+			const org = DEMO_ORGANIZATIONS.find((o) => o.id === session.activeOrganizationId);
+			return org ? `Brand ${org.name} (Konsolidasi Gerai)` : 'Brand Terpilih';
 		}
-		return DEMO_OUTLETS;
+		if (currentRole === 'store_manager') {
+			return 'Brand Seduhan Kopi Jodi (Konsolidasi 3 Gerai)';
+		}
+		return 'Seluruh Organisasi & Gerai (Konsolidasi Global)';
 	});
 
 	function normalizeScope(id: string | null | undefined): string {
 		if (!id || id === 'all') return '*';
 		return id;
 	}
-
-	const selectedOutletValue = $derived(normalizeScope(dashboardStore.outletId));
 
 	// Inisialisasi data dashboard saat komponen dimuat atau sesi berubah
 	onMount(() => {
@@ -106,12 +122,6 @@
 	});
 
 
-	function handleOutletChange(event: Event) {
-		const target = event.target as HTMLSelectElement;
-		const val = normalizeScope(target.value);
-		dashboardStore.setOutlet(val);
-		session.setOutlet(val);
-	}
 
 	function handleOwnerTypeChange(event: Event) {
 		const target = event.target as HTMLSelectElement;
@@ -138,24 +148,7 @@
 		<!-- Toolbar Filter Kontekstual Halaman (Lega, Rapi, Fokus Kontrol) -->
 		<div class="topbar-filters">
 
-			<!-- Pemilih Outlet (AC-01.2: SM terkunci hanya ke outlet tugas) -->
-			<div class="filter-group group-outlet">
-				<label for="dash-outlet-filter" class="filter-label">Outlet</label>
-				<select
-					id="dash-outlet-filter"
-					class="filter-select select-outlet"
-					value={selectedOutletValue}
-					disabled={isStoreManager && selectableOutlets.length <= 1}
-					onchange={handleOutletChange}
-				>
-					{#if !isStoreManager}
-						<option value="*">Semua Outlet (Konsolidasi)</option>
-					{/if}
-					{#each selectableOutlets as out}
-						<option value={out.id}>{out.name} ({out.city})</option>
-					{/each}
-				</select>
-			</div>
+
 
 			<!-- Filter Kepemilikan (Khusus Owner / HQ) -->
 			{#if !isStoreManager}
@@ -174,41 +167,85 @@
 				</div>
 			{/if}
 
-			<!-- Filter Rentang Waktu -->
-			<div class="filter-group group-period">
-				<label for="dash-date-filter" class="filter-label">Periode</label>
-				<select
-					id="dash-date-filter"
-					class="filter-select select-period"
-					value={dashboardStore.dateRange}
-					onchange={handleDateRangeChange}
+				<!-- Filter Rentang Waktu -->
+				<div class="filter-group group-period">
+					<label for="dash-date-filter" class="filter-label">Periode</label>
+					<select
+						id="dash-date-filter"
+						class="filter-select select-period"
+						value={dashboardStore.dateRange}
+						onchange={handleDateRangeChange}
+					>
+						<option value="today">Hari Ini (13 Okt)</option>
+						<option value="7days">7 Hari Terakhir</option>
+						<option value="month">Bulan Ini (Okt 2026)</option>
+					</select>
+				</div>
+
+				<!-- Tombol Segarkan Kartu (Cukup Icon Reset) -->
+				<button
+					type="button"
+					class="btn-refresh"
+					title="Segarkan data seluruh kartu"
+					aria-label="Segarkan data seluruh kartu"
+					onclick={() => dashboardStore.refreshAll()}
 				>
-					<option value="today">Hari Ini</option>
-					<option value="7days">7 Hari Terakhir</option>
-					<option value="month">Bulan Ini</option>
-				</select>
+					<Icon name="arrow-path" size={16} />
+				</button>
+			</div>
+		</header>
+
+		<!-- Global Sync & Reference Date Bar (Menggantikan footer berulang 8x di tiap kartu) -->
+		<div class="col-12 flex items-center justify-between flex-wrap gap-3 px-5 py-3 rounded-xl border mb-3" style="background: var(--bg-panel); border-color: var(--border-panel);">
+			<div class="flex items-center gap-3">
+				<span class="inline-flex items-center gap-2 font-bold text-[13px]" style="color: var(--text-main);">
+					<Icon name="clock" size={16} class="text-primary" />
+					<span>Data per: <strong>Selasa, 13 Okt 2026 &bull; 21:00 WIB</strong></span>
+				</span>
+				<span class="dot-sep">•</span>
+				<span class="text-xs" style="color: var(--text-muted); font-weight: 500;">
+					Cakupan: <strong style="color: #60a5fa;">{currentScopeDisplay}</strong>
+				</span>
+				<span class="dot-sep">•</span>
+				<span class="text-xs" style="color: var(--text-muted); font-weight: 500;">
+					Filter: <strong style="color: var(--text-main);">{dashboardStore.dateRange === 'today' ? 'Hari Ini (13 Okt)' : dashboardStore.dateRange === '7days' ? '7 Hari Terakhir' : 'Bulan Ini (Okt 2026)'}</strong>
+				</span>
 			</div>
 
-			<!-- Tombol Segarkan Kartu (Cukup Icon Reset) -->
-			<button
-				type="button"
-				class="btn-refresh"
-				title="Segarkan data seluruh kartu"
-				aria-label="Segarkan data seluruh kartu"
-				onclick={() => dashboardStore.refreshAll()}
-			>
-				<Icon name="arrow-path" size={16} />
-			</button>
+			<!-- Status Konektivitas Jaringan & Gateway (Lebih Besar & Kontras Tinggi) -->
+			<div class="flex items-center gap-3 text-xs flex-wrap">
+				<span class="inline-flex items-center gap-1.5 font-semibold px-2.5 py-1 rounded-md" style="background: rgba(16, 185, 129, 0.12); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25);">
+					<span class="w-2 h-2 rounded-full" style="background: #10b981; display: inline-block;"></span>
+					POS Kasir: Realtime (5/5)
+				</span>
+				<span class="inline-flex items-center gap-1.5 font-semibold px-2.5 py-1 rounded-md" style="background: rgba(59, 130, 246, 0.12); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.25);">
+					<span class="w-2 h-2 rounded-full" style="background: #3b82f6; display: inline-block;"></span>
+					Gateway QRIS: T+1 Klir
+				</span>
+				<span class="inline-flex items-center gap-1.5 font-semibold px-2.5 py-1 rounded-md" style="background: rgba(168, 85, 247, 0.12); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.25);">
+					<span class="w-2 h-2 rounded-full" style="background: #a855f7; display: inline-block;"></span>
+					Bank: BCA &amp; Mandiri
+				</span>
+			</div>
 		</div>
-	</header>
 
-	<!-- Fluid Responsive Card Grid (T-01.5: Tablet ≥ 768px hingga Desktop) -->
-	<main class="dashboard-grid" id="dashboard-cards-container">
+		<!-- Fluid Responsive Card Grid (T-01.5: Tablet ≥ 768px hingga Desktop) -->
+		<main class="dashboard-grid" id="dashboard-cards-container">
 		{#if currentRole === 'owner' || currentRole === 'hq_admin'}
 			<!-- 1. DASHBOARD OWNER & HQ ADMIN (Cockpit Fokus: Live Omzet, Penjualan Hari Ini vs Kemarin, Notifikasi & Persetujuan, Akses Cepat) -->
+			<!-- Row 1: 4 Kartu Pulse Finansial & Operasional -->
 			<OwnerPulseStrip />
+
+			<!-- Row 2: Live Traffic Hari Ini vs Kemarin & Notifikasi Otorisasi (Tinggi Seimbang) -->
 			<OwnerLiveTrafficCard />
 			<OwnerAlertRadarCard />
+
+			<!-- Row 3: Widget Analitik Selebar Penuh (Ranking Gerai, Top Produk, Saldo Kas & Void) -->
+			<OwnerOutletRankCard />
+			<OwnerTopProductsCard />
+			<OwnerCashRiskCard />
+
+			<!-- Row 4: Aksi Eksekutif & Tautan Cepat -->
 			<OwnerQuickLinksBar />
 
 		{:else if currentRole === 'finance'}
@@ -223,13 +260,44 @@
 			<FinanceQuickLinksBar />
 
 		{:else if currentRole === 'store_manager'}
-			<!-- 4. DASHBOARD STORE MANAGER (T-01.9, T-01.14 & AC-01.1) -->
-			<ActionCenterCard />
-			<SmEodStatusCard />
-			<SmStockMinCard />
-			<SmCountScheduleCard />
-			<SmPettyCashCard />
-			<SmProposalsCard />
+			<!-- 3. DASHBOARD BRAND & ORGANISASI MANAGER (Multi-Outlet Cockpit) -->
+			<!-- Row 1: KPI Brand (Omzet Brand LFL, Outlet Butuh Perhatian, Estimasi Food Cost %, Kas Gabungan) -->
+			<BrandPulseStrip
+				onSelectOutletAlert={(name) => {
+					selectedOutletDetail = {
+						id: name.toLowerCase().includes('dago') ? 'out-bdg-01' : 'out-sub-01',
+						name: name,
+						city: name.toLowerCase().includes('dago') ? 'Bandung' : 'Surabaya',
+						type: name.toLowerCase().includes('dago') ? 'Outlet Mandiri' : 'Outlet Kemitraan',
+						omzet: name.toLowerCase().includes('dago') ? '2430000.00' : '1200000.00',
+						target_omzet: name.toLowerCase().includes('dago') ? '2500000.00' : '1500000.00',
+						target_pct: name.toLowerCase().includes('dago') ? 97.2 : 80.0,
+						target_status: name.toLowerCase().includes('dago') ? 'warning' : 'danger',
+						critical_stock_count: name.toLowerCase().includes('dago') ? 1 : 0,
+						critical_stock_item: name.toLowerCase().includes('dago') ? 'Fresh Milk 8L' : undefined,
+						critical_stock_status: name.toLowerCase().includes('dago') ? 'danger' : 'success',
+						kds_avg_minutes: name.toLowerCase().includes('dago') ? 7.8 : 3.9,
+						kds_status: name.toLowerCase().includes('dago') ? 'warning' : 'success',
+						petty_cash_spent: name.toLowerCase().includes('dago') ? '150000.00' : '95000.00',
+						petty_cash_limit: name.toLowerCase().includes('dago') ? '300000.00' : '250000.00',
+						petty_cash_pct: name.toLowerCase().includes('dago') ? 50.0 : 38.0,
+						petty_cash_status: name.toLowerCase().includes('dago') ? 'warning' : 'success',
+						sync_status: name.toLowerCase().includes('dago') ? 'online' : 'delayed',
+						sync_last_seen: name.toLowerCase().includes('dago') ? '4m lalu' : 'Delay 15m'
+					};
+				}}
+			/>
+
+			<!-- Row 2: Bagian Utama (Peta Kesehatan Outlet Hero & Tugas Brand Manager) -->
+			<BrandOutletHealthMatrixCard
+				onSelectOutlet={(out) => (selectedOutletDetail = out)}
+			/>
+			<BrandTaskActionRadarCard />
+
+			<!-- Row 3: Analisis Brand (Performa Menu Inti vs Lokal, Efektivitas Promo, Komparasi Gerai & Tim Shift) -->
+			<BrandMenuPerformanceCard />
+			<BrandPromoConsistencyCard />
+			<BrandOutletComparisonCard />
 
 		{:else}
 			<!-- Fallback Kasir / Default -->
@@ -242,3 +310,11 @@
 		{/if}
 	</main>
 </div>
+
+<!-- Modal Detail Operasional Per Outlet (Drilldown dari Peta Kesehatan Gerai) -->
+{#if selectedOutletDetail}
+	<BrandOutletDetailModal
+		outlet={selectedOutletDetail}
+		onClose={() => (selectedOutletDetail = null)}
+	/>
+{/if}

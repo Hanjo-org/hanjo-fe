@@ -3,7 +3,8 @@
 	import { dashboardStore } from '../stores/dashboard.svelte.js';
 	import Badge from '../../../components/data/Badge.svelte';
 	import Button from '../../../components/forms/Button.svelte';
-	import type { ActionCenterCardData } from '../../../api/contract/types.js';
+	import Icon from '../../../components/data/Icon.svelte';
+	import type { ActionCenterCardData, ActionCenterItem } from '../../../api/contract/types.js';
 
 	interface Props {
 		colSpan?: string;
@@ -13,14 +14,47 @@
 
 	const cardState = $derived(dashboardStore.getCardState<ActionCenterCardData>('action_center'));
 	const items = $derived(cardState.data?.items || []);
+
+	function getTargetWidgetId(item: ActionCenterItem): string | null {
+		if (item.id === 'act-fin-1') return 'card-true_up_pending';
+		if (item.id === 'act-fin-2') return 'card-petty_cash';
+		if (item.id === 'act-fin-3') return 'card-hq_payables';
+		if (item.id === 'act-fin-4') return 'finance-quick-actions';
+		return null;
+	}
+
+	function handleActionItemClick(event: MouseEvent, item: ActionCenterItem) {
+		if (item.id === 'act-fin-4') {
+			event.preventDefault();
+			window.dispatchEvent(new CustomEvent('open-close-period-modal'));
+			const quickEl = document.getElementById('finance-quick-actions');
+			if (quickEl) {
+				quickEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			}
+			return;
+		}
+
+		const targetWidgetId = getTargetWidgetId(item);
+		if (targetWidgetId) {
+			const targetEl = document.getElementById(targetWidgetId);
+			if (targetEl) {
+				event.preventDefault();
+				targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				targetEl.classList.remove('card-highlight-pulse');
+				void targetEl.offsetWidth;
+				targetEl.classList.add('card-highlight-pulse');
+				setTimeout(() => targetEl.classList.remove('card-highlight-pulse'), 2500);
+			}
+		}
+	}
 </script>
 
 <DashboardCardFrame
 	cardKey="action_center"
-	title="Notifikasi & Persetujuan"
+	title="Notifikasi & Tindakan Menunggu"
 	icon="bell"
-	subtitle="Tugas menunggu verifikasi, otorisasi, & tindak lanjut operasional"
-	badgeText="{items.length} Menunggu"
+	subtitle="Daftar tugas terpusat: klik item untuk langsung menuju modul atau kartu terkait"
+	badgeText="{items.length} Tugas Aktif"
 	badgeVariant={items.length > 0 ? 'warning' : 'success'}
 	drilldownUrl="/approvals"
 	drilldownLabel="Inbox Persetujuan"
@@ -33,7 +67,16 @@
 	{:else}
 		<div class="action-item-list">
 			{#each items as item}
-				<div class="action-item-row" id="act-{item.id}">
+				{@const targetId = getTargetWidgetId(item)}
+				<div
+					class="action-item-row"
+					id="act-{item.id}"
+					role="button"
+					tabindex="0"
+					onclick={(e) => handleActionItemClick(e, item)}
+					onkeydown={(e) => { if (e.key === 'Enter') handleActionItemClick(e as any, item); }}
+					style="cursor: pointer; transition: background 0.15s ease;"
+				>
 					<div class="action-item-main">
 						<div class="action-item-header">
 							<Badge variant={item.badgeColor} text={item.badge} size="sm" />
@@ -43,9 +86,20 @@
 					</div>
 
 					<div class="action-item-cta">
-						<Button variant="secondary" size="sm" href={item.actionUrl}>
-							{item.actionLabel}
-						</Button>
+						{#if targetId}
+							<button
+								type="button"
+								class="btn-action-jump"
+								onclick={(e) => { e.stopPropagation(); handleActionItemClick(e, item); }}
+							>
+								<span>Buka Kartu</span>
+								<Icon name="arrow-right" size={13} />
+							</button>
+						{:else}
+							<Button variant="secondary" size="sm" href={item.actionUrl}>
+								{item.actionLabel}
+							</Button>
+						{/if}
 					</div>
 				</div>
 			{/each}

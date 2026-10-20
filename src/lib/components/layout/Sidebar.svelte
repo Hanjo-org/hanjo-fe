@@ -94,8 +94,6 @@
 			<div class="nav-section">
 				{#if section.title && !isCollapsed}
 					<div class="nav-section-title">{section.title}</div>
-				{:else if section.title && isCollapsed}
-					<div class="section-divider" aria-hidden="true"></div>
 				{/if}
 
 				{#each section.items as item (item.id)}
@@ -220,17 +218,17 @@
 		{/each}
 	</nav>
 
-	<!-- Footer Peran Aktif -->
+	<!-- Footer Sistem & Status (Terisolasi dari scroll navigasi) -->
 	<div class="sidebar-footer">
-		<div class="user-pill" class:compact={isCollapsed}>
-			<div class="role-avatar" title="{session.currentUser?.name} ({session.currentRole})">
-				{session.currentUser?.name?.charAt(0) || 'U'}
-			</div>
+		<div class="system-status-pill flex items-center justify-between px-2 py-1.5 rounded-md" style="background: rgba(255, 255, 255, 0.03);">
 			{#if !isCollapsed}
-				<div class="user-info">
-					<span class="user-name">{session.currentUser?.name || 'Pengguna'}</span>
-					<span class="user-role-badge">{session.currentRole.toUpperCase()}</span>
-				</div>
+				<span class="text-xs font-semibold" style="color: var(--text-muted);">Hanjō ERP &bull; v1.0</span>
+				<span class="inline-flex items-center gap-1.5 text-xs font-bold" style="color: var(--brand-primary);">
+					<span class="w-2 h-2 rounded-full" style="background: var(--brand-primary); display: inline-block;"></span>
+					Online
+				</span>
+			{:else}
+				<span class="w-2.5 h-2.5 rounded-full mx-auto" style="background: var(--brand-primary);" title="Sistem Online (WIB)"></span>
 			{/if}
 		</div>
 	</div>

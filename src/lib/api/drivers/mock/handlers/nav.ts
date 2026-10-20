@@ -16,7 +16,7 @@ let mockNotifications: NotificationItem[] = [
 		type: 'warning',
 		read: false,
 		link: '/approvals',
-		created_at: '2026-10-17T08:30:00.000Z'
+		created_at: '2026-10-13T08:30:00.000Z'
 	},
 	{
 		id: 'notif_002',
@@ -25,7 +25,7 @@ let mockNotifications: NotificationItem[] = [
 		type: 'danger',
 		read: false,
 		link: '/inventory',
-		created_at: '2026-10-17T09:15:00.000Z'
+		created_at: '2026-10-13T09:15:00.000Z'
 	},
 	{
 		id: 'notif_003',
@@ -34,7 +34,7 @@ let mockNotifications: NotificationItem[] = [
 		type: 'danger',
 		read: false,
 		link: '/procurement#invoices',
-		created_at: '2026-10-17T09:45:00.000Z'
+		created_at: '2026-10-13T09:45:00.000Z'
 	},
 	{
 		id: 'notif_004',
@@ -43,7 +43,7 @@ let mockNotifications: NotificationItem[] = [
 		type: 'info',
 		read: true,
 		link: '/catalog#proposals',
-		created_at: '2026-10-16T14:20:00.000Z'
+		created_at: '2026-10-13T13:20:00.000Z'
 	}
 ];
 
@@ -69,7 +69,7 @@ export function registerNavHandlers(): void {
 				'approvals.pending_for_me': 2,
 				'procurement.invoices_waiting': 3,
 				'petty_cash.pending_verification': 2,
-				'finance.true_up_pending': 4
+				'finance.true_up_pending': 3
 			};
 			return { data: financeBadges };
 		}
@@ -77,7 +77,7 @@ export function registerNavHandlers(): void {
 		if (role === 'hq_admin') {
 			const adminBadges: NavBadges = {
 				'approvals.pending_for_me': 3,
-				'inventory.below_min': 5,
+				'inventory.below_min': 4,
 				'procurement.invoices_waiting': 3,
 				'catalog.proposals_pending': 2
 			};
@@ -87,10 +87,10 @@ export function registerNavHandlers(): void {
 		// Owner (akses konsolidasi penuh)
 		const ownerBadges: NavBadges = {
 			'approvals.pending_for_me': 3,
-			'inventory.below_min': 5,
+			'inventory.below_min': 4,
 			'procurement.invoices_waiting': 3,
 			'petty_cash.pending_verification': 2,
-			'finance.true_up_pending': 4,
+			'finance.true_up_pending': 3,
 			'catalog.proposals_pending': 2
 		};
 
