@@ -1,11 +1,16 @@
 /**
  * Daftar Akun Demo Resmi Hanjo ERP
- * Referensi: MILESTONE.md §7, T-00.8
+ * Referensi: MILESTONE.md §7, T-00.8, T-01.2
  *
- * 5 akun demo untuk pengujian 4 peran dan pembatasan cakupan outlet.
+ * Akun demo untuk pengujian 4 peran dan hirarki Organisasi -> Multi-Outlet.
+ *
+ * Contoh Organisasi Nyata:
+ * - Seduhan Kopi Jodi (org-jodi): Budi (Jodi Senopati), Sari (Manager multi-outlet: Jodi Dago & Jodi Gubeng).
+ * - Kaveloka (org-kaveloka): gerai Ubud.
+ * - Plaga (org-plaga): gerai Farm Bistro.
  */
 
-import type { User } from '../api/contract/types.js';
+import type { User, UserRole } from '../api/contract/types.js';
 
 export const DEMO_USERS: Record<string, User> = {
 	'usr-rina': {
@@ -14,7 +19,8 @@ export const DEMO_USERS: Record<string, User> = {
 		email: 'rina.owner@hanjo.coffee',
 		role: 'owner',
 		avatar_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=128&auto=format&fit=crop&q=80',
-		outlet_ids: ['out-jkt-01', 'out-bdg-01', 'out-sub-01'],
+		organization_ids: ['org-jodi', 'org-kaveloka', 'org-plaga'],
+		outlet_ids: ['out-jkt-01', 'out-bdg-01', 'out-sub-01', 'out-kvl-01', 'out-plg-01'],
 		created_at: '2026-01-01T00:00:00Z'
 	},
 	'usr-dimas': {
@@ -23,7 +29,8 @@ export const DEMO_USERS: Record<string, User> = {
 		email: 'dimas.admin@hanjo.coffee',
 		role: 'hq_admin',
 		avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=128&auto=format&fit=crop&q=80',
-		outlet_ids: ['out-jkt-01', 'out-bdg-01', 'out-sub-01'],
+		organization_ids: ['org-jodi', 'org-kaveloka', 'org-plaga'],
+		outlet_ids: ['out-jkt-01', 'out-bdg-01', 'out-sub-01', 'out-kvl-01', 'out-plg-01'],
 		created_at: '2026-01-01T00:00:00Z'
 	},
 	'usr-maya': {
@@ -32,7 +39,8 @@ export const DEMO_USERS: Record<string, User> = {
 		email: 'maya.finance@hanjo.coffee',
 		role: 'finance',
 		avatar_url: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=128&auto=format&fit=crop&q=80',
-		outlet_ids: ['out-jkt-01', 'out-bdg-01', 'out-sub-01'],
+		organization_ids: ['org-jodi', 'org-kaveloka', 'org-plaga'],
+		outlet_ids: ['out-jkt-01', 'out-bdg-01', 'out-sub-01', 'out-kvl-01', 'out-plg-01'],
 		created_at: '2026-01-01T00:00:00Z'
 	},
 	'usr-budi': {
@@ -41,7 +49,9 @@ export const DEMO_USERS: Record<string, User> = {
 		email: 'budi.sm@hanjo.coffee',
 		role: 'store_manager',
 		avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=128&auto=format&fit=crop&q=80',
-		outlet_ids: ['out-jkt-01'], // Terkunci di Outlet Senopati (Outlet A)
+		organization_id: 'org-jodi',
+		organization_ids: ['org-jodi'],
+		outlet_ids: ['out-jkt-01'], // Jodi Senopati
 		created_at: '2026-01-01T00:00:00Z'
 	},
 	'usr-sari': {
@@ -50,7 +60,9 @@ export const DEMO_USERS: Record<string, User> = {
 		email: 'sari.sm@hanjo.coffee',
 		role: 'store_manager',
 		avatar_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=128&auto=format&fit=crop&q=80',
-		outlet_ids: ['out-bdg-01', 'out-sub-01'], // Outlet Dago & Outlet Gubeng (Outlet B & C)
+		organization_id: 'org-jodi',
+		organization_ids: ['org-jodi'],
+		outlet_ids: ['out-bdg-01', 'out-sub-01'], // 1 manager menjalankan beberapa outlet di Seduhan Kopi Jodi (Jodi Dago & Jodi Gubeng)
 		created_at: '2026-01-01T00:00:00Z'
 	},
 	'usr-fajar': {
@@ -59,9 +71,19 @@ export const DEMO_USERS: Record<string, User> = {
 		email: 'fajar.kasir@hanjo.coffee',
 		role: 'cashier',
 		avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=128&auto=format&fit=crop&q=80',
-		outlet_ids: ['out-jkt-01'], // Outlet Senopati
+		organization_id: 'org-jodi',
+		organization_ids: ['org-jodi'],
+		outlet_ids: ['out-jkt-01'], // Jodi Senopati
 		created_at: '2026-01-01T00:00:00Z'
 	}
 };
 
 export const DEMO_USER_LIST: User[] = Object.values(DEMO_USERS);
+ 
+export const DEMO_USERS_BY_ROLE: Record<UserRole, User> = {
+	owner: DEMO_USERS['usr-rina'],
+	hq_admin: DEMO_USERS['usr-dimas'],
+	finance: DEMO_USERS['usr-maya'],
+	store_manager: DEMO_USERS['usr-budi'],
+	cashier: DEMO_USERS['usr-fajar']
+};

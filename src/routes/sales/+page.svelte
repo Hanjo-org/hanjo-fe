@@ -142,8 +142,8 @@
 				<strong class="head-stat-val text-success">Rp 8.450.000</strong>
 			</div>
 			<div class="head-stat-item">
-				<span class="head-stat-label">Cup Terjual</span>
-				<strong class="head-stat-val">412 Cup</strong>
+				<span class="head-stat-label">Item Terjual</span>
+				<strong class="head-stat-val">412 item</strong>
 			</div>
 			<div class="head-stat-item">
 				<span class="head-stat-label">Status Sinkronisasi</span>

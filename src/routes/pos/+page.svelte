@@ -257,7 +257,7 @@
 								<span class="qty-val">{item.quantity}</span>
 								<button class="qty-btn" onclick={() => updateQty(item.id, 1)}>+</button>
 							</div>
-							<span class="per-unit">{formatRupiah(item.unit_price)}/cup</span>
+							<span class="per-unit">@ {formatRupiah(item.unit_price)}</span>
 						</div>
 					</div>
 				{/each}

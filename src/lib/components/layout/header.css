@@ -81,12 +81,28 @@
 .outlet-info {
 	display: flex;
 	flex-direction: column;
+	text-align: left;
+}
+
+.org-name-sub {
+	font-size: 10px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.4px;
+	color: var(--brand-primary, #059669);
+	line-height: 1.1;
+	margin-bottom: 1px;
+}
+
+:global([data-theme='dark']) .org-name-sub {
+	color: #34d399;
 }
 
 .outlet-name {
-	font-size: 13px;
+	font-size: 12.5px;
 	font-weight: 600;
 	color: var(--text-main, #0f172a);
+	line-height: 1.2;
 }
 
 :global([data-theme='dark']) .outlet-name {
@@ -579,11 +595,74 @@
 	right: auto;
 	background: var(--bg-panel, #ffffff);
 	border: 1px solid var(--border-panel, #e2e8f0);
-	border-radius: 10px;
+	border-radius: 12px;
 	box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
 	z-index: 1000;
-	min-width: 270px;
-	padding: 6px;
+	min-width: 320px;
+	max-height: 480px;
+	overflow-y: auto;
+	padding: 8px;
+}
+
+.outlet-dropdown-menu::-webkit-scrollbar {
+	width: 5px;
+}
+
+.outlet-dropdown-menu::-webkit-scrollbar-thumb {
+	background: var(--border-panel, #cbd5e1);
+	border-radius: 9999px;
+}
+
+.org-section-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 10px 4px;
+	margin-top: 6px;
+}
+
+.org-section-title {
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.5px;
+	color: var(--text-main, #0f172a);
+	text-transform: uppercase;
+}
+
+:global([data-theme='dark']) .org-section-title {
+	color: #f1f5f9;
+}
+
+.org-badge-code {
+	font-size: 9.5px;
+	font-weight: 700;
+	padding: 1px 6px;
+	border-radius: 4px;
+	background: var(--bg-panel-sub, #f1f5f9);
+	color: var(--brand-primary, #059669);
+	border: 1px solid var(--border-panel, #e2e8f0);
+}
+
+:global([data-theme='dark']) .org-badge-code {
+	background: #1e2638;
+	color: #34d399;
+	border-color: #2d3b55;
+}
+
+.dropdown-item.is-child {
+	padding-left: 20px;
+	position: relative;
+}
+
+.dropdown-item.is-child::before {
+	content: '';
+	position: absolute;
+	left: 10px;
+	top: 50%;
+	width: 5px;
+	height: 1px;
+	background: var(--text-muted, #94a3b8);
+	opacity: 0.6;
 }
 
 .user-dropdown-menu {
@@ -612,7 +691,7 @@
 	font-weight: 700;
 	letter-spacing: 0.5px;
 	color: var(--text-muted, #94a3b8);
-	padding: 8px 10px 4px;
+	padding: 6px 10px 4px;
 }
 
 .dropdown-item {

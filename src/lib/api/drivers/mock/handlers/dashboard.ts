@@ -15,8 +15,10 @@ import type {
 	SalesSummaryCardData,
 	GrossProfitCardData,
 	OutletComparisonCardData,
+	OutletComparisonRow,
 	StockIssuesCardData,
 	HqPayablesCardData,
+	DuePayableBill,
 	PettyCashCardData,
 	OutletOpsStatusCardData,
 	OutletEodStatusCardData,
@@ -35,6 +37,7 @@ export function registerDashboardHandlers(): void {
 	router.register('GET', '/api/v1/dashboard/cards/:key', async (ctx) => {
 		const key = ctx.params.key as DashboardCardKey;
 		const role = (ctx.req.query?.role as string) || 'owner';
+		const organizationId = (ctx.req.query?.organization_id as string) || '*';
 		const outletId = (ctx.req.query?.outlet_id as string) || '*';
 		const ownerType = (ctx.req.query?.owner_type as string) || 'all';
 		const date = (ctx.req.query?.date as string) || clock.businessDate();
@@ -57,12 +60,12 @@ export function registerDashboardHandlers(): void {
 			}
 
 			case 'sales_summary': {
-				cardData = generateSalesSummaryData(outletId);
+				cardData = generateSalesSummaryData(organizationId, outletId);
 				break;
 			}
 
 			case 'gross_profit': {
-				cardData = generateGrossProfitData(outletId);
+				cardData = generateGrossProfitData(organizationId, outletId);
 				break;
 			}
 
@@ -70,12 +73,12 @@ export function registerDashboardHandlers(): void {
 				if (role === 'store_manager') {
 					throw ApiErrors.forbidden('Akses ditolak');
 				}
-				cardData = generateOutletComparisonData(role, ownerType);
+				cardData = generateOutletComparisonData(role, ownerType, organizationId);
 				break;
 			}
 
 			case 'stock_issues': {
-				cardData = generateStockIssuesData(role, outletId);
+				cardData = generateStockIssuesData(role, organizationId, outletId);
 				break;
 			}
 
@@ -85,17 +88,17 @@ export function registerDashboardHandlers(): void {
 			}
 
 			case 'petty_cash': {
-				cardData = generatePettyCashData();
+				cardData = generatePettyCashData(organizationId);
 				break;
 			}
 
 			case 'outlet_ops_status': {
-				cardData = generateOutletOpsStatusData();
+				cardData = generateOutletOpsStatusData(organizationId);
 				break;
 			}
 
 			case 'outlet_eod_status': {
-				cardData = generateOutletEodStatusData(date);
+				cardData = generateOutletEodStatusData(date, organizationId);
 				break;
 			}
 
@@ -323,8 +326,8 @@ function generateActionCenterData(role: string, outletId: string, date: string):
 	};
 }
 
-function generateSalesSummaryData(outletId: string): SalesSummaryCardData {
-	// Jika spesifik per outlet
+function generateSalesSummaryData(organizationId: string, outletId: string): SalesSummaryCardData {
+	// 1. Jika spesifik per outlet
 	if (outletId === 'out-jkt-01') {
 		return {
 			omzet: '4820000.00',
@@ -428,47 +431,160 @@ function generateSalesSummaryData(outletId: string): SalesSummaryCardData {
 		};
 	}
 
-	// Konsolidasi Seluruh Outlet (Total: Rp 8.450.000, 412 cups, 220 transactions)
+	if (outletId === 'out-kvl-01' || (organizationId === 'org-kaveloka' && outletId === '*')) {
+		return {
+			omzet: '3200000.00',
+			cup_count: 145,
+			transaction_count: 82,
+			yesterday_transaction_count: 76,
+			avg_transaction_value: '39020.00',
+			cash_amount: '832000.00',
+			cash_percentage: '26.00',
+			non_cash_amount: '2368000.00',
+			non_cash_percentage: '74.00',
+			void_refund_count: 0,
+			void_refund_amount: '0.00',
+			trend_vs_previous_pct: '+14.5',
+			yesterday_omzet: '3050000.00',
+			yesterday_cup_count: 138,
+			is_busier_than_yesterday: true,
+			busier_label: 'Lebih Ramai (+14.5% vs Kemarin)',
+			hourly_traffic: [
+				{ hour: '08:00', count: 12, omzet: '240000.00' },
+				{ hour: '10:00', count: 20, omzet: '420000.00' },
+				{ hour: '12:00', count: 35, omzet: '780000.00' },
+				{ hour: '14:00', count: 25, omzet: '520000.00' }
+			],
+			daily_trends: [
+				{ date: '2026-10-07', omzet: '2800000.00', cup_count: 125 },
+				{ date: '2026-10-08', omzet: '2900000.00', cup_count: 130 },
+				{ date: '2026-10-09', omzet: '3100000.00', cup_count: 140 },
+				{ date: '2026-10-10', omzet: '3400000.00', cup_count: 152 },
+				{ date: '2026-10-11', omzet: '3500000.00', cup_count: 158 },
+				{ date: '2026-10-12', omzet: '3050000.00', cup_count: 138 },
+				{ date: '2026-10-13', omzet: '3200000.00', cup_count: 145, is_today: true }
+			]
+		};
+	}
+
+	if (outletId === 'out-plg-01' || (organizationId === 'org-plaga' && outletId === '*')) {
+		return {
+			omzet: '2850000.00',
+			cup_count: 115,
+			transaction_count: 58,
+			yesterday_transaction_count: 54,
+			avg_transaction_value: '49130.00',
+			cash_amount: '741000.00',
+			cash_percentage: '26.00',
+			non_cash_amount: '2109000.00',
+			non_cash_percentage: '74.00',
+			void_refund_count: 0,
+			void_refund_amount: '0.00',
+			trend_vs_previous_pct: '+11.8',
+			yesterday_omzet: '2700000.00',
+			yesterday_cup_count: 108,
+			is_busier_than_yesterday: true,
+			busier_label: 'Lebih Ramai (+11.8% vs Kemarin)',
+			hourly_traffic: [
+				{ hour: '08:00', count: 8, omzet: '180000.00' },
+				{ hour: '11:00', count: 22, omzet: '540000.00' },
+				{ hour: '13:00', count: 28, omzet: '720000.00' },
+				{ hour: '15:00', count: 18, omzet: '450000.00' }
+			],
+			daily_trends: [
+				{ date: '2026-10-07', omzet: '2500000.00', cup_count: 100 },
+				{ date: '2026-10-08', omzet: '2600000.00', cup_count: 104 },
+				{ date: '2026-10-09', omzet: '2750000.00', cup_count: 110 },
+				{ date: '2026-10-10', omzet: '3000000.00', cup_count: 120 },
+				{ date: '2026-10-11', omzet: '3100000.00', cup_count: 125 },
+				{ date: '2026-10-12', omzet: '2700000.00', cup_count: 108 },
+				{ date: '2026-10-13', omzet: '2850000.00', cup_count: 115, is_today: true }
+			]
+		};
+	}
+
+	// 2. Jika filter Organisasi Seduhan Kopi Jodi (Konsolidasi 3 Outlet)
+	if (organizationId === 'org-jodi') {
+		return {
+			omzet: '8450000.00',
+			cup_count: 412,
+			transaction_count: 220,
+			yesterday_transaction_count: 206,
+			avg_transaction_value: '38400.00',
+			cash_amount: '2197000.00',
+			cash_percentage: '26.00',
+			non_cash_amount: '6253000.00',
+			non_cash_percentage: '74.00',
+			void_refund_count: 1,
+			void_refund_amount: '38500.00',
+			trend_vs_previous_pct: '+18.4',
+			yesterday_omzet: '8100000.00',
+			yesterday_cup_count: 395,
+			is_busier_than_yesterday: true,
+			busier_label: 'Lebih Ramai (+18.4% vs Kemarin)',
+			hourly_traffic: [
+				{ hour: '08:00', count: 34, omzet: '670000.00', yesterday_count: 28, yesterday_omzet: '560000.00' },
+				{ hour: '09:00', count: 42, omzet: '840000.00', yesterday_count: 35, yesterday_omzet: '700000.00' },
+				{ hour: '10:00', count: 45, omzet: '920000.00', yesterday_count: 40, yesterday_omzet: '810000.00' },
+				{ hour: '11:00', count: 58, omzet: '1190000.00', yesterday_count: 52, yesterday_omzet: '1040000.00' },
+				{ hour: '12:00', count: 94, omzet: '1940000.00', yesterday_count: 82, yesterday_omzet: '1680000.00' },
+				{ hour: '13:00', count: 80, omzet: '1620000.00', yesterday_count: 72, yesterday_omzet: '1460000.00' },
+				{ hour: '14:00', count: 64, omzet: '1320000.00', yesterday_count: 56, yesterday_omzet: '1150000.00' },
+				{ hour: '15:00', count: 40, omzet: '850000.00', yesterday_count: 30, yesterday_omzet: '700000.00' }
+			],
+			daily_trends: [
+				{ date: '2026-10-07', omzet: '7250000.00', cup_count: 355 },
+				{ date: '2026-10-08', omzet: '7550000.00', cup_count: 370 },
+				{ date: '2026-10-09', omzet: '7900000.00', cup_count: 388 },
+				{ date: '2026-10-10', omzet: '8900000.00', cup_count: 433 },
+				{ date: '2026-10-11', omzet: '9200000.00', cup_count: 447 },
+				{ date: '2026-10-12', omzet: '8100000.00', cup_count: 395 },
+				{ date: '2026-10-13', omzet: '8450000.00', cup_count: 412, is_today: true }
+			]
+		};
+	}
+
+	// 3. Konsolidasi Global Seluruh Organisasi (Total 5 Outlet: Rp 14.500.000, 672 cups, 360 transactions)
 	return {
-		omzet: '8450000.00',
-		cup_count: 412,
-		transaction_count: 220,
-		yesterday_transaction_count: 206,
-		avg_transaction_value: '38400.00',
-		cash_amount: '2197000.00',
+		omzet: '14500000.00',
+		cup_count: 672,
+		transaction_count: 360,
+		yesterday_transaction_count: 336,
+		avg_transaction_value: '40270.00',
+		cash_amount: '3770000.00',
 		cash_percentage: '26.00',
-		non_cash_amount: '6253000.00',
+		non_cash_amount: '10730000.00',
 		non_cash_percentage: '74.00',
 		void_refund_count: 1,
 		void_refund_amount: '38500.00',
-		trend_vs_previous_pct: '+18.4',
-		yesterday_omzet: '8100000.00',
-		yesterday_cup_count: 395,
+		trend_vs_previous_pct: '+17.2',
+		yesterday_omzet: '13850000.00',
+		yesterday_cup_count: 641,
 		is_busier_than_yesterday: true,
-		busier_label: 'Lebih Ramai (+18.4% vs Kemarin)',
+		busier_label: 'Lebih Ramai (+17.2% vs Kemarin)',
 		hourly_traffic: [
-			{ hour: '08:00', count: 34, omzet: '670000.00', yesterday_count: 28, yesterday_omzet: '560000.00' },
-			{ hour: '09:00', count: 42, omzet: '840000.00', yesterday_count: 35, yesterday_omzet: '700000.00' },
-			{ hour: '10:00', count: 45, omzet: '920000.00', yesterday_count: 40, yesterday_omzet: '810000.00' },
-			{ hour: '11:00', count: 58, omzet: '1190000.00', yesterday_count: 52, yesterday_omzet: '1040000.00' },
-			{ hour: '12:00', count: 94, omzet: '1940000.00', yesterday_count: 82, yesterday_omzet: '1680000.00' },
-			{ hour: '13:00', count: 80, omzet: '1620000.00', yesterday_count: 72, yesterday_omzet: '1460000.00' },
-			{ hour: '14:00', count: 64, omzet: '1320000.00', yesterday_count: 56, yesterday_omzet: '1150000.00' },
-			{ hour: '15:00', count: 40, omzet: '850000.00', yesterday_count: 30, yesterday_omzet: '700000.00' }
+			{ hour: '08:00', count: 54, omzet: '1090000.00', yesterday_count: 46, yesterday_omzet: '920000.00' },
+			{ hour: '09:00', count: 68, omzet: '1380000.00', yesterday_count: 58, yesterday_omzet: '1160000.00' },
+			{ hour: '10:00', count: 75, omzet: '1520000.00', yesterday_count: 66, yesterday_omzet: '1350000.00' },
+			{ hour: '11:00', count: 96, omzet: '1980000.00', yesterday_count: 85, yesterday_omzet: '1720000.00' },
+			{ hour: '12:00', count: 157, omzet: '3280000.00', yesterday_count: 140, yesterday_omzet: '2860000.00' },
+			{ hour: '13:00', count: 136, omzet: '2760000.00', yesterday_count: 122, yesterday_omzet: '2480000.00' },
+			{ hour: '14:00', count: 104, omzet: '2140000.00', yesterday_count: 92, yesterday_omzet: '1860000.00' },
+			{ hour: '15:00', count: 66, omzet: '1350000.00', yesterday_count: 52, yesterday_omzet: '1150000.00' }
 		],
 		daily_trends: [
-			{ date: '2026-10-07', omzet: '7250000.00', cup_count: 355 },
-			{ date: '2026-10-08', omzet: '7550000.00', cup_count: 370 },
-			{ date: '2026-10-09', omzet: '7900000.00', cup_count: 388 },
-			{ date: '2026-10-10', omzet: '8900000.00', cup_count: 433 },
-			{ date: '2026-10-11', omzet: '9200000.00', cup_count: 447 },
-			{ date: '2026-10-12', omzet: '8100000.00', cup_count: 395 },
-			{ date: '2026-10-13', omzet: '8450000.00', cup_count: 412, is_today: true }
+			{ date: '2026-10-07', omzet: '12550000.00', cup_count: 580 },
+			{ date: '2026-10-08', omzet: '13050000.00', cup_count: 604 },
+			{ date: '2026-10-09', omzet: '13750000.00', cup_count: 638 },
+			{ date: '2026-10-10', omzet: '15300000.00', cup_count: 705 },
+			{ date: '2026-10-11', omzet: '15800000.00', cup_count: 730 },
+			{ date: '2026-10-12', omzet: '13850000.00', cup_count: 641 },
+			{ date: '2026-10-13', omzet: '14500000.00', cup_count: 672, is_today: true }
 		]
 	};
 }
 
-function generateGrossProfitData(outletId: string): GrossProfitCardData {
+function generateGrossProfitData(organizationId: string, outletId: string): GrossProfitCardData {
 	if (outletId === 'out-jkt-01') {
 		return {
 			gross_profit: '3325800.00',
@@ -481,22 +597,59 @@ function generateGrossProfitData(outletId: string): GrossProfitCardData {
 		};
 	}
 
+	if (outletId === 'out-kvl-01' || organizationId === 'org-kaveloka') {
+		return {
+			gross_profit: '2150000.00',
+			margin_pct: '67.20',
+			cogs_amount: '1050000.00',
+			is_estimate: false,
+			pending_invoice_count: 0,
+			trend_vs_previous_pct: '+1.8'
+		};
+	}
+
+	if (outletId === 'out-plg-01' || organizationId === 'org-plaga') {
+		return {
+			gross_profit: '1950000.00',
+			margin_pct: '68.40',
+			cogs_amount: '900000.00',
+			is_estimate: false,
+			pending_invoice_count: 0,
+			trend_vs_previous_pct: '+2.0'
+		};
+	}
+
+	if (organizationId === 'org-jodi') {
+		return {
+			gross_profit: '5762900.00',
+			margin_pct: '68.20',
+			cogs_amount: '2687100.00',
+			is_estimate: true,
+			pending_invoice_count: 1,
+			estimate_badge: 'Estimasi · 1 nota belum masuk',
+			trend_vs_previous_pct: '+2.1'
+		};
+	}
+
+	// Global Konsolidasi Seluruh Organisasi
 	return {
-		gross_profit: '5762900.00',
-		margin_pct: '68.20',
-		cogs_amount: '2687100.00',
+		gross_profit: '9862900.00',
+		margin_pct: '68.00',
+		cogs_amount: '4637100.00',
 		is_estimate: true,
 		pending_invoice_count: 1,
 		estimate_badge: 'Estimasi · 1 nota belum masuk',
-		trend_vs_previous_pct: '+2.1'
+		trend_vs_previous_pct: '+2.3'
 	};
 }
 
-function generateOutletComparisonData(role: string, ownerTypeFilter: string): OutletComparisonCardData {
-	const allRows = [
+function generateOutletComparisonData(role: string, ownerTypeFilter: string, organizationId: string): OutletComparisonCardData {
+	const allRows: OutletComparisonRow[] = [
 		{
 			outlet_id: 'out-jkt-01',
-			outlet_name: 'Senopati Flagship',
+			outlet_name: 'Jodi Senopati Flagship',
+			organization_id: 'org-jodi',
+			organization_name: 'Seduhan Kopi Jodi',
 			owner_type: 'own_company' as const,
 			omzet: '4820000.00',
 			cups: 238,
@@ -511,7 +664,9 @@ function generateOutletComparisonData(role: string, ownerTypeFilter: string): Ou
 		},
 		{
 			outlet_id: 'out-bdg-01',
-			outlet_name: 'Outlet Dago',
+			outlet_name: 'Jodi Dago',
+			organization_id: 'org-jodi',
+			organization_name: 'Seduhan Kopi Jodi',
 			owner_type: 'own_company' as const,
 			omzet: '2430000.00',
 			cups: 122,
@@ -526,7 +681,9 @@ function generateOutletComparisonData(role: string, ownerTypeFilter: string): Ou
 		},
 		{
 			outlet_id: 'out-sub-01',
-			outlet_name: 'Outlet Gubeng',
+			outlet_name: 'Jodi Gubeng',
+			organization_id: 'org-jodi',
+			organization_name: 'Seduhan Kopi Jodi',
 			owner_type: 'partner' as const,
 			omzet: '1200000.00',
 			cups: 52,
@@ -538,13 +695,54 @@ function generateOutletComparisonData(role: string, ownerTypeFilter: string): Ou
 			waste_pct: '1.80',
 			sync_status: 'ONLINE' as const,
 			last_sync: '7 menit lalu'
+		},
+		{
+			outlet_id: 'out-kvl-01',
+			outlet_name: 'Kaveloka Ubud',
+			organization_id: 'org-kaveloka',
+			organization_name: 'Kaveloka',
+			owner_type: 'own_company' as const,
+			omzet: '3200000.00',
+			cups: 145,
+			cogs: '1050000.00',
+			operational_costs: '210000.00',
+			gross_profit: '1940000.00',
+			margin_pct: '67.20',
+			stock_diff_pct: '0.30',
+			waste_pct: '0.90',
+			sync_status: 'ONLINE' as const,
+			last_sync: '1 menit lalu'
+		},
+		{
+			outlet_id: 'out-plg-01',
+			outlet_name: 'Plaga Farm Bistro',
+			organization_id: 'org-plaga',
+			organization_name: 'Plaga',
+			owner_type: 'own_company' as const,
+			omzet: '2850000.00',
+			cups: 115,
+			cogs: '900000.00',
+			operational_costs: '190000.00',
+			gross_profit: '1760000.00',
+			margin_pct: '68.40',
+			stock_diff_pct: '0.50',
+			waste_pct: '1.10',
+			sync_status: 'ONLINE' as const,
+			last_sync: '3 menit lalu'
 		}
 	];
 
-	const filteredRows = allRows.filter((row) => {
-		if (ownerTypeFilter === 'all') return true;
-		return row.owner_type === ownerTypeFilter;
-	});
+	let filteredRows = allRows;
+
+	// Filter organisasi
+	if (organizationId && organizationId !== '*' && organizationId !== 'all') {
+		filteredRows = filteredRows.filter((row) => row.organization_id === organizationId);
+	}
+
+	// Filter kepemilikan
+	if (ownerTypeFilter !== 'all') {
+		filteredRows = filteredRows.filter((row) => row.owner_type === ownerTypeFilter);
+	}
 
 	return {
 		rows: filteredRows,
@@ -552,13 +750,14 @@ function generateOutletComparisonData(role: string, ownerTypeFilter: string): Ou
 	};
 }
 
-function generateStockIssuesData(role: string, outletId: string): StockIssuesCardData {
+function generateStockIssuesData(role: string, organizationId: string, outletId: string): StockIssuesCardData {
 	const allItems = [
 		{
 			id: 'stk-1',
 			item_name: 'Fresh Milk Greenfield',
 			outlet_id: 'out-jkt-01',
-			outlet_name: 'Outlet Senopati',
+			outlet_name: 'Jodi Senopati',
+			organization_id: 'org-jodi',
 			current_qty: '18.2000',
 			min_qty: '20.0000',
 			unit: 'L',
@@ -571,7 +770,8 @@ function generateStockIssuesData(role: string, outletId: string): StockIssuesCar
 			id: 'stk-2',
 			item_name: 'Pure Uji Matcha Powder',
 			outlet_id: 'out-jkt-01',
-			outlet_name: 'Outlet Senopati',
+			outlet_name: 'Jodi Senopati',
+			organization_id: 'org-jodi',
 			current_qty: '120.0000',
 			min_qty: '150.0000',
 			unit: 'g',
@@ -584,7 +784,8 @@ function generateStockIssuesData(role: string, outletId: string): StockIssuesCar
 			id: 'stk-3',
 			item_name: 'House Blend Espresso Beans',
 			outlet_id: 'out-bdg-01',
-			outlet_name: 'Outlet Dago',
+			outlet_name: 'Jodi Dago',
+			organization_id: 'org-jodi',
 			current_qty: '24.5000',
 			min_qty: '10.0000',
 			unit: 'kg',
@@ -592,12 +793,29 @@ function generateStockIssuesData(role: string, outletId: string): StockIssuesCar
 			severity: 'success' as const,
 			stock_diff_pct: '0.00',
 			waste_pct: '0.50'
+		},
+		{
+			id: 'stk-4',
+			item_name: 'Single Origin Kintamani Beans',
+			outlet_id: 'out-kvl-01',
+			outlet_name: 'Kaveloka Ubud',
+			organization_id: 'org-kaveloka',
+			current_qty: '3.2000',
+			min_qty: '5.0000',
+			unit: 'kg',
+			est_days_left: '1.8',
+			severity: 'danger' as const,
+			stock_diff_pct: '-0.10',
+			waste_pct: '0.40'
 		}
 	];
 
-	const filtered = outletId && outletId !== '*'
-		? allItems.filter((i) => i.outlet_id === outletId)
-		: allItems;
+	let filtered = allItems;
+	if (outletId && outletId !== '*' && outletId !== 'all') {
+		filtered = filtered.filter((i) => i.outlet_id === outletId);
+	} else if (organizationId && organizationId !== '*' && organizationId !== 'all') {
+		filtered = filtered.filter((i) => i.organization_id === organizationId);
+	}
 
 	return {
 		items: filtered,
@@ -607,9 +825,62 @@ function generateStockIssuesData(role: string, outletId: string): StockIssuesCar
 }
 
 function generateHqPayablesData(role: string): HqPayablesCardData {
+	const dueBills: DuePayableBill[] = [
+		{
+			id: 'bill-001',
+			invoice_number: 'INV-SPM-2610-089',
+			supplier_name: 'PT Sukses Pangan Mandiri',
+			category: 'Biji Kopi & Sirup',
+			due_date: '2026-10-14',
+			due_date_formatted: '14 Okt 2026',
+			days_left: 1,
+			days_left_label: 'Besok (H-1)',
+			amount: '2450000.00',
+			status: 'due_soon'
+		},
+		{
+			id: 'bill-002',
+			invoice_number: 'INV-SSL-2610-092',
+			supplier_name: 'CV Susu Segar Lembang',
+			category: 'Susu Pasteurisasi',
+			due_date: '2026-10-16',
+			due_date_formatted: '16 Okt 2026',
+			days_left: 3,
+			days_left_label: '3 hari lagi',
+			amount: '1850000.00',
+			status: 'due_soon'
+		},
+		{
+			id: 'bill-003',
+			invoice_number: 'INV-KPA-2610-098',
+			supplier_name: 'PT Kemasan Prima Abadi',
+			category: 'Paper Cup & Sedotan',
+			due_date: '2026-10-18',
+			due_date_formatted: '18 Okt 2026',
+			days_left: 5,
+			days_left_label: '5 hari lagi',
+			amount: '1500000.00',
+			status: 'due_soon'
+		},
+		{
+			id: 'bill-004',
+			invoice_number: 'INV-RN-2610-104',
+			supplier_name: 'CV Rempah Nusantara',
+			category: 'Bumbu & Teh Artisan',
+			due_date: '2026-10-20',
+			due_date_formatted: '20 Okt 2026',
+			days_left: 7,
+			days_left_label: '7 hari lagi',
+			amount: '1050000.00',
+			status: 'due_soon'
+		}
+	];
+
 	return {
 		total_balance: '14850000.00',
-		due_soon_amount: '1250000.00',
+		due_soon_amount: '6850000.00',
+		due_soon_count: dueBills.length,
+		due_bills: dueBills,
 		overdue_amount: '0.00',
 		aging: {
 			not_due: '9500000.00',
@@ -622,82 +893,158 @@ function generateHqPayablesData(role: string): HqPayablesCardData {
 	};
 }
 
-function generatePettyCashData(): PettyCashCardData {
+function generatePettyCashData(organizationId: string): PettyCashCardData {
+	const allOutlets = [
+		{
+			outlet_id: 'out-jkt-01',
+			outlet_name: 'Jodi Senopati',
+			organization_id: 'org-jodi',
+			organization_name: 'Seduhan Kopi Jodi',
+			current_balance: '1500000.00',
+			daily_spent: '85000.00',
+			daily_limit: '300000.00',
+			pending_verification_count: 1,
+			pending_verification_amount: '85000.00'
+		},
+		{
+			outlet_id: 'out-bdg-01',
+			outlet_name: 'Jodi Dago',
+			organization_id: 'org-jodi',
+			organization_name: 'Seduhan Kopi Jodi',
+			current_balance: '1750000.00',
+			daily_spent: '150000.00',
+			daily_limit: '300000.00',
+			pending_verification_count: 1,
+			pending_verification_amount: '350000.00'
+		},
+		{
+			outlet_id: 'out-sub-01',
+			outlet_name: 'Jodi Gubeng',
+			organization_id: 'org-jodi',
+			organization_name: 'Seduhan Kopi Jodi',
+			current_balance: '1000000.00',
+			daily_spent: '50000.00',
+			daily_limit: '200000.00',
+			pending_verification_count: 0,
+			pending_verification_amount: '0.00'
+		},
+		{
+			outlet_id: 'out-kvl-01',
+			outlet_name: 'Kaveloka Ubud',
+			organization_id: 'org-kaveloka',
+			organization_name: 'Kaveloka',
+			current_balance: '1200000.00',
+			daily_spent: '60000.00',
+			daily_limit: '250000.00',
+			pending_verification_count: 0,
+			pending_verification_amount: '0.00'
+		},
+		{
+			outlet_id: 'out-plg-01',
+			outlet_name: 'Plaga Farm Bistro',
+			organization_id: 'org-plaga',
+			organization_name: 'Plaga',
+			current_balance: '1100000.00',
+			daily_spent: '75000.00',
+			daily_limit: '250000.00',
+			pending_verification_count: 0,
+			pending_verification_amount: '0.00'
+		}
+	];
+
+	const filtered = organizationId && organizationId !== '*' && organizationId !== 'all'
+		? allOutlets.filter((o) => o.organization_id === organizationId)
+		: allOutlets;
+
+	const totalBal = filtered.reduce((acc, curr) => acc + parseFloat(curr.current_balance), 0);
+	const totalPending = filtered.reduce((acc, curr) => acc + curr.pending_verification_count, 0);
+	const totalPendingAmt = filtered.reduce((acc, curr) => acc + parseFloat(curr.pending_verification_amount), 0);
+
 	return {
-		total_balance: '4250000.00',
-		pending_verification_count: 2,
-		pending_verification_amount: '435000.00',
-		outlets: [
-			{
-				outlet_id: 'out-jkt-01',
-				outlet_name: 'Outlet Senopati',
-				current_balance: '1500000.00',
-				daily_spent: '85000.00',
-				daily_limit: '300000.00',
-				pending_verification_count: 1,
-				pending_verification_amount: '85000.00'
-			},
-			{
-				outlet_id: 'out-bdg-01',
-				outlet_name: 'Outlet Dago',
-				current_balance: '1750000.00',
-				daily_spent: '150000.00',
-				daily_limit: '300000.00',
-				pending_verification_count: 1,
-				pending_verification_amount: '350000.00'
-			},
-			{
-				outlet_id: 'out-sub-01',
-				outlet_name: 'Outlet Gubeng',
-				current_balance: '1000000.00',
-				daily_spent: '50000.00',
-				daily_limit: '200000.00',
-				pending_verification_count: 0,
-				pending_verification_amount: '0.00'
-			}
-		]
+		total_balance: totalBal.toFixed(2),
+		pending_verification_count: totalPending,
+		pending_verification_amount: totalPendingAmt.toFixed(2),
+		outlets: filtered
 	};
 }
 
-function generateOutletOpsStatusData(): OutletOpsStatusCardData {
+function generateOutletOpsStatusData(organizationId: string): OutletOpsStatusCardData {
+	const allOutlets = [
+		{
+			outlet_id: 'out-jkt-01',
+			outlet_name: 'Jodi Senopati',
+			organization_id: 'org-jodi',
+			organization_name: 'Seduhan Kopi Jodi',
+			sync_status: 'ONLINE' as const,
+			last_sync_time: '14:28 WIB',
+			last_sync_mins_ago: 2,
+			eod_status: 'pending' as const
+		},
+		{
+			outlet_id: 'out-bdg-01',
+			outlet_name: 'Jodi Dago',
+			organization_id: 'org-jodi',
+			organization_name: 'Seduhan Kopi Jodi',
+			sync_status: 'ONLINE' as const,
+			last_sync_time: '14:26 WIB',
+			last_sync_mins_ago: 4,
+			eod_status: 'completed' as const
+		},
+		{
+			outlet_id: 'out-sub-01',
+			outlet_name: 'Jodi Gubeng',
+			organization_id: 'org-jodi',
+			organization_name: 'Seduhan Kopi Jodi',
+			sync_status: 'ONLINE' as const,
+			last_sync_time: '14:23 WIB',
+			last_sync_mins_ago: 7,
+			eod_status: 'pending' as const
+		},
+		{
+			outlet_id: 'out-kvl-01',
+			outlet_name: 'Kaveloka Ubud',
+			organization_id: 'org-kaveloka',
+			organization_name: 'Kaveloka',
+			sync_status: 'ONLINE' as const,
+			last_sync_time: '14:29 WIB',
+			last_sync_mins_ago: 1,
+			eod_status: 'pending' as const
+		},
+		{
+			outlet_id: 'out-plg-01',
+			outlet_name: 'Plaga Farm Bistro',
+			organization_id: 'org-plaga',
+			organization_name: 'Plaga',
+			sync_status: 'ONLINE' as const,
+			last_sync_time: '14:27 WIB',
+			last_sync_mins_ago: 3,
+			eod_status: 'completed' as const
+		}
+	];
+
+	const filtered = organizationId && organizationId !== '*' && organizationId !== 'all'
+		? allOutlets.filter((o) => o.organization_id === organizationId)
+		: allOutlets;
+
 	return {
-		online_count: 3,
-		total_outlets: 3,
-		outlets: [
-			{
-				outlet_id: 'out-jkt-01',
-				outlet_name: 'Outlet Senopati',
-				sync_status: 'ONLINE',
-				last_sync_time: '14:28 WIB',
-				last_sync_mins_ago: 2,
-				eod_status: 'pending'
-			},
-			{
-				outlet_id: 'out-bdg-01',
-				outlet_name: 'Outlet Dago',
-				sync_status: 'ONLINE',
-				last_sync_time: '14:26 WIB',
-				last_sync_mins_ago: 4,
-				eod_status: 'completed'
-			},
-			{
-				outlet_id: 'out-sub-01',
-				outlet_name: 'Outlet Gubeng',
-				sync_status: 'ONLINE',
-				last_sync_time: '14:23 WIB',
-				last_sync_mins_ago: 7,
-				eod_status: 'pending'
-			}
-		]
+		online_count: filtered.filter((o) => o.sync_status === 'ONLINE').length,
+		total_outlets: filtered.length,
+		outlets: filtered
 	};
 }
 
-function generateOutletEodStatusData(date: string): OutletEodStatusCardData {
-	const rows = DEMO_OUTLETS.map((outlet) => {
+function generateOutletEodStatusData(date: string, organizationId: string): OutletEodStatusCardData {
+	let targetOutlets = DEMO_OUTLETS;
+	if (organizationId && organizationId !== '*' && organizationId !== 'all') {
+		targetOutlets = targetOutlets.filter((o) => o.organization_id === organizationId);
+	}
+
+	const rows = targetOutlets.map((outlet) => {
 		const rec = getOutletEodStatus(outlet.id, date);
 		return {
 			outlet_id: outlet.id,
 			outlet_name: outlet.name,
+			organization_id: outlet.organization_id,
 			eod_status: rec?.is_completed ? ('completed' as const) : ('pending' as const),
 			cash_drawer_counted: rec?.cash_drawer_counted ?? false,
 			sales_synced: rec?.sales_synced ?? true,

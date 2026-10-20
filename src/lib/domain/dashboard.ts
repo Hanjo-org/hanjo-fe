@@ -24,10 +24,12 @@ export const ROLE_DASHBOARD_CARDS: Record<UserRole, DashboardCardKey[]> = {
 	],
 	hq_admin: [
 		'action_center',
-		'stock_issues',
-		'outlet_ops_status',
-		'outlet_comparison',
 		'sales_summary',
+		'gross_profit',
+		'outlet_comparison',
+		'stock_issues',
+		'hq_payables',
+		'outlet_ops_status',
 		'outlet_eod_status'
 	],
 	finance: [
@@ -36,7 +38,8 @@ export const ROLE_DASHBOARD_CARDS: Record<UserRole, DashboardCardKey[]> = {
 		'petty_cash',
 		'payment_reconciliation',
 		'gross_profit',
-		'true_up_pending'
+		'true_up_pending',
+		'outlet_eod_status'
 	],
 	store_manager: [
 		'action_center',

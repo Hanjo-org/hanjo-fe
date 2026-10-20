@@ -5,18 +5,26 @@
 	import Button from '../../../components/forms/Button.svelte';
 	import type { ActionCenterCardData } from '../../../api/contract/types.js';
 
+	interface Props {
+		colSpan?: string;
+	}
+
+	let { colSpan = 'col-12 col-lg-6' }: Props = $props();
+
 	const cardState = $derived(dashboardStore.getCardState<ActionCenterCardData>('action_center'));
 	const items = $derived(cardState.data?.items || []);
 </script>
 
 <DashboardCardFrame
 	cardKey="action_center"
-	title="Pusat Tindakan Mendesak"
-	icon="bolt"
-	subtitle="Tugas menunggu otorisasi & tindak lanjut operasional"
+	title="Notifikasi & Persetujuan"
+	icon="bell"
+	subtitle="Tugas menunggu verifikasi, otorisasi, & tindak lanjut operasional"
 	badgeText="{items.length} Menunggu"
 	badgeVariant={items.length > 0 ? 'warning' : 'success'}
-	colSpan="col-12 col-lg-7"
+	drilldownUrl="/approvals"
+	drilldownLabel="Inbox Persetujuan"
+	{colSpan}
 >
 	{#if items.length === 0}
 		<div class="p-6 text-center text-muted">

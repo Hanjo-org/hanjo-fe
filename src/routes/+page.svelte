@@ -23,11 +23,15 @@
 	import SmProposalsCard from '#lib/features/dashboard/components/SmProposalsCard.svelte';
 	import SmEodStatusCard from '#lib/features/dashboard/components/SmEodStatusCard.svelte';
 
-	// Komponen Khusus Cockpit Ringkasan Owner
+	// Komponen Khusus Cockpit Ringkasan Owner & HQ Admin
 	import OwnerPulseStrip from '#lib/features/dashboard/components/OwnerPulseStrip.svelte';
 	import OwnerLiveTrafficCard from '#lib/features/dashboard/components/OwnerLiveTrafficCard.svelte';
 	import OwnerAlertRadarCard from '#lib/features/dashboard/components/OwnerAlertRadarCard.svelte';
 	import OwnerQuickLinksBar from '#lib/features/dashboard/components/OwnerQuickLinksBar.svelte';
+
+	// Komponen Khusus Cockpit Finansial
+	import FinancePulseStrip from '#lib/features/dashboard/components/FinancePulseStrip.svelte';
+	import FinanceQuickLinksBar from '#lib/features/dashboard/components/FinanceQuickLinksBar.svelte';
 	import Icon from '#lib/components/data/Icon.svelte';
 
 	// Label Peran Pengguna
@@ -43,43 +47,68 @@
 	const roleTitle = $derived(roleLabels[currentRole] || 'Pengguna');
 	const userName = $derived(session.user?.name || 'Pengguna Hanjo');
 
-	// Daftar outlet yang boleh dipilih pengguna (AC-01.2)
-	const isStoreManager = $derived(session.role === 'store_manager');
+	const isStoreManager = $derived(session.role === 'store_manager' || session.role === 'cashier');
+
+	// Daftar outlet yang boleh dipilih pengguna (disaring per organisasi terpilih)
 	const selectableOutlets = $derived.by(() => {
 		if (isStoreManager) {
 			const assignedIds = session.user?.outlet_ids || [];
 			return DEMO_OUTLETS.filter((o) => assignedIds.includes(o.id));
 		}
+		if (dashboardStore.organizationId && dashboardStore.organizationId !== '*') {
+			return DEMO_OUTLETS.filter((o) => o.organization_id === dashboardStore.organizationId);
+		}
 		return DEMO_OUTLETS;
 	});
 
-	function normalizeOutlet(id: string | null | undefined): string {
+	function normalizeScope(id: string | null | undefined): string {
 		if (!id || id === 'all') return '*';
 		return id;
 	}
 
-	const selectedOutletValue = $derived(normalizeOutlet(dashboardStore.outletId));
+	const selectedOutletValue = $derived(normalizeScope(dashboardStore.outletId));
 
 	// Inisialisasi data dashboard saat komponen dimuat atau sesi berubah
 	onMount(() => {
+		if (session.activeOrganizationId) {
+			dashboardStore.organizationId = normalizeScope(session.activeOrganizationId);
+		}
 		if (session.activeOutletId) {
-			dashboardStore.outletId = normalizeOutlet(session.activeOutletId);
+			dashboardStore.outletId = normalizeScope(session.activeOutletId);
 		}
 		dashboardStore.refreshAll();
 	});
 
 	$effect(() => {
-		// Sinkronisasi jika peran atau outlet sesi berubah dari menu Dev / Header
-		const normalized = normalizeOutlet(session.activeOutletId);
-		if (normalized && dashboardStore.outletId !== normalized) {
-			dashboardStore.outletId = normalized;
+		// Sinkronisasi jika peran, organisasi, atau outlet sesi berubah dari menu Dev / Header
+		const normalizedOrg = normalizeScope(session.activeOrganizationId);
+		const normalizedOutlet = normalizeScope(session.activeOutletId);
+
+		let needsRefresh = false;
+		if (normalizedOrg && dashboardStore.organizationId !== normalizedOrg) {
+			dashboardStore.organizationId = normalizedOrg;
+			if (normalizedOrg !== '*') {
+				const outletsInOrg = DEMO_OUTLETS.filter((o) => o.organization_id === normalizedOrg);
+				if (!outletsInOrg.some((o) => o.id === dashboardStore.outletId)) {
+					dashboardStore.setOutlet('*');
+					session.setOutlet('*');
+				}
+			}
+			needsRefresh = true;
+		}
+		if (normalizedOutlet && dashboardStore.outletId !== normalizedOutlet) {
+			dashboardStore.outletId = normalizedOutlet;
+			needsRefresh = true;
+		}
+		if (needsRefresh) {
 			dashboardStore.refreshAll();
 		}
 	});
 
+
 	function handleOutletChange(event: Event) {
 		const target = event.target as HTMLSelectElement;
-		const val = normalizeOutlet(target.value);
+		const val = normalizeScope(target.value);
 		dashboardStore.setOutlet(val);
 		session.setOutlet(val);
 	}
@@ -108,8 +137,9 @@
 
 		<!-- Toolbar Filter Kontekstual Halaman (Lega, Rapi, Fokus Kontrol) -->
 		<div class="topbar-filters">
+
 			<!-- Pemilih Outlet (AC-01.2: SM terkunci hanya ke outlet tugas) -->
-			<div class="filter-group">
+			<div class="filter-group group-outlet">
 				<label for="dash-outlet-filter" class="filter-label">Outlet</label>
 				<select
 					id="dash-outlet-filter"
@@ -120,7 +150,6 @@
 				>
 					{#if !isStoreManager}
 						<option value="*">Semua Outlet (Konsolidasi)</option>
-						<option value="all" style="display: none;">Semua Outlet (Konsolidasi)</option>
 					{/if}
 					{#each selectableOutlets as out}
 						<option value={out.id}>{out.name} ({out.city})</option>
@@ -130,7 +159,7 @@
 
 			<!-- Filter Kepemilikan (Khusus Owner / HQ) -->
 			{#if !isStoreManager}
-				<div class="filter-group">
+				<div class="filter-group group-owner">
 					<label for="dash-owner-filter" class="filter-label">Kepemilikan</label>
 					<select
 						id="dash-owner-filter"
@@ -146,7 +175,7 @@
 			{/if}
 
 			<!-- Filter Rentang Waktu -->
-			<div class="filter-group">
+			<div class="filter-group group-period">
 				<label for="dash-date-filter" class="filter-label">Periode</label>
 				<select
 					id="dash-date-filter"
@@ -175,30 +204,23 @@
 
 	<!-- Fluid Responsive Card Grid (T-01.5: Tablet ≥ 768px hingga Desktop) -->
 	<main class="dashboard-grid" id="dashboard-cards-container">
-		{#if currentRole === 'owner'}
-			<!-- 1. DASHBOARD OWNER COCKPIT (Fokus & Ringkas: Live Omzet, Kemarin vs Hari Ini, Radar Masalah) -->
+		{#if currentRole === 'owner' || currentRole === 'hq_admin'}
+			<!-- 1. DASHBOARD OWNER & HQ ADMIN (Cockpit Fokus: Live Omzet, Penjualan Hari Ini vs Kemarin, Notifikasi & Persetujuan, Akses Cepat) -->
 			<OwnerPulseStrip />
 			<OwnerLiveTrafficCard />
 			<OwnerAlertRadarCard />
 			<OwnerQuickLinksBar />
 
-		{:else if currentRole === 'hq_admin'}
-			<!-- 2. DASHBOARD ADMIN PUSAT / HQ ADMIN (T-01.7 & AC-01.1) -->
-			<ActionCenterCard />
-			<StockIssuesCard />
-			<SalesSummaryCard />
-			<OutletOpsStatusCard />
-			<OutletComparisonCard />
-			<OutletEodStatusCard />
-
 		{:else if currentRole === 'finance'}
-			<!-- 3. DASHBOARD FINANCE (T-01.8 & AC-01.1) -->
-			<ActionCenterCard />
-			<GrossProfitCard />
-			<HqPayablesCard />
-			<PettyCashCard />
+			<!-- 2. DASHBOARD FINANCE COCKPIT (Financial Pulse, Notifikasi & Rekonsiliasi, AP Aging, Petty Cash & True-Up) -->
+			<FinancePulseStrip />
+			<ActionCenterCard colSpan="col-12 col-lg-6" />
 			<PaymentReconciliationCard />
+			<HqPayablesCard />
+			<GrossProfitCard />
+			<PettyCashCard />
 			<TrueUpPendingCard />
+			<FinanceQuickLinksBar />
 
 		{:else if currentRole === 'store_manager'}
 			<!-- 4. DASHBOARD STORE MANAGER (T-01.9, T-01.14 & AC-01.1) -->

@@ -17,7 +17,7 @@
 	icon="building-office"
 	subtitle={isFullMode
 		? 'Konsolidasi omzet, margin laba kotor, dan beban operasional antar cabang'
-		: 'Pemantauan operasional, pergerakan cup, dan kepatuhan stok cabang'}
+		: 'Pemantauan operasional, volume penjualan, dan kepatuhan stok cabang'}
 	drilldownUrl="/outlets"
 	drilldownLabel="Kelola Outlet"
 	colSpan="col-12"
@@ -34,7 +34,7 @@
 						<th>Outlet</th>
 						<th>Kepemilikan</th>
 						<th class="text-right">Omzet Hari Ini</th>
-						<th class="text-right">Cup Terjual</th>
+						<th class="text-right">Item Terjual</th>
 						{#if isFullMode}
 							<th class="text-right">HPP Bahan</th>
 							<th class="text-right">Laba Kotor</th>
@@ -51,7 +51,9 @@
 						<tr>
 							<td>
 								<div class="font-bold" style="color: var(--text-main);">{row.outlet_name}</div>
-								<div class="text-xs mono" style="color: var(--text-subtle);">{row.outlet_id}</div>
+								<div class="text-xs" style="color: var(--brand-primary); font-weight: 600;">
+									{row.organization_name || 'Seduhan Kopi Jodi'} · <span class="mono" style="color: var(--text-subtle);">{row.outlet_id}</span>
+								</div>
 							</td>
 							<td>
 								<Badge
@@ -64,7 +66,7 @@
 								{formatRupiah(row.omzet)}
 							</td>
 							<td class="text-right mono" style="color: var(--text-main);">
-								{formatNumber(row.cups)} cup
+								{formatNumber(row.cups)} item
 							</td>
 							{#if isFullMode}
 								<td class="text-right mono" style="color: var(--text-muted);">

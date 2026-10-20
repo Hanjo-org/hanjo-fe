@@ -43,7 +43,12 @@
 				<tbody>
 					{#each outlets as out}
 						<tr>
-							<td class="font-bold" style="color: var(--text-main);">{out.outlet_name}</td>
+							<td>
+								<div class="font-bold" style="color: var(--text-main);">{out.outlet_name}</div>
+								{#if out.organization_name}
+									<div class="text-[11px]" style="color: var(--brand-primary); font-weight: 600;">{out.organization_name}</div>
+								{/if}
+							</td>
 							<td>
 								{#if out.eod_status === 'completed'}
 									<span class="pill-status completed flex items-center gap-1">

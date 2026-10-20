@@ -15,7 +15,7 @@
 		(data?.daily_trends || []).map((t) => ({
 			label: t.date.slice(5), // '10-13'
 			value: parseFloat(t.omzet),
-			formattedValue: `${formatRupiah(t.omzet)} (${t.cup_count} cup)`
+			formattedValue: `${formatRupiah(t.omzet)} (${t.cup_count} item)`
 		}))
 	);
 
@@ -23,7 +23,7 @@
 		(data?.hourly_traffic || []).map((h) => ({
 			label: h.hour,
 			value: h.count,
-			formattedValue: `${h.count} cup (${formatRupiah(h.omzet)})`
+			formattedValue: `${h.count} item (${formatRupiah(h.omzet)})`
 		}))
 	);
 </script>
@@ -52,8 +52,8 @@
 		<!-- 2. Sub-metrik Transaksi & Komposisi Pembayaran -->
 		<div class="sales-subgrid">
 			<div class="sales-subitem">
-				<span class="sales-subitem-lbl">Total Cup</span>
-				<span class="sales-subitem-val">{formatNumber(data.cup_count)} Cup</span>
+				<span class="sales-subitem-lbl">Item Terjual</span>
+				<span class="sales-subitem-val">{formatNumber(data.cup_count)} item</span>
 			</div>
 			<div class="sales-subitem">
 				<span class="sales-subitem-lbl">Rata-rata Nilai (AOV)</span>

@@ -181,7 +181,7 @@ tests/
 
 ### 4.4 Daftar, filter, urut, cari
 - `GET /resource?page=1&per_page=25&sort=-created_at,name&q=kata`
-- Filter: `filter[outlet_id]=...&filter[status]=submitted,approved&filter[date_from]=2026-10-01&filter[date_to]=2026-10-31`
+- Filter: `filter[organization_id]=...&filter[outlet_id]=...&filter[status]=submitted,approved&filter[date_from]=2026-10-01&filter[date_to]=2026-10-31`
 - Daftar besar mendukung `include=lines,supplier` untuk relasi (mock dan backend sama-sama mendukung).
 - Pencarian `q` mencari kolom yang didefinisikan per resource di kontrak.
 
@@ -211,7 +211,7 @@ Respons: dokumen terbaru + `meta.effects` (daftar efek samping, mis. `stock_move
 | 500 | `server_error` | Galat tak terduga. |
 
 ### 4.8 Sesi dan izin
-- `GET /me` → `{ user, roles[], outlet_ids[], permissions[], feature_flags{}, settings{} }`. UI memakai ini untuk `can(aksi, sumber, outlet_id?)`.
+- `GET /me` → `{ user, roles[], organization_id?, organization_ids[], outlet_ids[], permissions[], feature_flags{}, settings{} }`. UI memakai ini untuk `can(aksi, sumber, outlet_id?, organization_id?)`.
 - `GET /nav/badges` → hitungan lencana menu (persetujuan menunggu, stok di bawah minimum, nota menunggu, dan seterusnya) sesuai peran dan scope.
 - Peran dev-only: `POST /dev/switch-role` hanya ada di driver mock.
 
@@ -332,13 +332,18 @@ Bucket umur: **belum jatuh tempo**, **1-30**, **31-60**, **61-90**, **>90** hari
 
 ## 7. Peran dan akun demo
 
-| Akun demo | Peran | Cakupan | Fokus demo |
-|---|---|---|---|
-| Rina | `owner` | Semua outlet | Perbandingan outlet, persetujuan tingkat atas, laba. |
-| Dimas | `hq_admin` | Semua outlet | Master, menu, resep, harga, usulan menu, status outlet. |
-| Maya | `finance` | Semua outlet | Verifikasi nota, pembayaran, hutang, kas kecil, pajak, periode. |
-| Budi | `store_manager` | Outlet A | Operasional harian satu outlet. |
-| Sari | `store_manager` | Outlet B dan C | Penugasan multi-outlet dan pemilihan outlet. |
+Di atas outlet terdapat entitas **Organisasi** (1 organisasi dapat menjalankan beberapa outlet):
+- **Seduhan Kopi Jodi** (`org-jodi`): Menjalankan beberapa outlet (Jodi Senopati `out-jkt-01`, Jodi Dago `out-bdg-01`, Jodi Gubeng `out-sub-01`).
+- **Kaveloka** (`org-kaveloka`): Sementara menjalankan 1 outlet (Kaveloka Ubud `out-dps-01`).
+- **Plaga** (`org-plaga`): Sementara menjalankan 1 outlet (Plaga Farm Bistro `out-plg-01`).
+
+| Akun demo | Peran | Organisasi | Cakupan Outlet | Fokus demo |
+|---|---|---|---|---|
+| Rina | `owner` | Semua (`*`) | Semua outlet | Konsolidasi grup, perbandingan outlet lintas organisasi, persetujuan tingkat atas, laba. |
+| Dimas | `hq_admin` | Semua (`*`) | Semua outlet | Master katalog, menu, resep, harga pusat, usulan menu, status outlet. |
+| Maya | `finance` | Semua (`*`) | Semua outlet | Verifikasi nota, pembayaran hutang, kas kecil, rekonsiliasi, tutup periode fiskal. |
+| Budi | `store_manager` | Seduhan Kopi Jodi | Jodi Senopati (`out-jkt-01`) | Operasional harian satu outlet dalam organisasi Seduhan Kopi Jodi. |
+| Sari | `store_manager` | Seduhan Kopi Jodi | Jodi Dago (`out-bdg-01`) & Jodi Gubeng (`out-sub-01`) | **Store Manager multi-outlet**: mengelola dan beralih antar beberapa outlet di bawah 1 organisasi yang sama. |
 
 Pengalih peran (dev-only) ada di menu pengguna; pada produksi hilang.
 
@@ -354,7 +359,7 @@ Ringkasan urutan dan usaha kasar (hari kerja satu orang, `[ASSUMED]`):
 |---|---|---|
 | 00 | Fondasi dan kontrak | 7-9 |
 | 01 | Shell, navigasi, dashboard (4 peran), status EOD | 8-10 |
-| 02 | Outlet dan mitra | 4-5 |
+| 02 | Master organisasi, multi-outlet dan mitra | 4-5 |
 | 03 | Katalog: bahan, satuan, pemasok | 5-6 |
 | 04 | Katalog: menu, modifier, resep, harga, channel | 10-12 |
 | 05 | Mesin persetujuan dan inbox | 6-7 |
@@ -433,7 +438,7 @@ Belum ada layar bisnis. Yang ada: halaman **Masuk** (pilih akun demo), halaman *
 | Keuangan | Keuangan & Pajak | `/finance` | `owner`, `hq_admin` (baca), `finance` | `tax` untuk submenu Pajak | `finance.true_up_pending` |
 | Keuangan | Laporan | `/reports` | semua (isi per peran) | – | – |
 | Master Data | Katalog & Resep | `/catalog` | semua (SM baca + Usulan Menu) | – | `catalog.proposals_pending` |
-| Master Data | Outlet & Mitra | `/org` | `owner`, `hq_admin`, `finance` (baca), SM (baca outlet sendiri) | `partner_ownership` untuk submenu Pemilik | – |
+| Master Data | Organisasi & Outlet | `/org` | `owner`, `hq_admin`, `finance` (baca), SM (baca outlet tugas) | `partner_ownership` untuk submenu Pemilik | – |
 | Sistem | Pengaturan | `/settings` | `owner`, `hq_admin`, `finance` (baca terbatas) | – | – |
 
 Aturan: grup berbentuk akordeon (hanya grup aktif terbuka); sidebar dapat dilipat menjadi ikon dengan tooltip dan keadaannya diingat per pengguna; label seksi huruf kapital kecil; **Penjualan hanya-baca masuk ke Laporan** (R-17, R-18), bukan menu sendiri.
@@ -441,7 +446,7 @@ Aturan: grup berbentuk akordeon (hanya grup aktif terbuka); sidebar dapat dilipa
 **Aturan lencana:** hanya untuk hal yang menunggu tindakan dan berupa angka; warna menunjukkan urgensi (merah = lewat batas, kuning = peringatan, biru = informasi).
 
 ### Header
-- **Pemilih outlet:** `owner`/`hq_admin`/`finance` → "Semua Outlet" + daftar; SM → hanya outlet yang ditugaskan (satu outlet = terkunci). **"Pusat" bukan pilihan.**
+- **Pemilih hierarkis Organisasi & Outlet:** `owner`/`hq_admin`/`finance` → "Semua Organisasi", organisasi spesifik (Seduhan Kopi Jodi, Kaveloka, Plaga), atau outlet tertentu; SM → hanya outlet yang ditugaskan dalam organisasinya (Budi ke Senopati; Sari beralih antara Dago dan Gubeng). **"Pusat" bukan pilihan outlet.**
 - **Filter pemilik** (milik sendiri / mitra): tersembunyi bila flag `partner_ownership` mati.
 - **Rentang tanggal:** Hari ini, 7 hari, Bulan ini, Kustom. Disimpan di URL dan diingat per pengguna.
 - **Pencarian global `Ctrl+K`:** halaman menu + entitas (nomor PO/nota/tagihan, bahan, menu, outlet, pemasok), hasil mengikuti scope pengguna.
@@ -515,7 +520,7 @@ Penjualan harian 90 hari per outlet (variasi akhir pekan, tren naik moderat), do
 
 ### Kriteria penerimaan
 - **AC-01.1** Tiap peran hanya melihat kartu pada matriks di atas.
-- **AC-01.2** Budi (Outlet A) tidak dapat memilih outlet lain; Sari memilih antara Outlet B dan C; Rina "Semua Outlet" + filter pemilik.
+- **AC-01.2** Budi (Jodi Senopati) terkunci pada outletnya; Sari (Store Manager multi-outlet Seduhan Kopi Jodi) memilih antara Jodi Dago & Jodi Gubeng; Rina/Dimas/Maya "Semua Organisasi", organisasi tertentu, atau outlet spesifik.
 - **AC-01.3** Angka kartu sama dengan angka pada halaman telusurnya (uji otomatis per kartu setelah milestone terkait selesai).
 - **AC-01.4** Lencana menu sama dengan jumlah pada halaman tujuan.
 - **AC-01.5** `gross_profit` menampilkan Estimasi dengan N yang benar; N berkurang saat nota diverifikasi (setelah MS-07).
@@ -530,16 +535,17 @@ Penjualan harian 90 hari per outlet (variasi akhir pekan, tren naik moderat), do
 
 ---
 
-## MS-02: Outlet dan mitra
+## MS-02: Master organisasi, multi-outlet dan mitra
 
-**Tujuan:** master organisasi: outlet, pemilik/investor, penugasan, grup.
+**Tujuan:** master organisasi tingkat atas (`Organization`), relasi hierarki 1 Organisasi -> banyak Outlet, pemilik/investor mitra, penugasan pengguna/manager multi-outlet, dan grup outlet.
 **Dependensi:** MS-00, MS-01. **Usaha:** 4-5 hari.
 
 ### Layar per peran
 
 | Halaman | Owner | Admin pusat | Finance | SM |
 |---|---|---|---|---|
-| `PG-org-outlets` daftar outlet | CRUA | CRU | R | R (outlet sendiri) |
+| `PG-org-list` daftar organisasi & entitas induk | CRUA | CRU | R | R (organisasi sendiri) |
+| `PG-org-outlets` daftar outlet (filter organisasi) | CRUA | CRU | R | R (outlet tugas) |
 | `PG-org-outlet-detail` tab Ringkasan, Pemilik, Pengguna, Syarat bayar*, Kas kecil*, Ketersediaan menu* | CRUA | CRU | R | R |
 | `PG-org-owners` pemilik/investor (flag `partner_ownership`) | CRUA | CRU | R | – |
 | `PG-org-groups` grup outlet | CRU | CRU | R | – |
@@ -547,42 +553,47 @@ Penjualan harian 90 hari per outlet (variasi akhir pekan, tren naik moderat), do
 \*Tab ini berisi tautan ke modul terkait dan terisi penuh di milestone masing-masing.
 
 ### Kontrak (endpoint)
+- `GET/POST /organizations` · `GET/PUT /organizations/{id}` · `POST /organizations/{id}/actions/activate|deactivate`
 - `GET/POST /outlets` · `GET/PUT /outlets/{id}` · `POST /outlets/{id}/actions/activate|deactivate`
 - `GET/POST /outlet-owners` · `GET/PUT /outlet-owners/{id}`
 - `GET/POST /outlets/{id}/ownerships` · `PUT/DELETE /ownerships/{id}` (DELETE = akhiri/soft)
-- `PUT /outlets/{id}/users` (penugasan) · `GET /users?outlet_id=`
+- `PUT /outlets/{id}/users` (penugasan) · `GET /users?outlet_id=&organization_id=`
 - `GET/POST /outlet-groups` · `PUT /outlet-groups/{id}`
 
 ### Perilaku mock wajib
-1. Kode outlet unik; nonaktifkan outlet **ditolak** (`409 conflict`) bila masih ada PO belum selesai atau nota belum terverifikasi; respons memuat daftar penghalang.
+1. Kode outlet unik; setiap outlet **wajib terikat pada satu organisasi induk**. Nonaktifkan outlet **ditolak** (`409 conflict`) bila masih ada PO belum selesai atau nota belum terverifikasi; respons memuat daftar penghalang. Nonaktifkan organisasi ditolak bila masih memiliki outlet aktif.
 2. `share_pct` boleh kosong; bila **semua** baris pemilik aktif pada tanggal yang sama terisi, total harus 100 (`validation_error`); bila ada yang kosong, validasi total dilewati dan UI menampilkan banner "Persentase belum diisi".
 3. `share_pct` di antara 0 dan 100; `effective_to` ≥ `effective_from`; baris untuk pasangan (outlet, pemilik) yang sama tidak boleh tumpang tindih.
 4. Satu outlet dapat memiliki banyak pemilik (investor); jenis `own_company` dan `partner` dibedakan.
-5. Menugaskan pengguna ke outlet memengaruhi scope pengguna itu seketika.
+5. Menugaskan pengguna ke organisasi & outlet memengaruhi scope pengguna itu seketika (Store Manager multi-outlet dapat beralih outlet di Header tanpa reload).
 6. Flag `partner_ownership` mati: tab/halaman pemilik tersembunyi, endpoint `/outlet-owners` → `feature_disabled`, semua outlet dianggap milik sendiri.
 
 ### Data seed
-3 outlet: `HJ-01 Outlet A` (milik sendiri), `HJ-02 Outlet B` (milik sendiri), `HJ-03 Outlet C` (mitra dengan dua investor, persentase kosong). Pemilik: perusahaan sendiri, Mitra 1, Mitra 2. Satu grup "Semua outlet". Penugasan sesuai bagian 7.
+- 3 Organisasi: **Seduhan Kopi Jodi** (`org-jodi`), **Kaveloka** (`org-kaveloka`), **Plaga** (`org-plaga`).
+- 5 Outlet: Jodi Senopati (`out-jkt-01`), Jodi Dago (`out-bdg-01`), Jodi Gubeng (`out-sub-01`) di bawah Seduhan Kopi Jodi; Kaveloka Ubud (`out-dps-01`) di bawah Kaveloka; Plaga Farm Bistro (`out-plg-01`) di bawah Plaga.
+- Pemilik: perusahaan sendiri, Mitra 1, Mitra 2. Satu grup "Semua outlet". Penugasan sesuai bagian 7.
 
 ### Tugas
-- **T-02.1** Layanan dan skema kontrak outlet, pemilik, kepemilikan, grup, penugasan.
+- **T-02.0** Skema kontrak dan CRUD organisasi induk (`GET/POST/PUT /organizations`).
+- **T-02.1** Layanan dan skema kontrak outlet (dengan foreign key `organization_id`), pemilik, kepemilikan, grup, penugasan.
 - **T-02.2** Handler mock dengan seluruh aturan di atas (termasuk daftar penghalang nonaktifkan).
-- **T-02.3** Daftar outlet (filter status/pemilik/grup, cari) dan formulir outlet.
+- **T-02.3** Daftar outlet (filter organisasi/status/pemilik/grup, cari) dan formulir outlet.
 - **T-02.4** Detail outlet bertab dengan tab bertanda tautan untuk modul yang belum selesai.
 - **T-02.5** Editor kepemilikan: garis waktu dengan tanggal berlaku, input persentase boleh kosong, banner belum diisi, validasi total.
 - **T-02.6** Halaman pemilik/investor.
-- **T-02.7** Penugasan pengguna ke outlet (multi-pilih) dan efek scope.
+- **T-02.7** Penugasan pengguna ke organisasi dan multi-outlet serta efek scope.
 - **T-02.8** Grup outlet.
 - **T-02.9** Pemfilteran flag `partner_ownership` di UI dan mock.
 - **T-02.10** Uji kontrak dan uji domain aturan kepemilikan.
 
 ### Kriteria penerimaan
+- **AC-02.0** Organisasi baru dapat dibuat, dan outlet baru wajib memilih organisasi induk yang terdaftar.
 - **AC-02.1** Membuat outlet dengan kode ganda ditolak dengan pesan jelas.
 - **AC-02.2** Menonaktifkan outlet dengan PO terbuka menampilkan daftar dokumen penghalang.
 - **AC-02.3** Dua investor dengan persentase kosong dapat disimpan tanpa galat; mengisi 60 dan 30 menampilkan galat total ≠ 100.
 - **AC-02.4** Dua baris pemilik yang sama dengan tanggal tumpang tindih ditolak.
-- **AC-02.5** Setelah Budi ditugaskan juga ke Outlet B, ia dapat memilih Outlet B di header tanpa muat ulang manual.
-- **AC-02.6** SM hanya melihat outlet sendiri; Finance hanya baca.
+- **AC-02.5** Setelah Sari ditugaskan ke Jodi Dago dan Jodi Gubeng, ia dapat beralih antar outlet tugasnya di header tanpa muat ulang manual.
+- **AC-02.6** SM hanya melihat outlet tugasnya dalam organisasinya; Finance hanya baca.
 - **AC-02.7** Mematikan `partner_ownership` menyembunyikan semua elemen kepemilikan.
 
 ---
@@ -829,9 +840,9 @@ Riwayat 90 hari per outlet yang **dihasilkan dengan menjalankan fungsi domain** 
 - **T-06.7** Pengaturan jadwal opname dan pengingat.
 - **T-06.8** Form waste dengan alasan dan foto opsional.
 - **T-06.9** Produksi: pilih resep produksi, jumlah rencana dan aktual, pratinjau biaya dan susut.
-- **T-06.10** Transfer (di balik flag) dengan alur penuh.
+- **T-06.10** Transfer (di balik flag) dengan alur penuh, mendukung transfer antar-outlet dalam satu organisasi (mis. Jodi Senopati ke Jodi Dago).
 - **T-06.11** Koreksi manual khusus Admin (alasan wajib, masuk audit).
-- **T-06.12** Tampilan SM yang dibatasi satu outlet, tombol "Buat permintaan barang" dari stok rendah (mengarah ke MS-07).
+- **T-06.12** Tampilan SM yang dibatasi organisasi dan outlet tugasnya (Budi ke Jodi Senopati, Sari dapat beralih antara Jodi Dago & Jodi Gubeng di bawah Seduhan Kopi Jodi), tombol "Buat permintaan barang" dari stok rendah (mengarah ke MS-07).
 - **T-06.13** Uji kontrak dan uji skenario (opname di bawah/atas ambang, produksi, negatif).
 
 ### Kriteria penerimaan
@@ -841,7 +852,7 @@ Riwayat 90 hari per outlet yang **dihasilkan dengan menjalankan fungsi domain** 
 - **AC-06.4** Waste tidak tercampur di HPP resep; muncul terpisah di laporan.
 - **AC-06.5** Batch produksi menghasilkan biaya satuan olahan = Σ bahan ÷ hasil aktual dan mencatat susut.
 - **AC-06.6** Stok negatif ditampilkan dengan peringatan, tidak diblokir.
-- **AC-06.7** Budi tidak melihat stok Outlet B (`404`).
+- **AC-06.7** Budi tidak melihat stok outlet di luar tugasnya (`404`); Sari dapat melihat stok Jodi Dago dan Jodi Gubeng secara bergantian namun terisolasi dari organisasi luar (Kaveloka / Plaga).
 - **AC-06.8** Mematikan `stock_transfer` menyembunyikan halaman dan endpoint menjawab `feature_disabled`.
 - **AC-06.9** Hitungan stok rendah di lencana, kartu dashboard, dan halaman stok identik.
 
@@ -1194,7 +1205,7 @@ Periode: Agustus dan September **tertutup**, Oktober **terbuka**; satu nota Sept
 |---|---|
 | Indeks `/reports` | Daftar laporan berkelompok (Operasional, Pembelian & Hutang, Biaya, Keuangan, Penjualan, Kontrol); hanya yang boleh dilihat peran tampil. |
 | Halaman `/reports/[key]` | Header, `FilterBar` (disinkronkan ke URL), tabel server-side (paginasi, urut), baris total, grafik opsional, kolom dapat diatur, telusur ke dokumen sumber. |
-| Filter umum | Outlet (mengikuti aturan peran), pemilik, rentang tanggal atau periode, ditambah filter khusus per laporan. |
+| Filter umum | Organisasi dan Outlet (mengikuti aturan peran), pemilik, rentang tanggal atau periode, ditambah filter khusus per laporan. |
 | Estimasi | Laporan yang menyangkut HPP/laba menampilkan lencana **Estimasi · N nota belum masuk** sesuai 6.11. |
 | Ekspor | CSV (UTF-8 dengan BOM), XLSX, dan PDF lewat tata letak cetak. Isi ekspor **sama** dengan tabel (nilai mentah, bukan teks terformat). |
 | Preset | Simpan filter sebagai preset pribadi per laporan. |
@@ -1367,7 +1378,7 @@ Periode: Agustus dan September **tertutup**, Oktober **terbuka**; satu nota Sept
 - **T-13.2** Handler mock dengan validasi dependensi dan versi pengaturan.
 - **T-13.3** Halaman pengaturan umum dan flag (dengan pratinjau dampak: menu/kartu/endpoint yang terpengaruh).
 - **T-13.4** Master pajak dengan tarif berjangka waktu.
-- **T-13.5** Pengguna: daftar, form, peran, penugasan outlet, nonaktifkan.
+- **T-13.5** Pengguna: daftar, form, peran, penugasan organisasi & multi-outlet (seperti Sari di Seduhan Kopi Jodi: Dago & Gubeng), nonaktifkan.
 - **T-13.6** Matriks peran dan izin (baca) dari `GET /roles`.
 - **T-13.7** Preferensi notifikasi pribadi.
 - **T-13.8** Penampil audit log dengan filter, DiffViewer, ekspor.
@@ -1379,7 +1390,7 @@ Periode: Agustus dan September **tertutup**, Oktober **terbuka**; satu nota Sept
 - **AC-13.1** (A12) Mematikan `petty_cash` menyembunyikan menu dan endpoint menjawab `feature_disabled`; menghidupkan `payables` tanpa `procurement` ditolak dengan alasan.
 - **AC-13.2** Mematikan lalu menghidupkan `procurement` mengembalikan seluruh data semula.
 - **AC-13.3** Perubahan pengaturan menghasilkan entri audit dengan diff yang benar.
-- **AC-13.4** Percobaan Budi membuka data Outlet B muncul di audit log (PRD A6).
+- **AC-13.4** Percobaan Budi membuka data outlet di luar tugasnya atau organisasi lain muncul di audit log (PRD A6).
 - **AC-13.5** Mengubah tarif master tidak mengubah catatan pajak lama.
 - **AC-13.6** Skenario *Banyak nota tertunda* mengubah kartu, lencana, dan laporan terkait sekaligus.
 - **AC-13.7** Panel Sumber Data tidak ada di build produksi (uji build).

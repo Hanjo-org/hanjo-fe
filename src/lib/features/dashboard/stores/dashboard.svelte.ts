@@ -27,6 +27,7 @@ export interface CardState<T = unknown> {
 
 class DashboardStore {
 	// Toolbar Filters
+	organizationId = $state<string>('*');
 	outletId = $state<string>('*');
 	ownerType = $state<'all' | 'own_company' | 'partner'>('all');
 	dateRange = $state<'today' | '7days' | 'month' | 'custom'>('today');
@@ -106,6 +107,7 @@ class DashboardStore {
 		try {
 			const res = await dashboardService.getCard(key, {
 				role: this.currentRole,
+				organization_id: this.organizationId,
 				outlet_id: this.outletId,
 				owner_type: this.ownerType,
 				date: session.businessDate
@@ -128,6 +130,14 @@ class DashboardStore {
 	async refreshAll(): Promise<void> {
 		const keysToLoad = this.allowedCardKeys;
 		await Promise.allSettled(keysToLoad.map((k) => this.loadCard(k)));
+	}
+
+	/**
+	 * Mengubah filter organisasi dan memperbarui kartu terkait
+	 */
+	setOrganization(orgId: string): void {
+		this.organizationId = orgId === 'all' ? '*' : orgId;
+		this.refreshAll();
 	}
 
 	/**

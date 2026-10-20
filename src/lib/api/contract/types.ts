@@ -176,6 +176,32 @@ export interface Versioned {
 }
 
 // ---------------------------------------------------------------------------
+// Organisasi & Outlet (§MS-00, §MS-02)
+// ---------------------------------------------------------------------------
+
+/** Entitas Organisasi (Di atas Outlet: 1 Organisasi mengelola beberapa Outlet) */
+export interface Organization {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  active?: boolean;
+  created_at?: string;
+}
+
+/** Entitas Outlet / Gerai (Berada di bawah Organisasi) */
+export interface Outlet {
+  id: string;
+  organization_id: string;
+  code: string;
+  name: string;
+  city: string;
+  owner_type?: 'own_company' | 'partner';
+  active?: boolean;
+  created_at?: string;
+}
+
+// ---------------------------------------------------------------------------
 // Identitas, Autentikasi & RBAC (§7, §MS-00)
 // ---------------------------------------------------------------------------
 
@@ -189,6 +215,10 @@ export interface User {
   email: string;
   role: UserRole;
   avatar_url?: string;
+  /** ID organisasi utama tempat pengguna bertugas */
+  organization_id?: string;
+  /** Daftar ID organisasi yang boleh diakses pengguna */
+  organization_ids?: string[];
   /** Daftar ID outlet yang ditugaskan (khusus store_manager) */
   outlet_ids?: string[];
   /** Daftar izin granular spesifik pengguna (PBAC) */
@@ -287,6 +317,7 @@ export interface DashboardCardResponse<T = unknown> {
 }
 
 export interface DashboardCardQuery {
+  organization_id?: string;
   outlet_id?: string;
   owner_type?: 'all' | 'own_company' | 'partner';
   from?: string;
@@ -355,6 +386,8 @@ export interface GrossProfitCardData {
 export interface OutletComparisonRow {
   outlet_id: string;
   outlet_name: string;
+  organization_id?: string;
+  organization_name?: string;
   owner_type: 'own_company' | 'partner';
   omzet: DecimalString;
   cups: number;
@@ -403,9 +436,24 @@ export interface AgingBucket {
   days_over_90: DecimalString;
 }
 
+export interface DuePayableBill {
+  id: string;
+  invoice_number: string;
+  supplier_name: string;
+  category: string;
+  due_date: string;
+  due_date_formatted: string;
+  days_left: number;
+  days_left_label: string;
+  amount: DecimalString;
+  status: 'due_today' | 'due_soon' | 'overdue';
+}
+
 export interface HqPayablesCardData {
   total_balance: DecimalString;
   due_soon_amount: DecimalString;
+  due_soon_count: number;
+  due_bills: DuePayableBill[];
   overdue_amount: DecimalString;
   aging: AgingBucket;
   summary_mode: boolean;
@@ -415,6 +463,8 @@ export interface HqPayablesCardData {
 export interface PettyCashOutletRow {
   outlet_id: string;
   outlet_name: string;
+  organization_id?: string;
+  organization_name?: string;
   current_balance: DecimalString;
   daily_spent: DecimalString;
   daily_limit: DecimalString;
@@ -433,6 +483,8 @@ export interface PettyCashCardData {
 export interface OutletOpsStatusRow {
   outlet_id: string;
   outlet_name: string;
+  organization_id?: string;
+  organization_name?: string;
   sync_status: 'ONLINE' | 'DELAYED' | 'OFFLINE';
   last_sync_time: string;
   last_sync_mins_ago: number;
@@ -449,6 +501,8 @@ export interface OutletOpsStatusCardData {
 export interface OutletEodStatusRow {
   outlet_id: string;
   outlet_name: string;
+  organization_id?: string;
+  organization_name?: string;
   eod_status: 'completed' | 'pending';
   cash_drawer_counted: boolean;
   sales_synced: boolean;

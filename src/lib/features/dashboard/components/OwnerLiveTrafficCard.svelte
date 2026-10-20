@@ -1,7 +1,7 @@
 <script lang="ts">
 	/**
 	 * OwnerLiveTrafficCard.svelte
-	 * Ritme Penjualan Hari Ini vs Kemarin
+	 * Penjualan Hari Ini vs Kemarin
 	 * Menjawab rasa penasaran Owner:
 	 * "Apakah hari ini lebih sepi atau ramai dari kemarin? Jam berapa toko paling ramai?"
 	 */
@@ -49,18 +49,18 @@
 		dailyTrends.map((d) => ({
 			label: formatDate(d.date).slice(0, 6),
 			value: parseFloat(d.omzet) || 0,
-			formattedValue: formatRupiah(d.omzet) + ` (${d.cup_count} cup)`
+			formattedValue: formatRupiah(d.omzet) + ` (${d.cup_count} item)`
 		}))
 	);
 </script>
 
 <DashboardCardFrame
 	cardKey="sales_summary"
-	title="Ritme Penjualan: Hari Ini vs Kemarin"
+	title="Penjualan: Hari Ini vs Kemarin"
 	icon="chart-bar"
 	subtitle="Live komparasi transaksi jam per jam untuk memantau jam ramai dan jam sepi"
 	badgeText={data?.trend_vs_previous_pct ? `▲ ${data.trend_vs_previous_pct}% Lebih Ramai` : 'Live'}
-	badgeVariant="success"
+	badgeVariant="info"
 	drilldownUrl="/reports"
 	drilldownLabel="Laporan Penjualan Lengkap"
 	colSpan="col-12 col-lg-7"
@@ -87,12 +87,16 @@
 				</button>
 			</div>
 
-			<!-- Legenda Warna -->
+			<!-- Legenda Warna: Biru jika naik/sama, Merah jika turun, Abu-abu untuk kemarin -->
 			{#if activeView === 'hourly'}
 				<div class="flex items-center gap-3 text-xs">
 					<div class="flex items-center gap-1.5">
-						<span class="legend-box today"></span>
-						<span style="color: var(--text-main); font-weight: 600;">Hari Ini</span>
+						<span class="legend-box higher"></span>
+						<span style="color: var(--text-main); font-weight: 500;">Hari Ini (&ge; Kemarin)</span>
+					</div>
+					<div class="flex items-center gap-1.5">
+						<span class="legend-box lower"></span>
+						<span style="color: var(--text-main); font-weight: 500;">Hari Ini (&lt; Kemarin)</span>
 					</div>
 					<div class="flex items-center gap-1.5">
 						<span class="legend-box yesterday"></span>
@@ -109,6 +113,8 @@
 					{#each hourlyTraffic as hourItem, idx}
 						{@const todayVal = parseFloat(hourItem.omzet) || 0}
 						{@const yesterdayVal = parseFloat(hourItem.yesterday_omzet || '0') || 0}
+						{@const diff = todayVal - yesterdayVal}
+						{@const isHigher = diff >= 0}
 						{@const todayHeight = Math.max((todayVal / maxHourlyVal) * 100, 6)}
 						{@const yesterdayHeight = Math.max((yesterdayVal / maxHourlyVal) * 100, 6)}
 						{@const isHovered = hoveredHourIndex === idx}
@@ -119,20 +125,51 @@
 							onmouseenter={() => (hoveredHourIndex = idx)}
 							onmouseleave={() => (hoveredHourIndex = null)}
 						>
+							<!-- Floating Tooltip (Tidak berada di bawah sehingga tidak menyebabkan glitch layout) -->
+							{#if isHovered}
+								<div
+									class="hourly-bar-tooltip"
+									class:align-left={idx <= 1}
+									class:align-right={idx >= hourlyTraffic.length - 2}
+								>
+									<div class="tooltip-header">
+										<span class="tooltip-hour">Jam {hourItem.hour} WIB</span>
+										<span class="tooltip-badge {isHigher ? 'badge-higher' : 'badge-lower'}">
+											{diff >= 0 ? `▲ +${formatRupiah(diff)} Lebih Ramai` : `▼ ${formatRupiah(diff)} Lebih Sepi`}
+										</span>
+									</div>
+									<div class="tooltip-body">
+										<div class="tooltip-row">
+											<span class="tooltip-dot {isHigher ? 'dot-higher' : 'dot-lower'}"></span>
+											<span class="tooltip-label">Hari Ini:</span>
+											<strong class="tooltip-val {isHigher ? 'val-higher' : 'val-lower'}">{formatRupiah(hourItem.omzet)}</strong>
+											<span class="tooltip-qty">({hourItem.count} item)</span>
+										</div>
+										<div class="tooltip-row">
+											<span class="tooltip-dot dot-yesterday"></span>
+											<span class="tooltip-label">Kemarin:</span>
+											<strong class="tooltip-val val-yesterday">{formatRupiah(hourItem.yesterday_omzet || '0')}</strong>
+											<span class="tooltip-qty">({hourItem.yesterday_count || 0} item)</span>
+										</div>
+									</div>
+									<div class="tooltip-arrow"></div>
+								</div>
+							{/if}
+
 							<div class="bars-pair">
-								<!-- Bar Kemarin -->
+								<!-- Bar Kemarin (Netral / Abu-abu) -->
 								<div
 									class="bar yesterday"
 									style="height: {yesterdayHeight}%;"
-									title="Kemarin: {formatRupiah(hourItem.yesterday_omzet || '0')}"
 								></div>
 
-								<!-- Bar Hari Ini -->
+								<!-- Bar Hari Ini (Biru jika >= kemarin, Merah jika < kemarin) -->
 								<div
 									class="bar today"
+									class:higher={isHigher}
+									class:lower={!isHigher}
 									class:highlight={isHovered}
 									style="height: {todayHeight}%;"
-									title="Hari Ini: {formatRupiah(hourItem.omzet)}"
 								></div>
 							</div>
 
@@ -140,46 +177,18 @@
 						</div>
 					{/each}
 				</div>
-
-				<!-- Tooltip / Detail Bar yang Sedang Diarahkan Kursor -->
-				{#if hoveredHourIndex !== null && hourlyTraffic[hoveredHourIndex]}
-					{@const sel = hourlyTraffic[hoveredHourIndex]}
-					{@const selToday = parseFloat(sel.omzet) || 0}
-					{@const selYest = parseFloat(sel.yesterday_omzet || '0') || 0}
-					{@const diff = selToday - selYest}
-					<div class="hourly-hover-card">
-						<div class="flex items-center justify-between text-xs font-bold border-b pb-1 mb-1.5" style="border-color: var(--border-panel);">
-							<span style="color: var(--text-main);">Jam {sel.hour} WIB</span>
-							<span style={diff >= 0 ? 'color: var(--brand-primary);' : 'color: var(--pill-danger-text);'}>
-								{diff >= 0 ? `▲ +${formatRupiah(diff)} Lebih Ramai` : `▼ ${formatRupiah(diff)} Lebih Sepi`}
-							</span>
-						</div>
-						<div class="grid grid-cols-2 gap-2 text-xs">
-							<div>
-								<span class="text-[11px] block text-muted">Hari Ini:</span>
-								<strong style="color: var(--brand-primary);">{formatRupiah(sel.omzet)}</strong>
-								<span class="text-[11px] block text-muted">{sel.count} Cup</span>
-							</div>
-							<div>
-								<span class="text-[11px] block text-muted">Kemarin:</span>
-								<strong style="color: var(--text-main);">{formatRupiah(sel.yesterday_omzet || '0')}</strong>
-								<span class="text-[11px] block text-muted">{sel.yesterday_count || 0} Cup</span>
-							</div>
-						</div>
-					</div>
-				{/if}
 			</div>
 
 			<!-- Insight Puncak Jam Ramai -->
 			{#if peakHour}
-				<div class="dash-banner dash-banner-success mt-3 flex items-center justify-between">
+				<div class="dash-banner dash-banner-info mt-3 flex items-center justify-between">
 					<div class="flex items-center gap-2">
 						<Icon name="bolt" size={16} />
 						<span class="text-xs">
-							<strong>Puncak Keramaian Hari Ini:</strong> Jam <strong>{peakHour.hour} WIB</strong> dengan omzet <strong>{formatRupiah(peakHour.omzet)}</strong> ({peakHour.count} cup).
+							<strong>Puncak Keramaian Hari Ini:</strong> Jam <strong>{peakHour.hour} WIB</strong> dengan omzet <strong>{formatRupiah(peakHour.omzet)}</strong> ({peakHour.count} item).
 						</span>
 					</div>
-					<span class="text-[11px] font-semibold" style="color: var(--brand-primary);">
+					<span class="text-[11px] font-semibold" style="color: #3b82f6;">
 						Peak Hour
 					</span>
 				</div>

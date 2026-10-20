@@ -56,10 +56,11 @@
    - **Galat (Error)**: Tampilkan pesan kesalahan ramah pengguna + tombol Coba Lagi (*Retry*).
    - **Tidak Berhak (403 / Forbidden)**: Tampilkan layar akses ditolak jika `can()` bernilai false.
 
-9. **Otorisasi & Scope Terpusat (§7 & Prinsip P5)**:
+9. **Otorisasi & Scope Hirarkis Organisasi-Outlet (§7 & Prinsip P5)**:
+   - **Hirarki Domain**: `Organisasi` berada di atas `Outlet` (1 organisasi menjalankan 1 atau banyak outlet, mis. Seduhan Kopi Jodi dengan 3 outlet, Kaveloka 1 outlet, Plaga 1 outlet).
    - **Dilarang** hardcode peran di komponen (mis. `if (user.role === 'store_manager')`).
    - Gunakan fungsi izin terpusat: `can(action, resource, outlet_id?)` dari `#lib/auth/can.js`.
-   - Store Manager dibatasi secara ketat hanya pada outlet tugasnya (`404 not_found` jika mencoba membuka data outlet lain).
+   - Store Manager dibatasi secara ketat hanya pada organisasi dan outlet tugasnya (`404 not_found` jika mencoba membuka data outlet luar). Store manager dapat mengelola beberapa outlet dalam organisasi yang sama (mis. Sari mengelola Jodi Dago & Jodi Gubeng).
 
 10. **Invarian Tema Ganda & Anti-Sticker Putih (Light & Dark Mode Parity)**:
    - **DILARANG KERAS** menggunakan warna statis/heksadesimal mentah atau class utility Tailwind statis untuk latar belakang, border, dan teks (seperti `#ffffff`, `#fff`, `#f8fafc`, `#f1f5f9`, `bg-white`, `bg-slate-50`, `bg-slate-100`, `text-slate-900`, `text-slate-800`, `text-slate-700`).
@@ -89,6 +90,29 @@
    - **WAJIB** menggunakan icon SVG berbasis standar **Heroicons** (24x24 outline dengan `stroke-width="1.8"` atau `2`, atau 20x20 solid) yang bersih, profesional, elegan, dan proporsional.
    - Gunakan komponen terpusat `<Icon name="..." size={...} class="..." />` dari `#lib/components/ui/Icon.svelte` atau `#lib/ui/Icon.svelte`.
    - Seluruh icon wajib mewarisi warna secara dinamis menggunakan `stroke="currentColor"` atau `fill="currentColor"` agar otomatis selaras dengan token semantik (`var(--brand-primary)`, `var(--text-muted)`, status badges, dll.).
+
+12. **Wajib Desain Penuh (Full-Width) & Responsif 4-Tier Seketika (Simultaneous Responsive Engineering)**:
+   - **Prinsip Seketika (Zero Deferred Responsiveness)**: Setiap kali membuat, mengubah, atau merancang komponen UI, kartu (*card*), filter toolbar, tabel data, chart, atau layout halaman, **WAJIB LANGSUNG DIBUAT RESPONSIF SEKALIAN** mencakup 4 skala layar tanpa ditunda. Dilarang membuat tampilan hanya untuk desktop lalu menunda penyesuaian mobile/tablet.
+   - **Full-Width (Bebas Kotak Kaku)**: Kontainer utama dan dashboard **WAJIB 100% Fluid Full-Width** (`max-width: 100%`). **DILARANG KERAS** membatasi kontainer luar dengan `max-width: 1440px` atau `1600px` yang meninggalkan ruang kosong/hitam lebar di sisi kiri-kanan pada monitor desktop besar atau ultrawide.
+   - **Standar Adaptasi 4 Skala Layar (4-Tier Breakpoints)**:
+     1. **Layar Besar (Large Desktop & Ultrawide $\ge$ 1600px)**:
+        - Lebar 100% penuh dengan padding lega (`24px` hingga `32px`).
+        - Hero strip KPI berjajar 4 kolom dalam 1 baris (`repeat(4, 1fr)`).
+        - Grid kartu 12 kolom dengan gap lega (`gap: 24px`).
+     2. **Layar Agak Besar (Laptop & Desktop Standar 1024px – 1599px)**:
+        - Lebar 100% penuh dengan padding seimbang (`20px 24px`).
+        - Hero strip KPI 4 kolom, grid kartu 12 kolom (pasangan kartu 6+6 sejajar rapi, `gap: 20px`).
+     3. **Tablet (768px – 1023px, iPad / Tablet Portrait & Landscape)**:
+        - Padding `16px 20px`.
+        - Hero strip KPI otomatis menjadi 2 kolom $\times$ 2 baris.
+        - Grid kartu bertransformasi menjadi 2 kolom seimbang; kartu-kartu pasangan 6-kolom otomatis membagi rata 1 kolom per kartu (`grid-column: span 1`).
+        - Toolbar filter membungkus (*wrap*) rapi tanpa teks label terjepit.
+     4. **HP / Smartphone (< 768px, 360px – 480px)**:
+        - Padding ringkas `10px 14px` agar area baca layar kecil maksimal.
+        - Filter toolbar bertransformasi menjadi form grid 2-kolom yang mudah disentuh jempol (*touch-friendly tap targets* $\ge$ 38px).
+        - Seluruh kartu mengambil 1 kolom penuh (100% lebar).
+        - Nilai headline metrik menyesuaikan ukuran font (`20px–22px`) agar tidak terpotong.
+        - Elemen horizontal lebar (tabel data, grafik batang jam-per-jam) **WAJIB** dibungkus kontainer scroll sentuh (`overflow-x: auto; -webkit-overflow-scrolling: touch;`) sehingga tidak gepeng dan **DILARANG KERAS** menyebabkan layar utama meluap secara horizontal (*zero page-level horizontal overflow*).
 
 ---
 
@@ -147,8 +171,9 @@ Setiap kali mengerjakan sub-fase atau tugas dari `docs/milestones/MS-xx.md`:
 5. **Cek Komponen Terlebih Dahulu (Component-First)**:
    - Periksa `src/lib/ui/`.
    - Jika butuh elemen input/data baru, buat komponen reusable di `src/lib/ui/` terlebih dahulu.
-6. **Susun Tampilan `.svelte`**:
+6. **Susun Tampilan `.svelte` & Full-Width Responsif 4-Tier Seketika**:
    - Rakit tampilan halaman dengan mengimpor reusable component dari `ui/` dan state dari `stores/*.svelte.ts`.
+   - **Wajib Responsif Seketika**: Terapkan langsung aturan Golden Rule 12 (Layar Besar, Agak Besar, Tablet, HP) pada komponen dan layout yang sedang dibangun tanpa menunda penyesuaian mobile/tablet. Pastikan kontainer 100% fluid full-width tanpa overflow horizontal.
    - Terapkan **4 state wajib**: Loading (Skeleton), Empty, Error (+ Retry), dan 403 Forbidden.
 7. **Verifikasi Kualitas**: Jalankan `npm run check` (harus 0 errors, 0 warnings).
 8. **Perbarui Checklist**: Centang `- [x]` tugas terkait di [`docs/milestones/MS-xx.md`](file:///c:/PROJECT/WEBSITE/hanjo/frontend/docs/milestones/).

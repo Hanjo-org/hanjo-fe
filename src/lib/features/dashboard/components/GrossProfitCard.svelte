@@ -6,6 +6,12 @@
 	import Icon from '../../../components/data/Icon.svelte';
 	import type { GrossProfitCardData } from '../../../api/contract/types.js';
 
+	interface Props {
+		colSpan?: string;
+	}
+
+	let { colSpan = 'col-12 col-lg-6' }: Props = $props();
+
 	const cardState = $derived(dashboardStore.getCardState<GrossProfitCardData>('gross_profit'));
 	const data = $derived(cardState.data);
 </script>
@@ -17,7 +23,7 @@
 	subtitle="Kalkulasi laba kotor terhadap omzet bersih dan estimasi HPP"
 	drilldownUrl="/finance"
 	drilldownLabel="Keuangan & HPP"
-	colSpan="col-12 col-lg-5"
+	{colSpan}
 >
 	{#if data}
 		<div class="sales-kpi-headline">

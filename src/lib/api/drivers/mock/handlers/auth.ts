@@ -24,16 +24,42 @@ export const DEMO_USERS_BY_ROLE: Record<UserRole, User> = {
 	cashier: DEMO_USERS['usr-fajar']
 };
 
-// Sesi mock aktif di memori browser (default: Rina / Owner untuk kemudahan awal demo)
-let currentMockUser: User | null = DEMO_USERS['usr-rina'];
+function getInitialMockUser(): User | null {
+	if (typeof window !== 'undefined' && window.localStorage) {
+		const savedUserId = localStorage.getItem('hanjo_mock_user_id');
+		if (savedUserId && DEMO_USERS[savedUserId]) {
+			return DEMO_USERS[savedUserId];
+		}
+		const savedRole = localStorage.getItem('hanjo_mock_user_role') as UserRole;
+		if (savedRole && DEMO_USERS_BY_ROLE[savedRole]) {
+			return DEMO_USERS_BY_ROLE[savedRole];
+		}
+	}
+	return DEMO_USERS['usr-rina'];
+}
+
+// Sesi mock aktif di memori browser (otomatis dipulihkan dari localStorage saat reload)
+let currentMockUser: User | null = getInitialMockUser();
 let currentFlags: Record<string, boolean> = getDefaultFeatureFlags();
 
 export function getCurrentMockUser(): User | null {
+	if (!currentMockUser) {
+		currentMockUser = getInitialMockUser();
+	}
 	return currentMockUser;
 }
 
 export function setCurrentMockUser(user: User | null): void {
 	currentMockUser = user;
+	if (typeof window !== 'undefined' && window.localStorage) {
+		if (user) {
+			localStorage.setItem('hanjo_mock_user_id', user.id);
+			localStorage.setItem('hanjo_mock_user_role', user.role);
+		} else {
+			localStorage.removeItem('hanjo_mock_user_id');
+			localStorage.removeItem('hanjo_mock_user_role');
+		}
+	}
 }
 
 /**
@@ -42,6 +68,9 @@ export function setCurrentMockUser(user: User | null): void {
 export function registerAuthHandlers(): void {
 	// GET /api/v1/me
 	router.get(Endpoints.AUTH.ME, async () => {
+		if (!currentMockUser) {
+			currentMockUser = getInitialMockUser();
+		}
 		if (!currentMockUser) {
 			throw ApiErrors.unauthenticated('Sesi pengguna tidak ditemukan atau telah kedaluwarsa');
 		}
@@ -74,7 +103,7 @@ export function registerAuthHandlers(): void {
 			);
 		}
 
-		currentMockUser = userToLogin;
+		setCurrentMockUser(userToLogin);
 
 		return {
 			token: `mock-token-${userToLogin.id}-${clock.now().getTime()}`,
@@ -87,7 +116,7 @@ export function registerAuthHandlers(): void {
 
 	// POST /api/v1/auth/logout
 	router.post(Endpoints.AUTH.LOGOUT, async () => {
-		currentMockUser = null;
+		setCurrentMockUser(null);
 		return { success: true, message: 'Berhasil keluar' };
 	});
 
@@ -110,7 +139,7 @@ export function registerAuthHandlers(): void {
 			);
 		}
 
-		currentMockUser = targetUser;
+		setCurrentMockUser(targetUser);
 
 		return {
 			token: `mock-token-${targetUser.id}-${clock.now().getTime()}`,

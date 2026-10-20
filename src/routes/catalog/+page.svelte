@@ -89,7 +89,7 @@
 					<div class="bom-details">
 						<div class="bom-header">
 							<h3>📋 Formula Resep Bahan Baku (Bill of Materials)</h3>
-							<p>Setiap penjualan cup varian ini di POS akan memotong inventaris sesuai takaran di bawah ini.</p>
+							<p>Setiap penjualan item varian ini di POS akan memotong inventaris sesuai takaran di bawah ini.</p>
 						</div>
 
 						<div class="variants-grid">

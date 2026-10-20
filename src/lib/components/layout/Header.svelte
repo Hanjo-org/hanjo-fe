@@ -4,7 +4,7 @@
 	import { session } from '../../auth/session.svelte.js';
 	import { DEMO_USER_LIST } from '../../config/demo_accounts.js';
 	import { themeStore } from '../../theme.svelte.js';
-	import { DEMO_OUTLETS } from '../../auth/scope.js';
+	import { DEMO_ORGANIZATIONS, DEMO_OUTLETS } from '../../auth/scope.js';
 	import { navService } from '../../services/nav.service.js';
 	import { relativeTime } from '../../utils/format.js';
 	import type { NotificationItem } from '../../api/contract/types.js';
@@ -20,17 +20,31 @@
 	let showNotifications = $state(false);
 	let notifications = $state<NotificationItem[]>([]);
 
-	// Cek apakah user saat ini dibatasi (Store Manager)
-	const isStoreManager = $derived(session.currentRole === 'store_manager');
+	// Cek apakah user saat ini dibatasi (Store Manager / Kasir)
+	const isStoreManager = $derived(session.currentRole === 'store_manager' || session.currentRole === 'cashier');
 
-	// Daftar outlet yang boleh dipilih user
+	// Daftar organisasi & outlet yang boleh dipilih user
+	const accessibleOrgs = $derived(session.accessibleOrganizations);
+	const accessibleOutletIds = $derived(session.accessibleOutlets);
+
 	const availableOutlets = $derived.by(() => {
 		if (!isStoreManager) {
 			return DEMO_OUTLETS;
 		}
-		// Hanya outlet dalam scope SM
-		const scopeIds = session.accessibleOutlets;
-		return DEMO_OUTLETS.filter((o) => scopeIds.includes(o.id));
+		return DEMO_OUTLETS.filter((o) => accessibleOutletIds.includes(o.id));
+	});
+
+	// Label organisasi yang sedang aktif
+	const currentOrgLabel = $derived.by(() => {
+		if (isStoreManager) {
+			const org = DEMO_ORGANIZATIONS.find((o) => o.id === (session.currentUser?.organization_id || 'org-jodi'));
+			return org ? org.name : 'Seduhan Kopi Jodi';
+		}
+		if (session.activeOrganizationId === 'all' || session.activeOrganizationId === '*') {
+			return 'Semua Organisasi';
+		}
+		const found = DEMO_ORGANIZATIONS.find((o) => o.id === session.activeOrganizationId);
+		return found ? found.name : 'Organisasi';
 	});
 
 	// Label outlet yang sedang aktif
@@ -41,6 +55,8 @@
 		const found = DEMO_OUTLETS.find((o) => o.id === session.activeOutletId);
 		return found ? found.name : (availableOutlets[0]?.name || 'Pilih Outlet');
 	});
+
+	const isLocked = $derived(isStoreManager && availableOutlets.length <= 1);
 
 	// Hitung jumlah notifikasi belum dibaca
 	const unreadCount = $derived(notifications.filter((n) => !n.read).length);
@@ -57,7 +73,22 @@
 		loadNotifications();
 	});
 
-	function handleSelectOutlet(outletId: string) {
+	function handleSelectGlobalAll() {
+		session.setOrganization('*');
+		session.setOutlet('*');
+		showOutletDropdown = false;
+	}
+
+	function handleSelectOrgAll(orgId: string) {
+		session.setOrganization(orgId);
+		session.setOutlet('*');
+		showOutletDropdown = false;
+	}
+
+	function handleSelectOutlet(outletId: string, orgId?: string) {
+		if (orgId) {
+			session.setOrganization(orgId);
+		}
 		session.setOutlet(outletId);
 		showOutletDropdown = false;
 	}
@@ -119,17 +150,17 @@
 
 <header class="app-header">
 	<div class="header-left">
-		<!-- Role-Scoped Outlet Picker -->
+		<!-- Role-Scoped Organization & Outlet Hierarchical Picker -->
 		<div id="header-outlet-picker" class="outlet-picker-wrapper">
 			<button
 				type="button"
 				class="outlet-picker-btn"
 				class:is-open={showOutletDropdown}
-				class:is-locked={isStoreManager && availableOutlets.length <= 1}
-				disabled={isStoreManager && availableOutlets.length <= 1}
+				class:is-locked={isLocked}
+				disabled={isLocked}
 				onclick={() => (showOutletDropdown = !showOutletDropdown)}
 				aria-expanded={showOutletDropdown}
-				aria-label="Pilih Outlet Aktif"
+				aria-label="Pilih Organisasi dan Outlet Aktif"
 			>
 				<span class="outlet-icon" aria-hidden="true">
 					<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
@@ -138,56 +169,123 @@
 					</svg>
 				</span>
 				<div class="outlet-info">
+					<span class="org-name-sub">{currentOrgLabel}</span>
 					<span class="outlet-name">{currentOutletLabel}</span>
 				</div>
 
-				{#if !(isStoreManager && availableOutlets.length <= 1)}
+				{#if !isLocked}
 					<svg class="chevron-icon" class:rotate={showOutletDropdown} viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
 						<polyline points="6 9 12 15 18 9"></polyline>
 					</svg>
 				{/if}
 			</button>
 
-			{#if showOutletDropdown && !(isStoreManager && availableOutlets.length <= 1)}
+			{#if showOutletDropdown && !isLocked}
 				<div class="outlet-dropdown-menu">
-					<div class="dropdown-header">PILIH CAKUPAN OUTLET</div>
+					<div class="dropdown-header">PILIH ORGANISASI &amp; OUTLET</div>
 
-					<!-- Opsi Konsolidasi (Hanya untuk Owner, HQ Admin, Finance) -->
+					<!-- 1. Opsi Konsolidasi Global (Khusus HQ: Owner, HQ Admin, Finance) -->
 					{#if !isStoreManager}
 						<button
 							type="button"
 							class="dropdown-item"
-							class:selected={session.activeOutletId === '*' || session.activeOutletId === 'all'}
-							onclick={() => handleSelectOutlet('*')}
+							class:selected={session.activeOrganizationId === '*' && (session.activeOutletId === '*' || session.activeOutletId === 'all')}
+							onclick={handleSelectGlobalAll}
 						>
 							<div class="item-text">
-								<span class="item-title">Semua Outlet</span>
-								<span class="item-desc">Konsolidasi seluruh transaksi &amp; biaya</span>
+								<span class="item-title">Semua Organisasi &amp; Outlet</span>
+								<span class="item-desc">Konsolidasi seluruh brand, unit bisnis &amp; cabang gerai</span>
 							</div>
-							{#if session.activeOutletId === 'all' || session.activeOutletId === '*'}
+							{#if session.activeOrganizationId === '*' && (session.activeOutletId === '*' || session.activeOutletId === 'all')}
 								<span class="check-mark">✓</span>
 							{/if}
 						</button>
 						<div class="dropdown-divider"></div>
-					{/if}
 
-					<!-- Daftar Outlet Individual -->
-					{#each availableOutlets as outlet (outlet.id)}
-						<button
-							type="button"
-							class="dropdown-item"
-							class:selected={session.activeOutletId === outlet.id}
-							onclick={() => handleSelectOutlet(outlet.id)}
-						>
-							<div class="item-text">
-								<span class="item-title">{outlet.name}</span>
-								<span class="item-desc">{outlet.city}</span>
+						<!-- Loop Organisasi Terdaftar -->
+						{#each accessibleOrgs as org (org.id)}
+							{@const orgOutlets = DEMO_OUTLETS.filter((o) => o.organization_id === org.id)}
+							<div class="org-section-header">
+								<span class="org-section-title">{org.name}</span>
+								<span class="org-badge-code">{org.code}</span>
 							</div>
-							{#if session.activeOutletId === outlet.id}
-								<span class="check-mark">✓</span>
-							{/if}
-						</button>
-					{/each}
+
+							<!-- Opsi Semua Outlet dalam Organisasi Ini -->
+							<button
+								type="button"
+								class="dropdown-item"
+								class:selected={session.activeOrganizationId === org.id && (session.activeOutletId === '*' || session.activeOutletId === 'all')}
+								onclick={() => handleSelectOrgAll(org.id)}
+							>
+								<div class="item-text">
+									<span class="item-title">Semua Outlet di {org.name}</span>
+									<span class="item-desc">Konsolidasi {orgOutlets.length} outlet ({orgOutlets.map((o) => o.city).join(', ')})</span>
+								</div>
+								{#if session.activeOrganizationId === org.id && (session.activeOutletId === '*' || session.activeOutletId === 'all')}
+									<span class="check-mark">✓</span>
+								{/if}
+							</button>
+
+							<!-- Daftar Outlet Individual di Bawah Organisasi Ini -->
+							{#each orgOutlets as outlet (outlet.id)}
+								<button
+									type="button"
+									class="dropdown-item is-child"
+									class:selected={session.activeOutletId === outlet.id}
+									onclick={() => handleSelectOutlet(outlet.id, org.id)}
+								>
+									<div class="item-text">
+										<span class="item-title">{outlet.name}</span>
+										<span class="item-desc">{outlet.city} · {outlet.code}</span>
+									</div>
+									{#if session.activeOutletId === outlet.id}
+										<span class="check-mark">✓</span>
+									{/if}
+								</button>
+							{/each}
+							<div class="dropdown-divider"></div>
+						{/each}
+					{:else}
+						<!-- 2. Tampilan Store Manager Multi-Outlet (mis. Sari mengelola Dago & Gubeng di Jodi) -->
+						<div class="org-section-header">
+							<span class="org-section-title">{currentOrgLabel}</span>
+							<span class="org-badge-code">Unit Tugas</span>
+						</div>
+
+						{#if availableOutlets.length > 1}
+							<button
+								type="button"
+								class="dropdown-item"
+								class:selected={session.activeOutletId === '*' || session.activeOutletId === 'all'}
+								onclick={() => session.setOutlet('*')}
+							>
+								<div class="item-text">
+									<span class="item-title">Semua Outlet Tugas Saya</span>
+									<span class="item-desc">Konsolidasi {availableOutlets.length} gerai yang Anda kelola</span>
+								</div>
+								{#if session.activeOutletId === '*' || session.activeOutletId === 'all'}
+									<span class="check-mark">✓</span>
+								{/if}
+							</button>
+						{/if}
+
+						{#each availableOutlets as outlet (outlet.id)}
+							<button
+								type="button"
+								class="dropdown-item is-child"
+								class:selected={session.activeOutletId === outlet.id}
+								onclick={() => handleSelectOutlet(outlet.id)}
+							>
+								<div class="item-text">
+									<span class="item-title">{outlet.name}</span>
+									<span class="item-desc">{outlet.city} · {outlet.code}</span>
+								</div>
+								{#if session.activeOutletId === outlet.id}
+									<span class="check-mark">✓</span>
+								{/if}
+							</button>
+						{/each}
+					{/if}
 				</div>
 			{/if}
 		</div>

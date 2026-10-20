@@ -21,13 +21,11 @@
 	{#if data}
 		<div class="sales-kpi-headline">
 			<span class="headline-val">{formatRupiah(data.erp_non_cash_total)}</span>
-			<span class="headline-trend">
-				<Badge
-					variant={data.status === 'matched' ? 'success' : 'danger'}
-					text={data.status === 'matched' ? 'Cocok 100%' : 'Ada Selisih'}
-					size="sm"
-				/>
-			</span>
+			<Badge
+				variant={data.status === 'matched' ? 'success' : 'danger'}
+				text={data.status === 'matched' ? 'Cocok 100%' : 'Ada Selisih'}
+				size="md"
+			/>
 		</div>
 
 		<div class="sales-subgrid">

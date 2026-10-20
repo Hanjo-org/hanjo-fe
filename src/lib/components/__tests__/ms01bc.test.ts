@@ -90,8 +90,8 @@ async function runTests() {
 	const hqCards = ROLE_DASHBOARD_CARDS.hq_admin;
 	assert(hqCards.includes('stock_issues'), 'HQ Admin memiliki kartu stock_issues');
 	assert(hqCards.includes('outlet_comparison'), 'HQ Admin memiliki kartu outlet_comparison');
-	assert(!hqCards.includes('gross_profit'), 'HQ Admin TIDAK memiliki kartu gross_profit');
-	assert(!hqCards.includes('hq_payables'), 'HQ Admin TIDAK memiliki kartu hq_payables');
+	assert(hqCards.includes('gross_profit'), 'HQ Admin memiliki kartu gross_profit (Paritas Dashboard Owner & HQ Admin)');
+	assert(hqCards.includes('sales_summary'), 'HQ Admin memiliki kartu sales_summary');
 
 	const financeCards = ROLE_DASHBOARD_CARDS.finance;
 	assert(financeCards.includes('hq_payables'), 'Finance memiliki kartu hq_payables');

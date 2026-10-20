@@ -112,15 +112,34 @@
 
 	.page-body {
 		flex: 1;
-		padding: 24px;
-		max-width: 1600px;
+		padding: 24px 32px;
+		max-width: 100%;
 		width: 100%;
-		margin: 0 auto;
+		margin: 0;
+		box-sizing: border-box;
+	}
+
+	@media (max-width: 1440px) {
+		.page-body {
+			padding: 20px 24px;
+		}
+	}
+
+	@media (max-width: 1024px) {
+		.page-body {
+			padding: 18px 20px;
+		}
 	}
 
 	@media (max-width: 768px) {
 		.page-body {
-			padding: 16px 12px;
+			padding: 14px 12px;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.page-body {
+			padding: 12px 8px;
 		}
 	}
 </style>

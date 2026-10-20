@@ -296,7 +296,7 @@ export const COMMAND_PALETTE_ITEMS: CommandSearchItem[] = [
 	{ title: 'Penutupan Periode Fiskal', section: 'Keuangan', href: '/finance#periods', icon: 'lock-closed', tags: ['tutup buku', 'fiskal', 'periode'], permission: 'finance:read' },
 	{ title: 'Rekonsiliasi Midtrans / POS', section: 'Keuangan', href: '/finance#reconciliation', icon: 'arrow-path', tags: ['qris', 'settlement', 'rekon'], permission: 'finance:midtrans_reconcile' },
 	{ title: 'Laporan Laba Rugi (P&L)', section: 'Laporan', href: '/reports#pnl', icon: 'chart-pie', tags: ['laba', 'rugi', 'omzet', 'ebitda'], permission: 'dashboard:view:gross_profit' },
-	{ title: 'Laporan Penjualan POS', section: 'Laporan', href: '/reports#sales', icon: 'chart-bar', tags: ['sales', 'cup', 'terlaris', 'kasir'], permission: 'reports:read' },
+	{ title: 'Laporan Penjualan POS', section: 'Laporan', href: '/reports#sales', icon: 'chart-bar', tags: ['sales', 'item', 'terlaris', 'kasir'], permission: 'reports:read' },
 	{ title: 'Laporan Umur Hutang (Aging)', section: 'Laporan', href: '/reports#aging', icon: 'clock', tags: ['hutang', 'jatuh tempo', 'aging'], permission: 'payables:manage_bills' },
 	{ title: 'Katalog Bahan Baku', section: 'Master Data', href: '/catalog#items', icon: 'cube', tags: ['bahan', 'item', 'biji kopi', 'susu'], permission: 'catalog:read' },
 	{ title: 'Menu, Varian & Resep', section: 'Master Data', href: '/catalog#recipes', icon: 'book-open', tags: ['resep', 'formula', 'kopi susu'], permission: 'catalog:read' },
