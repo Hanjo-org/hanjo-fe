@@ -280,12 +280,26 @@
 			<SmQuickLinksBar />
 
 		{:else}
-			<!-- Fallback Kasir / Default -->
+			<!-- Fallback Kasir / Workspace POS -->
 			<ActionCenterCard />
-			<div class="col-12 p-8 text-center rounded-xl" style="background: var(--bg-panel); border: 1px solid var(--border-panel);">
-				<p class="font-semibold" style="color: var(--text-muted);">
-					Selamat bertugas, kasir! Gunakan menu POS untuk input transaksi penjualan hari ini.
-				</p>
+			<div class="col-12 p-8 text-center rounded-xl flex flex-col items-center justify-center gap-4" style="background: var(--bg-panel); border: 1px solid var(--border-panel); min-height: 240px;">
+				<div class="w-14 h-14 rounded-2xl flex items-center justify-center text-emerald-500" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25);">
+					<Icon name="device-tablet" size={28} />
+				</div>
+				<div class="max-w-md">
+					<h3 class="text-lg font-bold text-main m-0">Terminal Kasir POS Siap Digunakan</h3>
+					<p class="text-sm text-muted mt-1 mb-0">
+						Selamat bertugas! Gunakan terminal kasir untuk input pesanan dine-in, takeaway, serta penerimaan pembayaran tunai &amp; QRIS.
+					</p>
+				</div>
+				<a
+					href="/pos"
+					class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white transition-all shadow-sm"
+					style="background: var(--primary, #059669); text-decoration: none;"
+				>
+					<Icon name="arrow-right" size={18} />
+					<span>Buka Terminal Kasir (POS)</span>
+				</a>
 			</div>
 		{/if}
 	</main>

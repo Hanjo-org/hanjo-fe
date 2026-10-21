@@ -185,6 +185,8 @@ export const ROLE_DEFAULT_PERMISSIONS: Record<UserRole, string[]> = {
 		'inventory:read',
 		'inventory:count',
 		'inventory:record_waste',
+		'pos:order:create',
+		'pos:order:read',
 		'procurement:read',
 		'procurement:create_po',
 		'procurement:receive_goods',
@@ -200,6 +202,7 @@ export const ROLE_DEFAULT_PERMISSIONS: Record<UserRole, string[]> = {
 	// Kasir Outlet (Cashier): Operasional POS harian standar
 	// Catatan: Aksi sensitif seperti void, diskon manual, buka laci kas manual secara default OFF (bisa ditambah di checklist)
 	cashier: [
+		'dashboard:view',
 		'pos:order:create',
 		'pos:order:read',
 		'pos:payment:collect',

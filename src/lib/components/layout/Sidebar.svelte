@@ -1,9 +1,11 @@
 <script lang="ts">
 	import './sidebar.css';
 	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 	import { session } from '../../auth/session.svelte.js';
 	import { getNavigationForUser } from '../../config/navigation.js';
 	import { navBadges } from '../../features/nav/stores/badges.svelte.js';
+	import { DEMO_USER_LIST } from '../../config/demo_accounts.js';
 
 	interface Props {
 		isCollapsed?: boolean;
@@ -14,6 +16,16 @@
 
 	let currentPath = $derived(page.url.pathname);
 	let openAccordion = $state<string | null>(null);
+	let showRoleMenu = $state(false);
+
+	const roleDisplayMap: Record<string, string> = {
+		owner: 'Owner & Pimpinan',
+		hq_admin: 'Admin Pusat (HQ)',
+		finance: 'Finance & Akuntansi',
+		brand_manager: 'Brand Manager',
+		store_manager: 'Store Manager',
+		cashier: 'Kasir POS'
+	};
 
 	// Hitung daftar navigasi dinamis sesuai izin (PBAC) & flag aktif pengguna
 	const navSections = $derived(
@@ -46,7 +58,29 @@
 			openAccordion = itemId;
 		}
 	}
+
+	async function handleSelectRole(userId: string) {
+		showRoleMenu = false;
+		await session.switchRole(undefined, userId);
+		const user = session.currentUser;
+		if (user?.role === 'cashier' && currentPath !== '/pos') {
+			goto('/pos');
+		} else if (currentPath === '/settings' && (user?.role === 'store_manager' || user?.role === 'brand_manager' || user?.role === 'cashier')) {
+			goto('/');
+		} else if (currentPath === '/finance' && (user?.role === 'store_manager' || user?.role === 'brand_manager' || user?.role === 'cashier')) {
+			goto('/');
+		}
+	}
+
+	function handleWindowClick(e: MouseEvent) {
+		const target = e.target as HTMLElement;
+		if (!target.closest('#sidebar-mock-role')) {
+			showRoleMenu = false;
+		}
+	}
 </script>
+
+<svelte:window onclick={handleWindowClick} />
 
 <aside class="sidebar" class:collapsed={isCollapsed} aria-label="Navigasi Utama">
 	<!-- Brand Header -->
@@ -113,7 +147,9 @@
 								aria-expanded={isOpen}
 							>
 								<span class="nav-icon" aria-hidden="true">
-									{#if item.icon === 'inventory'}
+									{#if item.icon === 'pos'}
+										<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line><circle cx="7" cy="14" r="1.5"></circle><circle cx="12" cy="14" r="1.5"></circle><circle cx="17" cy="14" r="1.5"></circle></svg>
+									{:else if item.icon === 'inventory'}
 										<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
 									{:else if item.icon === 'procurement'}
 										<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
@@ -204,6 +240,8 @@
 									<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
 								{:else if item.icon === 'approvals'}
 									<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+								{:else if item.icon === 'pos'}
+									<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line><circle cx="7" cy="14" r="1.5"></circle><circle cx="12" cy="14" r="1.5"></circle><circle cx="17" cy="14" r="1.5"></circle></svg>
 								{:else if item.icon === 'outlets'}
 									<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
 								{:else}
@@ -230,6 +268,53 @@
 			</div>
 		{/each}
 	</nav>
+
+	<!-- Mock Role Switcher (PRD §8 / Dev Parity) -->
+	<div id="sidebar-mock-role" class="sidebar-mock-role">
+		<button
+			type="button"
+			class="mock-role-trigger"
+			onclick={() => (showRoleMenu = !showRoleMenu)}
+			title={isCollapsed ? `Peran Mock: ${roleDisplayMap[session.currentRole] || session.currentRole}` : 'Ganti Peran Mock'}
+			aria-expanded={showRoleMenu}
+		>
+			<div class="mock-role-avatar">
+				{session.currentUser?.name?.charAt(0) || 'U'}
+			</div>
+			{#if !isCollapsed}
+				<div class="mock-role-info">
+					<span class="mock-user-name">{session.currentUser?.name || 'Pengguna'}</span>
+					<span class="mock-role-badge">{roleDisplayMap[session.currentRole] || session.currentRole}</span>
+				</div>
+				<svg class="role-chevron" class:rotate={showRoleMenu} viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+					<polyline points="6 9 12 15 18 9"></polyline>
+				</svg>
+			{/if}
+		</button>
+
+		{#if showRoleMenu}
+			<div class="mock-role-popover" role="menu">
+				<div class="mock-popover-header">GANTI AKUN PERAN DEMO:</div>
+				{#each DEMO_USER_LIST as demo (demo.id)}
+					<button
+						type="button"
+						class="mock-popover-item"
+						class:active={session.currentUser?.id === demo.id}
+						onclick={() => handleSelectRole(demo.id)}
+					>
+						<span class="demo-avatar-mini">{demo.name.charAt(0)}</span>
+						<div class="demo-meta">
+							<span class="demo-title">{demo.name}</span>
+							<span class="demo-role">{roleDisplayMap[demo.role] || demo.role}</span>
+						</div>
+						{#if session.currentUser?.id === demo.id}
+							<span class="active-check">✓</span>
+						{/if}
+					</button>
+				{/each}
+			</div>
+		{/if}
+	</div>
 
 	<!-- Footer Sistem & Status (Terisolasi dari scroll navigasi) -->
 	<div class="sidebar-footer">

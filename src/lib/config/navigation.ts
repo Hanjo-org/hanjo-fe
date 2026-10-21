@@ -70,6 +70,13 @@ export const NAVIGATION_CONFIG: NavSection[] = [
 		title: 'OPERASIONAL',
 		items: [
 			{
+				id: 'pos',
+				title: 'Kasir POS',
+				href: '/pos',
+				icon: 'pos',
+				permission: 'pos:order:create'
+			},
+			{
 				id: 'inventory',
 				title: 'Inventaris',
 				href: '/inventory',
