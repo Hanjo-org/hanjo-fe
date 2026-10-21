@@ -20,6 +20,9 @@
 		if (item.id === 'act-fin-2') return 'card-petty_cash';
 		if (item.id === 'act-fin-3') return 'card-hq_payables';
 		if (item.id === 'act-fin-4') return 'finance-quick-actions';
+		if (item.id === 'act-sm-1') return 'card-sm_stock_min';
+		if (item.id === 'act-sm-2') return 'card-sm_petty_cash';
+		if (item.id === 'act-sm-eod') return 'card-sm_eod_status';
 		return null;
 	}
 
@@ -92,8 +95,8 @@
 								class="btn-action-jump"
 								onclick={(e) => { e.stopPropagation(); handleActionItemClick(e, item); }}
 							>
-								<span>Buka Kartu</span>
-								<Icon name="arrow-right" size={13} />
+								<Icon name="eye" size={13} />
+								<span>Lihat</span>
 							</button>
 						{:else}
 							<Button variant="secondary" size="sm" href={item.actionUrl}>

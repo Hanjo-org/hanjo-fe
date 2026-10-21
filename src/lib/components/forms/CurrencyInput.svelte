@@ -106,32 +106,48 @@
 	.form-control {
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
+		gap: 5px;
 		width: 100%;
 	}
 
 	.form-label {
-		font-size: 12.5px;
-		font-weight: 600;
-		color: var(--text-main);
+		font-size: 11.5px;
+		font-weight: 500;
+		color: var(--text-muted, #94a3b8);
 		display: flex;
 		align-items: center;
-		gap: 4px;
+		gap: 3px;
+		text-transform: none;
+		letter-spacing: 0.015em;
+		transition: color 0.15s ease;
+		user-select: none;
+	}
+
+	.form-control:focus-within .form-label {
+		color: var(--text-main, #f1f5f9);
 	}
 
 	.required-star {
-		color: var(--pill-danger-text);
-		font-weight: 700;
+		color: var(--pill-danger-text, #ef4444);
+		font-size: 11px;
+		font-weight: 500;
+		opacity: 0.85;
 	}
 
 	.input-container {
 		display: flex;
 		align-items: center;
 		background: var(--bg-input);
-		border: 1px solid var(--border-panel);
+		border: 1px solid var(--border-input, rgba(255, 255, 255, 0.12));
 		border-radius: var(--radius-md);
-		transition: all 0.15s ease-in-out;
+		transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 		overflow: hidden;
+		min-height: 40px;
+		box-sizing: border-box;
+	}
+
+	.input-container:hover:not(.is-disabled):not(:focus-within) {
+		border-color: var(--border-input-hover, rgba(255, 255, 255, 0.22));
 	}
 
 	.input-container:focus-within {
@@ -155,7 +171,7 @@
 		font-weight: 700;
 		color: var(--text-muted);
 		background: var(--bg-panel-sub);
-		padding: 9px 12px;
+		padding: 9px 14px;
 		border-right: 1px solid var(--border-panel);
 		user-select: none;
 	}
@@ -165,7 +181,7 @@
 		border: none;
 		outline: none;
 		background: transparent;
-		padding: 9px 12px;
+		padding: 9px 14px;
 		font-size: 14px;
 		font-weight: 600;
 		color: var(--text-main);

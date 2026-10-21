@@ -56,7 +56,7 @@
 			<!-- Modal Header -->
 			<div class="flex items-center justify-between pb-3 mb-3 border-b" style="border-color: var(--border-panel);">
 				<div class="flex items-center gap-3">
-					<div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">
+					<div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold" style="background: var(--pill-info-bg); color: var(--pill-info-text); border: 1px solid var(--pill-info-border);">
 						<Icon name="building-storefront" size={20} />
 					</div>
 					<div>
@@ -114,23 +114,23 @@
 				<div class="dash-subbox p-3 flex flex-col gap-2.5">
 					<div class="flex items-center justify-between text-xs">
 						<span class="font-bold" style="color: var(--text-main);">Tren Jam Penjualan Gerai Hari Ini:</span>
-						<span class="font-mono font-bold" style="color: #60a5fa;">Total: {formatRupiah(outlet.omzet)}</span>
+						<span class="font-mono font-bold" style="color: var(--brand-primary);">Total: {formatRupiah(outlet.omzet)}</span>
 					</div>
 
 					<!-- Mini Hourly Bar Grid -->
-					<div class="flex items-end justify-between gap-2 h-28 pt-2 pb-1 px-2" style="background: rgba(0,0,0,0.15); border-radius: 8px;">
+					<div class="flex items-end justify-between gap-2 h-28 pt-2 pb-1 px-2" style="background: var(--bg-panel-sub); border: 1px solid var(--border-panel); border-radius: 8px;">
 						{#each hourlyData as h}
 							{@const val = parseFloat(h.omzet) || 0}
 							{@const height = (val / 600000) * 100}
 							<div class="flex flex-col items-center flex-1 h-full justify-end gap-1" title="Jam {h.hour}: {formatRupiah(h.omzet)} ({h.cups} cup)">
-								<div class="w-full rounded-t transition-all hover:opacity-80" style="height: {height}%; background: #3b82f6;"></div>
+								<div class="w-full rounded-t transition-all hover:opacity-80" style="height: {height}%; background: var(--brand-primary);"></div>
 								<span class="text-[9px] font-mono text-muted">{h.hour}</span>
 							</div>
 						{/each}
 					</div>
 
 					<div class="flex items-center justify-between text-xs text-muted pt-1 border-t" style="border-color: var(--border-panel);">
-						<span>Waktu Saji Rata-rata KDS: <strong style="color: #34d399;">{outlet.kds_avg_minutes} menit</strong></span>
+						<span>Waktu Saji Rata-rata KDS: <strong style="color: var(--pill-success-text);">{outlet.kds_avg_minutes} menit</strong></span>
 						<span>Status: <strong style="color: var(--text-main);">Operasional Buka</strong></span>
 					</div>
 				</div>
@@ -146,8 +146,8 @@
 									<strong>Peringatan Stok Kritis:</strong> {outlet.critical_stock_item} berada di bawah batas aman.
 								</div>
 							</div>
-							<a href="/inventory#transfer" class="btn-approve-direct text-[11px] py-1 px-2.5" style="background: #2563eb; border-color: #3b82f6;">
-								Transfer Stok &rarr;
+							<a href="/inventory#transfer" class="btn-approve-direct text-[11px] py-1 px-2.5" style="background: var(--brand-primary); border-color: var(--brand-primary);">
+								Transfer Stok
 							</a>
 						</div>
 						<div class="text-xs text-muted leading-relaxed mt-1">
@@ -167,11 +167,11 @@
 				<div class="dash-subbox p-3 flex flex-col gap-2.5">
 					<div class="flex items-center justify-between text-xs">
 						<span class="font-bold" style="color: var(--text-main);">Penggunaan Plafon Kas Harian:</span>
-						<span class="font-mono font-bold" style="color: #fbbf24;">{outlet.petty_cash_pct}% Terpakai</span>
+						<span class="font-mono font-bold" style="color: var(--pill-warning-text);">{outlet.petty_cash_pct}% Terpakai</span>
 					</div>
 
-					<div class="w-full h-2 rounded-full overflow-hidden" style="background: rgba(255,255,255,0.06);">
-						<div style="width: {outlet.petty_cash_pct}%; background: {outlet.petty_cash_pct > 60 ? '#f59e0b' : '#10b981'}; height: 100%;"></div>
+					<div class="w-full h-2 rounded-full overflow-hidden" style="background: var(--bg-panel-sub); border: 1px solid var(--border-panel);">
+						<div style="width: {outlet.petty_cash_pct}%; background: {outlet.petty_cash_pct > 60 ? 'var(--color-warning, #f59e0b)' : 'var(--color-success, #10b981)'}; height: 100%;"></div>
 					</div>
 
 					<div class="flex items-center justify-between text-xs text-muted pt-1">
@@ -194,9 +194,9 @@
 			{/if}
 
 			<!-- Modal Footer -->
-			<div class="flex items-center justify-between pt-3 mt-3 border-t text-xs" style="border-color: var(--border-panel);">
+			<div class="flex items-center justify-between text-xs" style="border-top: 1px solid var(--border-panel); padding-top: 20px; margin-top: 24px;">
 				<span class="text-muted">ID Gerai: <strong class="font-mono">{outlet.id}</strong></span>
-				<button type="button" class="btn-reject-direct py-1.5 px-4" onclick={onClose}>
+				<button type="button" class="btn btn-secondary btn-sm" onclick={onClose}>
 					Tutup
 				</button>
 			</div>

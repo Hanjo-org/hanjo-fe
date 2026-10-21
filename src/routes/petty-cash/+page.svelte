@@ -615,7 +615,9 @@
 	.modal-footer {
 		display: flex;
 		justify-content: flex-end;
-		gap: 10px;
-		margin-top: 8px;
+		gap: 12px;
+		margin-top: 24px;
+		padding-top: 20px;
+		border-top: 1px solid var(--border-panel);
 	}
 </style>

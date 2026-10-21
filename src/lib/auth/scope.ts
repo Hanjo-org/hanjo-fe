@@ -106,7 +106,7 @@ export const ALL_OUTLET_IDS = DEMO_OUTLETS.map((o) => o.id);
 export function getAccessibleOrganizations(user: User | null | undefined): Organization[] {
 	if (!user) return [];
 
-	if (user.role === 'store_manager' || user.role === 'cashier') {
+	if (user.role === 'brand_manager' || user.role === 'store_manager' || user.role === 'cashier') {
 		const orgId = user.organization_id || 'org-jodi';
 		const allowedOrgIds = user.organization_ids || [orgId];
 		return DEMO_ORGANIZATIONS.filter((o) => allowedOrgIds.includes(o.id));
@@ -121,6 +121,11 @@ export function getAccessibleOrganizations(user: User | null | undefined): Organ
  */
 export function getAccessibleOutlets(user: User | null | undefined): string[] {
 	if (!user) return [];
+
+	if (user.role === 'brand_manager') {
+		const orgId = user.organization_id || 'org-jodi';
+		return DEMO_OUTLETS.filter((o) => o.organization_id === orgId).map((o) => o.id);
+	}
 
 	if (user.role === 'store_manager' || user.role === 'cashier') {
 		return user.outlet_ids || [];
@@ -138,8 +143,12 @@ export function getAccessibleOutletEntities(user: User | null | undefined, orgId
 
 	let baseOutlets = DEMO_OUTLETS;
 
-	// Batasi jika store manager atau kasir
-	if (user.role === 'store_manager' || user.role === 'cashier') {
+	// Batasi jika brand manager (seluruh outlet dalam brand)
+	if (user.role === 'brand_manager') {
+		const brandOrgId = user.organization_id || 'org-jodi';
+		baseOutlets = DEMO_OUTLETS.filter((o) => o.organization_id === brandOrgId);
+	} else if (user.role === 'store_manager' || user.role === 'cashier') {
+		// Batasi ketat jika store manager atau kasir (hanya gerai tugasnya)
 		const allowedIds = user.outlet_ids || [];
 		baseOutlets = DEMO_OUTLETS.filter((o) => allowedIds.includes(o.id));
 	}
@@ -159,10 +168,10 @@ export function isOrgInScope(user: User | null | undefined, orgId: string): bool
 	if (!user) return false;
 
 	if (orgId === '*' || orgId === 'all') {
-		return user.role !== 'store_manager' && user.role !== 'cashier';
+		return user.role === 'owner' || user.role === 'hq_admin' || user.role === 'finance';
 	}
 
-	if (user.role !== 'store_manager' && user.role !== 'cashier') {
+	if (user.role === 'owner' || user.role === 'hq_admin' || user.role === 'finance') {
 		return ALL_ORG_IDS.includes(orgId);
 	}
 
@@ -176,13 +185,19 @@ export function isOrgInScope(user: User | null | undefined, orgId: string): bool
 export function isInScope(user: User | null | undefined, outletId: string): boolean {
 	if (!user) return false;
 
-	// Opsi "Semua Outlet" / konsolidasi hanya diizinkan untuk peran HQ
+	// Opsi "Semua Outlet" / konsolidasi hanya diizinkan untuk peran HQ & Brand Manager
 	if (outletId === '*' || outletId === 'all') {
 		return user.role !== 'store_manager' && user.role !== 'cashier';
 	}
 
-	if (user.role !== 'store_manager' && user.role !== 'cashier') {
+	if (user.role === 'owner' || user.role === 'hq_admin' || user.role === 'finance') {
 		return ALL_OUTLET_IDS.includes(outletId);
+	}
+
+	if (user.role === 'brand_manager') {
+		const orgId = user.organization_id || 'org-jodi';
+		const brandOutlets = DEMO_OUTLETS.filter((o) => o.organization_id === orgId).map((o) => o.id);
+		return brandOutlets.includes(outletId);
 	}
 
 	return (user.outlet_ids || []).includes(outletId);

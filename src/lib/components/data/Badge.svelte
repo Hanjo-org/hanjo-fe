@@ -47,12 +47,12 @@
 
 	.size-sm {
 		font-size: 11px;
-		padding: 3px 10px;
+		padding: 3.5px 11px;
 	}
 
 	.size-md {
 		font-size: 12px;
-		padding: 4.5px 12px;
+		padding: 5px 14px;
 	}
 
 	.pill-neutral {

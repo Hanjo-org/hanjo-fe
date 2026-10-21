@@ -9,9 +9,11 @@
 // --- Forms ---
 export { default as Button } from './forms/Button.svelte';
 export { default as Input } from './forms/Input.svelte';
+export { default as TextField } from './forms/TextField.svelte';
 export { default as NumberInput } from './forms/NumberInput.svelte';
 export { default as CurrencyInput } from './forms/CurrencyInput.svelte';
 export { default as Select } from './forms/Select.svelte';
+export type { SelectOption } from './forms/Select.svelte';
 export { default as MultiSelect } from './forms/MultiSelect.svelte';
 export { default as Combobox } from './forms/Combobox.svelte';
 export { default as DatePicker } from './forms/DatePicker.svelte';
@@ -44,8 +46,11 @@ export { default as ProgressBar } from './feedback/ProgressBar.svelte';
 export { default as Skeleton } from './feedback/Skeleton.svelte';
 export { default as EmptyState } from './feedback/EmptyState.svelte';
 export { default as ErrorState } from './feedback/ErrorState.svelte';
+export { default as ComingSoon } from './feedback/ComingSoon.svelte';
 export { default as ConfirmDialog } from './feedback/ConfirmDialog.svelte';
 export { default as StepUpDialog } from './feedback/StepUpDialog.svelte';
+export { default as ActionMenu } from './feedback/ActionMenu.svelte';
+export type { ActionMenuItem } from './feedback/ActionMenu.svelte';
 export { default as Toast } from './feedback/Toast.svelte';
 export { toast } from './feedback/toast.svelte.js';
 

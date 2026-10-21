@@ -35,10 +35,12 @@ class DashboardStore {
 	// Map of per-card reactive states
 	cards = $state<Record<string, CardState<any>>>({});
 
-	// Derived list of visible cards for the current session's role
+	// Derived list of visible cards for the current session's role & feature flags
 	currentRole = $derived<UserRole>(session.role || 'owner');
 	allowedCardKeys = $derived<DashboardCardKey[]>(
-		ROLE_DASHBOARD_CARDS[this.currentRole] || ROLE_DASHBOARD_CARDS.owner
+		(ROLE_DASHBOARD_CARDS[this.currentRole] || ROLE_DASHBOARD_CARDS.owner).filter((k) =>
+			canRoleAccessCard(this.currentRole, k, session.featureFlags)
+		)
 	);
 
 	constructor() {
@@ -92,11 +94,18 @@ class DashboardStore {
 	}
 
 	/**
+	 * Memeriksa apakah kartu boleh ditampilkan untuk peran & feature flags saat ini (AC-01.1 & AC-01.10)
+	 */
+	canShowCard(key: DashboardCardKey): boolean {
+		return canRoleAccessCard(this.currentRole, key, session.featureFlags);
+	}
+
+	/**
 	 * Memuat satu kartu secara mandiri (AC-01.6)
 	 */
 	async loadCard(key: DashboardCardKey, isRetry = false): Promise<void> {
-		// Validasi apakah peran saat ini berhak atas kartu ini (AC-01.1)
-		if (!canRoleAccessCard(this.currentRole, key)) {
+		// Validasi apakah peran saat ini berhak atas kartu ini (AC-01.1 & AC-01.10)
+		if (!canRoleAccessCard(this.currentRole, key, session.featureFlags)) {
 			return;
 		}
 

@@ -29,34 +29,43 @@
 			</Button>
 		</div>
 	{:else}
-		<div class="flex flex-col gap-3">
+		<div class="flex flex-col gap-2.5">
 			{#each items as item}
-				<div class="dash-subbox flex items-center justify-between">
-					<div class="flex flex-col gap-0.5">
-						<div class="flex items-center gap-2">
-							<span class="font-bold text-sm" style="color: var(--text-main);">{item.recipe_name}</span>
+				<div class="dash-subbox p-3.5 rounded-xl flex items-center justify-between gap-3">
+					<div class="flex flex-col gap-1 min-w-0 flex-1">
+						<div class="flex items-center gap-2 flex-wrap">
+							<span class="font-bold text-xs truncate" style="color: var(--text-main);">{item.recipe_name}</span>
 							<Badge
 								variant={item.status === 'approved' ? 'success' : item.status === 'revision_needed' ? 'danger' : 'info'}
 								text={item.status === 'approved' ? 'Disetujui Pusat' : item.status === 'submitted' ? 'Menunggu Kurasi HQ' : 'Perlu Revisi'}
 								size="sm"
 							/>
 						</div>
-						<span class="text-xs" style="color: var(--text-subtle);">
+						<span class="text-[11px] leading-relaxed" style="color: var(--text-muted);">
 							{item.feedback || 'Resep sedang dianalisis margin & standarisasi bahan oleh HQ Admin.'}
 						</span>
 					</div>
 
-					<Button variant="secondary" size="sm" href="/catalog">
-						Lihat Resep
-					</Button>
+					<a
+						href="/catalog"
+						class="btn-view-direct text-xs py-1.5 px-3 font-semibold flex-shrink-0"
+					>
+						<Icon name="eye" size={13} />
+						<span>Lihat</span>
+					</a>
 				</div>
 			{/each}
 
-			<div class="flex justify-end pt-1">
-				<Button variant="secondary" size="sm" href="/catalog">
+			<div class="flex items-center justify-between pt-2 border-t text-xs" style="border-color: var(--border-panel);">
+				<span class="text-muted text-[11px]">Inovasi menu lokal disetujui dapat dirilis ke POS gerai</span>
+				<a
+					href="/catalog"
+					class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
+					style="background: var(--bg-panel-sub); border: 1px solid var(--border-panel); color: var(--text-main);"
+				>
 					<Icon name="plus" size={13} />
 					<span>Ajukan Menu Baru</span>
-				</Button>
+				</a>
 			</div>
 		</div>
 	{/if}

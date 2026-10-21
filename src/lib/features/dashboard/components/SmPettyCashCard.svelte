@@ -42,7 +42,7 @@
 				height={8}
 			/>
 
-			<div class="flex items-center justify-between text-xs pt-1" style="border-top: 1px solid var(--border-subtle);">
+			<div class="flex items-center justify-between text-xs pt-1" style="border-top: 1px solid var(--border-panel);">
 				<span style="color: var(--text-subtle);">
 					Sisa batas bebas tanpa approval Owner: <strong style="color: var(--brand-primary);">{formatRupiah(data.remaining_today)}</strong>
 				</span>

@@ -17,7 +17,8 @@
 		ActionCenterCardData,
 		StockIssuesCardData,
 		OutletEodStatusCardData,
-		ActionCenterItem
+		ActionCenterItem,
+		StockIssueItem
 	} from '../../../api/contract/types.js';
 
 	const actionState = $derived(dashboardStore.getCardState<ActionCenterCardData>('action_center'));
@@ -53,8 +54,18 @@
 		return () => window.removeEventListener('click', handleWindowClick);
 	});
 
-	// Modal Khusus Izin Sensitif (Buka Ulang Periode Fiskal)
+	// Modal Detail Persetujuan & Otorisasi
 	let sensitiveModalItem = $state<ActionCenterItem | null>(null);
+	let detailModalItem = $state<ActionCenterItem | null>(null);
+	let stockModalItem = $state<StockIssueItem | null>(null);
+
+	function handleViewItem(item: ActionCenterItem) {
+		if (item.type === 'PERIOD_REOPEN') {
+			sensitiveModalItem = item;
+		} else {
+			detailModalItem = item;
+		}
+	}
 
 	function approveItem(item: ActionCenterItem) {
 		approvedItemIds.add(item.id);
@@ -169,148 +180,37 @@
 					<p class="text-[11px] text-muted m-0 mt-1">Tidak ada persetujuan yang menunggu tindakan Owner.</p>
 				</div>
 			{:else}
-				<div class="flex flex-col gap-2.5">
+				<div class="flex flex-col gap-2">
 					{#each actionItems as item}
-						{#if item.type === 'PERIOD_REOPEN'}
-							<!-- Tampilan Khusus: Izin Sensitif Buka Ulang Periode Fiskal (High Risk) -->
-							<div class="sensitive-perm-card">
-								<div class="sensitive-perm-header">
-									<div class="flex items-center gap-1.5">
-										<Badge variant="danger" text="Izin Sensitif &bull; Risiko Tinggi" size="sm" />
-										<span class="font-bold text-xs" style="color: #f87171;">{item.title}</span>
-									</div>
-									<span class="text-[11px] font-mono font-semibold" style="color: var(--text-muted);">{item.outlet_name || 'HQ'}</span>
+						<div
+							class="dash-subbox flex items-center justify-between gap-3 p-2.5"
+							style={item.type === 'PERIOD_REOPEN' ? 'border-left: 3px solid #ef4444;' : ''}
+						>
+							<div class="flex flex-col gap-0.5 min-w-0 flex-1">
+								<div
+									class="font-bold text-xs truncate"
+									style={item.type === 'PERIOD_REOPEN' ? 'color: #f87171;' : 'color: var(--text-main);'}
+									title={item.title}
+								>
+									{item.title}
 								</div>
-
-								<div class="sensitive-perm-details">
-									<div class="font-medium mb-1">
-										Diajukan oleh: <strong style="color: var(--text-main);">{item.requester || 'Maya Septiani - Finance HQ'}</strong>
-									</div>
-									<div class="text-[11px] text-muted">
-										Alasan: <em>"{item.reason || item.desc}"</em>
-									</div>
-								</div>
-
-								<div class="flex items-center justify-between pt-1">
-									<span class="text-[10px] text-muted flex items-center gap-1">
-										<Icon name="lock-closed" size={12} />
-										Audit trail tercatat permanen
-									</span>
-									<div class="flex items-center gap-1.5">
-										<button
-											type="button"
-											class="btn-reject-direct"
-											onclick={() => rejectItem(item)}
-										>
-											Tolak
-										</button>
-										<button
-											type="button"
-											class="btn-approve-direct"
-											style="background: #dc2626; border-color: #ef4444;"
-											onclick={() => (sensitiveModalItem = item)}
-										>
-											<Icon name="shield-check" size={13} />
-											<span>Tinjau &amp; Otorisasi</span>
-										</button>
-									</div>
+								<div class="text-[11px]" style="color: var(--text-muted);">
+									Pemohon: <strong style="color: var(--text-main);">{item.requester || 'Maya Septiani - Finance HQ'}</strong>
 								</div>
 							</div>
-						{:else}
-							<!-- Persetujuan Reguler (Dengan Nominal, Urgensi, & Tombol Langsung) -->
-							<div class="dash-subbox flex items-start justify-between gap-3 p-3">
-								<div class="flex flex-col gap-1 flex-1">
-									<div class="flex items-center gap-2 flex-wrap">
-										<Badge variant={item.badgeColor} text={item.badge} size="sm" />
-										{#if item.amount && parseFloat(item.amount) > 0}
-											<span class="text-[11.5px] font-bold font-mono px-1.5 py-0.5 rounded" style="background: rgba(16, 185, 129, 0.12); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25);">
-												{formatRupiah(item.amount)}
-											</span>
-										{/if}
-										<span class="font-bold text-xs" style="color: var(--text-main);">{item.title}</span>
-									</div>
-									<p class="text-xs m-0" style="color: var(--text-muted); line-height: 1.4;">
-										{item.desc}
-									</p>
-									{#if item.requester}
-										<span class="text-[11px]" style="color: var(--text-subtle);">
-											Pemohon: <strong>{item.requester}</strong>
-										</span>
-									{/if}
-								</div>
 
-								<!-- Tombol Aksi Langsung (Setujui / Tolak) + Menu Detail -->
-								<div class="flex items-center gap-1.5 flex-shrink-0">
-									<button
-										type="button"
-										class="btn-approve-direct"
-										title="Setujui langsung transaksi ini"
-										onclick={() => approveItem(item)}
-									>
-										<Icon name="check" size={13} />
-										<span>Setujui</span>
-									</button>
-									<button
-										type="button"
-										class="btn-reject-direct"
-										title="Tolak permintaan"
-										onclick={() => rejectItem(item)}
-									>
-										Tolak
-									</button>
-
-									<!-- Menu ⋮ untuk Opsi Lanjutan -->
-									<div class="relative">
-										<button
-											type="button"
-											class="action-dots-btn"
-											aria-label="Menu Opsi Persetujuan"
-											onclick={(e) => {
-												e.stopPropagation();
-												activeDropdownId = activeDropdownId === `act-${item.id}` ? null : `act-${item.id}`;
-											}}
-										>
-											<Icon name="ellipsis-vertical" size={16} />
-										</button>
-
-										{#if activeDropdownId === `act-${item.id}`}
-											<div class="dots-dropdown-menu" role="menu" tabindex="-1">
-												{#if item.actionLabel.includes('PO') || item.title.toLowerCase().includes('pembelian')}
-													<a
-														href="/procurement"
-														class="dots-dropdown-item font-semibold text-primary"
-														onclick={() => (activeDropdownId = null)}
-													>
-														<Icon name="shopping-cart" size={14} />
-														<span>Buka Dokumen PO</span>
-													</a>
-												{:else}
-													<a
-														href={item.actionUrl}
-														class="dots-dropdown-item font-semibold text-primary"
-														onclick={() => (activeDropdownId = null)}
-													>
-														<Icon name="bolt" size={14} />
-														<span>{item.actionLabel}</span>
-													</a>
-												{/if}
-												<button
-													type="button"
-													class="dots-dropdown-item"
-													onclick={() => {
-														openContactModal(item.outlet_name || 'Jodi Senopati', item.title);
-														activeDropdownId = null;
-													}}
-												>
-													<Icon name="phone" size={14} />
-													<span>Hubungi Store Manager</span>
-												</button>
-											</div>
-										{/if}
-									</div>
-								</div>
+							<!-- Aksi: Hanya "Lihat" -->
+							<div class="flex items-center flex-shrink-0">
+								<button
+									type="button"
+									class="btn-view-direct"
+									onclick={() => handleViewItem(item)}
+								>
+									<Icon name="eye" size={13} />
+									<span>Lihat</span>
+								</button>
 							</div>
-						{/if}
+						</div>
 					{/each}
 				</div>
 			{/if}
@@ -322,38 +222,35 @@
 					<p>Seluruh stok bahan aman dan operasional gerai berjalan normal.</p>
 				</div>
 			{:else}
-				<div class="flex flex-col gap-2.5">
+				<div class="flex flex-col gap-2">
 					{#each stockItems as itm}
-						<div class="dash-subbox flex items-center justify-between gap-3 p-3" style="border-left: 3px solid var(--pill-danger-border);">
-							<div class="flex flex-col gap-0.5">
-								<div class="flex items-center gap-2">
-									<span class="font-bold text-xs" style="color: var(--text-main);">{itm.item_name}</span>
-									<Badge variant="danger" text="Hampir Habis" size="sm" />
+						<div
+							class="dash-subbox flex items-center justify-between gap-3 p-2.5"
+							style="border-left: 3px solid #ef4444;"
+						>
+							<div class="flex flex-col gap-0.5 min-w-0 flex-1">
+								<div class="flex items-center gap-2 flex-wrap">
+									<span class="font-bold text-xs truncate" style="color: var(--text-main);" title={itm.item_name}>
+										{itm.item_name}
+									</span>
+									<span class="text-[11px] font-bold" style="color: #f87171;">
+										(Sisa ~{itm.est_days_left} hari)
+									</span>
 								</div>
-								<span class="text-xs" style="color: var(--text-muted);">
-									{itm.outlet_name} &bull; Fisik: <strong style="color: var(--pill-danger-text);">{itm.current_qty} {itm.unit}</strong> (Min: {itm.min_qty} {itm.unit})
-								</span>
+								<div class="text-[11px]" style="color: var(--text-muted);">
+									{itm.outlet_name} &bull; Fisik: <strong style="color: var(--text-main);">{itm.current_qty} {itm.unit}</strong> (Min: {itm.min_qty} {itm.unit})
+								</div>
 							</div>
 
-							<!-- Sisa Hari & Menu Aksi -->
-							<div class="flex items-center gap-2 flex-shrink-0">
-								<span class="text-xs font-bold" style="color: var(--pill-danger-text);">Sisa ~{itm.est_days_left} hari</span>
-								<a
-									href="/procurement?item={encodeURIComponent(itm.item_name)}&outlet={encodeURIComponent(itm.outlet_name)}"
-									class="btn-approve-direct"
-									style="font-size: 11px; padding: 4px 8px;"
-								>
-									<Icon name="shopping-cart" size={12} />
-									<span>Buat PO</span>
-								</a>
+							<!-- Aksi: Hanya "Lihat" -->
+							<div class="flex items-center flex-shrink-0">
 								<button
 									type="button"
-									class="action-dots-btn"
-									aria-label="Hubungi SM"
-									onclick={() => openContactModal(itm.outlet_name, itm.item_name)}
-									title="Hubungi Store Manager"
+									class="btn-view-direct"
+									onclick={() => (stockModalItem = itm)}
 								>
-									<Icon name="phone" size={14} />
+									<Icon name="eye" size={13} />
+									<span>Lihat</span>
 								</button>
 							</div>
 						</div>
@@ -381,7 +278,7 @@
 	{#if actionItems.length > 2}
 		<div class="pt-2 text-center border-t mt-2" style="border-color: var(--border-panel);">
 			<a href="/approvals" class="text-xs font-semibold text-primary hover:underline">
-				Buka Seluruh Inbox Persetujuan ({actionItems.length} Menunggu) &rarr;
+				Buka Seluruh Inbox Persetujuan ({actionItems.length} Menunggu)
 			</a>
 		</div>
 	{/if}
@@ -402,59 +299,308 @@
 			tabindex="-1"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
-			style="border-color: rgba(239, 68, 68, 0.5); max-width: 440px;"
+			style="border-color: rgba(239, 68, 68, 0.5); max-width: 540px;"
 		>
-			<div class="flex items-center justify-between pb-3 mb-3 border-b" style="border-color: var(--border-panel);">
-				<div class="flex items-center gap-2">
-					<div class="w-8 h-8 rounded-full flex items-center justify-center bg-danger/15 text-danger" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
+			<div class="flex items-center justify-between pb-4 mb-4 border-b" style="border-color: var(--border-panel);">
+				<div class="flex items-center gap-3">
+					<div class="w-9 h-9 rounded-xl flex items-center justify-center bg-danger/15 text-danger" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
 						<Icon name="exclamation-triangle" size={18} />
 					</div>
 					<div>
-						<h3 class="text-sm font-bold m-0" style="color: #f87171;">Otorisasi Buka Ulang Periode Fiskal</h3>
-						<span class="text-[11px]" style="color: var(--text-muted);">Tindakan Risiko Tinggi &bull; Audit Wajib</span>
+						<h3 class="text-base font-bold m-0" style="color: #f87171;">Otorisasi Buka Ulang Periode Fiskal</h3>
+						<span class="text-xs" style="color: var(--text-muted);">Tindakan Risiko Tinggi &bull; Audit Wajib</span>
 					</div>
 				</div>
-				<button type="button" class="text-xs text-muted hover:text-main p-1 cursor-pointer" onclick={() => (sensitiveModalItem = null)}>✕</button>
+				<button
+					type="button"
+					class="w-7 h-7 rounded-lg flex items-center justify-center text-xs text-muted hover:text-main hover:bg-white/5 cursor-pointer transition-colors"
+					onclick={() => (sensitiveModalItem = null)}
+					aria-label="Tutup"
+				>
+					✕
+				</button>
 			</div>
 
-			<div class="dash-subbox p-3 mb-3" style="background: rgba(0,0,0,0.25);">
-				<div class="text-xs mb-1">
-					Pemohon: <strong style="color: var(--text-main);">{sensitiveModalItem.requester || 'Maya Septiani - Finance HQ'}</strong>
+			<div class="dash-subbox p-4 mb-4 flex flex-col gap-3.5" style="background: rgba(0,0,0,0.25);">
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-lg" style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-subtle);">
+					<div>
+						<span class="text-[11px] text-muted block mb-1">Pemohon:</span>
+						<strong class="text-xs block" style="color: var(--text-main);">{sensitiveModalItem.requester || 'Maya Septiani - Finance HQ'}</strong>
+					</div>
+					<div>
+						<span class="text-[11px] text-muted block mb-1">Target Periode:</span>
+						<strong class="text-xs block" style="color: #60a5fa;">Bulan September 2026</strong>
+					</div>
 				</div>
-				<div class="text-xs mb-2">
-					Target Periode: <strong style="color: #60a5fa;">Bulan September 2026</strong>
-				</div>
-				<div class="text-[11px] p-2 rounded text-muted" style="background: rgba(239, 68, 68, 0.08); border-left: 2px solid #ef4444;">
-					Alasan Pengajuan: <em>"{sensitiveModalItem.reason || sensitiveModalItem.desc}"</em>
+
+				<div class="text-xs p-3.5 rounded-lg leading-relaxed" style="background: rgba(239, 68, 68, 0.08); border-left: 3px solid #ef4444;">
+					<span class="text-[11px] font-bold block mb-1 text-danger" style="color: #f87171;">Alasan Pengajuan:</span>
+					<span class="italic text-xs" style="color: var(--text-main); line-height: 1.5;">"{sensitiveModalItem.reason || sensitiveModalItem.desc}"</span>
 				</div>
 			</div>
 
-			<div class="text-[11.5px] p-2.5 rounded mb-4" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #fcd34d; line-height: 1.4;">
+			<div class="text-xs p-3.5 rounded-lg mb-4 leading-relaxed" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #fcd34d;">
 				<strong>Peringatan Owner:</strong> Pembukaan ulang akan mengaktifkan kembali mutasi jurnal September selama <strong>24 jam</strong>. Seluruh entri penyesuaian akan dicatat dengan timestamp dan ditandatangani digital oleh akun Anda.
 			</div>
 
-			<div class="flex items-center justify-end gap-2">
+			<div class="flex items-center justify-between gap-3 pt-2">
 				<button
 					type="button"
-					class="btn-reject-direct py-2 px-3"
-					onclick={() => (sensitiveModalItem = null)}
-				>
-					Batalkan
-				</button>
-				<button
-					type="button"
-					class="btn-approve-direct py-2 px-4"
-					style="background: #dc2626; border-color: #ef4444;"
+					class="btn-reject-direct py-2 px-4"
 					onclick={() => {
 						if (sensitiveModalItem) {
-							approveItem(sensitiveModalItem);
+							rejectItem(sensitiveModalItem);
 							sensitiveModalItem = null;
 						}
 					}}
 				>
-					<Icon name="lock-open" size={14} />
-					<span>Konfirmasi Buka Ulang (24 Jam)</span>
+					Tolak Permintaan
 				</button>
+				<div class="flex items-center gap-2.5">
+					<button
+						type="button"
+						class="text-xs text-muted hover:text-main px-3 py-2 cursor-pointer"
+						onclick={() => (sensitiveModalItem = null)}
+					>
+						Tutup
+					</button>
+					<button
+						type="button"
+						class="btn-approve-direct py-2 px-5"
+						style="background: #dc2626; border-color: #ef4444;"
+						onclick={() => {
+							if (sensitiveModalItem) {
+								approveItem(sensitiveModalItem);
+								sensitiveModalItem = null;
+							}
+						}}
+					>
+						<Icon name="check" size={14} />
+						<span>Konfirmasi Buka Ulang (24 Jam)</span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Modal Detail Permintaan Persetujuan (Reguler) -->
+{#if detailModalItem}
+	<div
+		class="contact-modal-backdrop"
+		role="presentation"
+		onclick={() => (detailModalItem = null)}
+		onkeydown={(e) => e.key === 'Escape' && (detailModalItem = null)}
+	>
+		<div
+			class="contact-modal-box"
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			style="max-width: 560px;"
+		>
+			<!-- Header Modal -->
+			<div class="flex items-center justify-between pb-4 mb-4 border-b" style="border-color: var(--border-panel);">
+				<div class="flex items-center gap-3">
+					<div class="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/10 text-primary">
+						<Icon name="bolt" size={18} />
+					</div>
+					<div>
+						<h3 class="text-base font-bold m-0" style="color: var(--text-main);">Detail Permintaan Persetujuan</h3>
+						<span class="text-xs" style="color: var(--text-muted);">{detailModalItem.outlet_name || 'Kantor Pusat / Gerai'}</span>
+					</div>
+				</div>
+				<button
+					type="button"
+					class="w-7 h-7 rounded-lg flex items-center justify-center text-xs text-muted hover:text-main hover:bg-white/5 cursor-pointer transition-colors"
+					onclick={() => (detailModalItem = null)}
+					aria-label="Tutup"
+				>
+					✕
+				</button>
+			</div>
+
+			<!-- Box Konten Utama -->
+			<div class="dash-subbox p-4 mb-4 flex flex-col gap-3.5">
+				<!-- Judul Permintaan -->
+				<div class="font-bold text-sm sm:text-base leading-snug pb-3 border-b" style="border-color: var(--border-subtle); color: var(--text-main);">
+					{detailModalItem.title}
+				</div>
+
+				<!-- Grid Pemohon & Nominal dengan Box Lega -->
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-lg" style="background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border-subtle);">
+					<div>
+						<span class="text-[11px] text-muted block mb-1">Pemohon:</span>
+						<strong class="text-xs block leading-snug" style="color: var(--text-main);">{detailModalItem.requester || '-'}</strong>
+					</div>
+					{#if detailModalItem.amount && parseFloat(detailModalItem.amount) > 0}
+						<div>
+							<span class="text-[11px] text-muted block mb-1">Nominal Pengajuan:</span>
+							<strong class="text-xs font-mono font-bold block" style="color: #34d399;">{formatRupiah(detailModalItem.amount)}</strong>
+						</div>
+					{/if}
+				</div>
+
+				<!-- Deskripsi Pengajuan -->
+				{#if detailModalItem.desc}
+					<div class="text-xs leading-relaxed" style="color: var(--text-muted);">
+						<span class="text-[11px] font-semibold text-muted uppercase tracking-wider block mb-1">Deskripsi Pengajuan:</span>
+						<p class="m-0 text-xs" style="color: var(--text-main); line-height: 1.5;">{detailModalItem.desc}</p>
+					</div>
+				{/if}
+
+				<!-- Alasan Pengajuan -->
+				{#if detailModalItem.reason}
+					<div class="text-xs p-3.5 rounded-lg leading-relaxed" style="background: rgba(16, 185, 129, 0.06); border-left: 3px solid var(--brand-primary);">
+						<span class="text-[11px] font-bold block mb-1" style="color: var(--brand-primary);">Alasan Pengajuan:</span>
+						<span class="italic text-xs" style="color: var(--text-main); line-height: 1.5;">"{detailModalItem.reason}"</span>
+					</div>
+				{/if}
+			</div>
+
+			<!-- Footer Aksi -->
+			<div class="flex items-center justify-between gap-3 pt-2">
+				<a
+					href="/approvals"
+					class="text-xs font-semibold text-primary hover:underline"
+					onclick={() => (detailModalItem = null)}
+				>
+					Buka di Halaman Persetujuan
+				</a>
+				<div class="flex items-center gap-2.5">
+					<button
+						type="button"
+						class="btn-reject-direct py-2 px-4"
+						onclick={() => {
+							if (detailModalItem) {
+								rejectItem(detailModalItem);
+								detailModalItem = null;
+							}
+						}}
+					>
+						Tolak
+					</button>
+					<button
+						type="button"
+						class="btn-approve-direct py-2 px-5"
+						onclick={() => {
+							if (detailModalItem) {
+								approveItem(detailModalItem);
+								detailModalItem = null;
+							}
+						}}
+					>
+						<Icon name="check" size={13} />
+						<span>Setujui</span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Modal Detail Bahan Kritis & Tindak Lanjut -->
+{#if stockModalItem}
+	{@const manager = getManager(stockModalItem.outlet_name)}
+	<div
+		class="contact-modal-backdrop"
+		role="presentation"
+		onclick={() => (stockModalItem = null)}
+		onkeydown={(e) => e.key === 'Escape' && (stockModalItem = null)}
+	>
+		<div
+			class="contact-modal-box"
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			style="max-width: 560px;"
+		>
+			<div class="flex items-center justify-between pb-4 mb-4 border-b" style="border-color: var(--border-panel);">
+				<div class="flex items-center gap-3">
+					<div class="w-9 h-9 rounded-xl flex items-center justify-center bg-danger/15 text-danger" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
+						<Icon name="exclamation-triangle" size={18} />
+					</div>
+					<div>
+						<h3 class="text-base font-bold m-0" style="color: var(--text-main);">Peringatan Bahan Kritis</h3>
+						<span class="text-xs" style="color: var(--text-muted);">{stockModalItem.outlet_name}</span>
+					</div>
+				</div>
+				<button
+					type="button"
+					class="w-7 h-7 rounded-lg flex items-center justify-center text-xs text-muted hover:text-main hover:bg-white/5 cursor-pointer transition-colors"
+					onclick={() => (stockModalItem = null)}
+					aria-label="Tutup"
+				>
+					✕
+				</button>
+			</div>
+
+			<div class="dash-subbox p-4 mb-4 flex flex-col gap-3.5">
+				<div class="flex items-center justify-between gap-2 pb-3 border-b" style="border-color: var(--border-subtle);">
+					<span class="font-bold text-sm sm:text-base" style="color: var(--text-main);">{stockModalItem.item_name}</span>
+					<Badge variant="danger" text="Hampir Habis" size="sm" />
+				</div>
+
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-lg" style="background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border-subtle);">
+					<div>
+						<span class="text-[11px] text-muted block mb-1">Stok Fisik:</span>
+						<strong style="color: #f87171;" class="text-xs font-mono font-bold block">{stockModalItem.current_qty} {stockModalItem.unit}</strong>
+					</div>
+					<div>
+						<span class="text-[11px] text-muted block mb-1">Batas Minimum:</span>
+						<strong style="color: var(--text-main);" class="text-xs font-mono font-bold block">{stockModalItem.min_qty} {stockModalItem.unit}</strong>
+					</div>
+					<div>
+						<span class="text-[11px] text-muted block mb-1">Estimasi Kehabisan:</span>
+						<strong style="color: #f87171;" class="text-xs font-mono font-bold block">~{stockModalItem.est_days_left} hari</strong>
+					</div>
+					<div>
+						<span class="text-[11px] text-muted block mb-1">Lokasi Gerai:</span>
+						<strong style="color: var(--text-main);" class="text-xs block">{stockModalItem.outlet_name}</strong>
+					</div>
+				</div>
+
+				<div class="text-xs p-3.5 rounded-lg leading-relaxed" style="background: rgba(0, 0, 0, 0.2); border-left: 3px solid var(--border-panel);">
+					<div class="text-[11px] text-muted mb-1 font-semibold">Penanggung Jawab Gerai (Store Manager):</div>
+					<div class="font-semibold text-xs" style="color: var(--text-main);">{manager.name} ({manager.role})</div>
+					<div class="text-muted text-[11px] mt-0.5">No. Kontak: {manager.phone}</div>
+				</div>
+			</div>
+
+			<div class="flex items-center justify-between gap-3 pt-2">
+				<button
+					type="button"
+					class="text-xs text-muted hover:text-main px-3 py-2 cursor-pointer"
+					onclick={() => (stockModalItem = null)}
+				>
+					Tutup
+				</button>
+				<div class="flex items-center gap-2.5">
+					<button
+						type="button"
+						class="btn-reject-direct py-2 px-4"
+						onclick={() => {
+							const itm = stockModalItem;
+							stockModalItem = null;
+							if (itm) openContactModal(itm.outlet_name, itm.item_name);
+						}}
+					>
+						<Icon name="phone" size={13} />
+						<span>Hubungi SM</span>
+					</button>
+					<a
+						href="/procurement?item={encodeURIComponent(stockModalItem.item_name)}&outlet={encodeURIComponent(stockModalItem.outlet_name)}"
+						class="btn-approve-direct py-2 px-5"
+						onclick={() => (stockModalItem = null)}
+					>
+						<Icon name="shopping-cart" size={13} />
+						<span>Buat PO Pengadaan</span>
+					</a>
+				</div>
 			</div>
 		</div>
 	</div>

@@ -117,69 +117,69 @@
 	colSpan="col-12 col-lg-7"
 >
 	<!-- Petunjuk Interaktif -->
-	<div class="flex items-center justify-between mb-2 text-xs text-muted flex-wrap gap-2">
-		<span>Indikator komprehensif kesehatan operasional seluruh outlet di bawah naungan brand Anda</span>
+	<div class="flex items-center justify-between mb-2.5 text-xs flex-wrap gap-2">
+		<span style="color: var(--text-muted);">Indikator komprehensif kesehatan operasional seluruh outlet di bawah naungan brand Anda</span>
 		<span class="text-primary font-semibold text-[11px]">&bull; Klik baris untuk detail operasional &amp; grafik</span>
 	</div>
 
 	<!-- Tabel Matriks Responsif -->
-	<div class="overflow-x-auto rounded-lg border" style="border-color: var(--border-panel); background: var(--bg-panel-sub);">
-		<table class="w-full text-left text-xs border-collapse">
+	<div class="health-matrix-container">
+		<table class="health-matrix-table">
 			<thead>
-				<tr class="border-b font-semibold" style="border-color: var(--border-panel); color: var(--text-muted); background: rgba(0,0,0,0.12);">
-					<th class="py-2.5 px-3">Gerai / Lokasi</th>
-					<th class="py-2.5 px-3">Omzet vs Target</th>
-					<th class="py-2.5 px-3">Stok Kritis</th>
-					<th class="py-2.5 px-3">Saji KDS</th>
-					<th class="py-2.5 px-3">Kas Kecil</th>
-					<th class="py-2.5 px-3 text-center">Sync POS</th>
-					<th class="py-2.5 px-2 text-right">Aksi</th>
+				<tr>
+					<th style="width: 22%;">Gerai / Lokasi</th>
+					<th style="width: 20%;">Omzet vs Target</th>
+					<th style="width: 14%;">Stok Kritis</th>
+					<th style="width: 14%;">Saji KDS</th>
+					<th style="width: 14%;">Kas Kecil</th>
+					<th class="text-center" style="width: 10%;">Sync POS</th>
+					<th class="text-right" style="width: 6%;">Aksi</th>
 				</tr>
 			</thead>
-			<tbody class="divide-y" style="border-color: var(--border-panel);">
+			<tbody>
 				{#each outletsHealth as out}
 					<!-- svelte-ignore a11y_click_events_have_key_events -->
 					<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 					<tr
-						class="hover:bg-panel cursor-pointer transition-colors group"
+						class="group"
 						onclick={() => onSelectOutlet?.(out)}
 						title="Klik untuk membuka detail operasional {out.name}"
 					>
 						<!-- 1. Outlet & Tipe -->
-						<td class="py-3 px-3">
-							<div class="font-bold text-xs group-hover:text-primary transition-colors" style="color: var(--text-main);">
+						<td>
+							<div class="outlet-title group-hover:text-primary transition-colors">
 								{out.name}
 							</div>
-							<div class="text-[10px]" style="color: var(--text-muted);">
+							<div class="outlet-subtitle">
 								{out.city} &bull; <span class="font-medium">{out.type}</span>
 							</div>
 						</td>
 
 						<!-- 2. Omzet vs Target (Warna + Ikon) -->
-						<td class="py-3 px-3 font-mono">
+						<td class="font-mono">
 							<div class="flex items-center gap-1.5 font-bold text-xs">
 								{#if out.target_status === 'success'}
 									<Icon name="check-circle" size={13} class="text-success" />
-									<span style="color: #34d399;">{out.target_pct}%</span>
+									<span style="color: var(--pill-success-text);">{out.target_pct}%</span>
 								{:else if out.target_status === 'warning'}
 									<Icon name="arrow-trending-up" size={13} class="text-warning" />
-									<span style="color: #fbbf24;">{out.target_pct}%</span>
+									<span style="color: var(--pill-warning-text);">{out.target_pct}%</span>
 								{:else}
 									<Icon name="arrow-trending-down" size={13} class="text-danger" />
-									<span style="color: #f87171;">{out.target_pct}%</span>
+									<span style="color: var(--pill-danger-text);">{out.target_pct}%</span>
 								{/if}
 							</div>
-							<div class="text-[10.5px]" style="color: var(--text-muted);">
-								{formatRupiah(out.omzet)} <span class="text-[9.5px]">/ {formatRupiah(out.target_omzet)}</span>
+							<div class="metric-subtext">
+								{formatRupiah(out.omzet)} <span style="opacity: 0.8;">/ {formatRupiah(out.target_omzet)}</span>
 							</div>
 						</td>
 
 						<!-- 3. Stok Kritis (Warna + Ikon) -->
-						<td class="py-3 px-3">
+						<td>
 							{#if out.critical_stock_status === 'success'}
 								<span
 									class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded"
-									style="background: rgba(16, 185, 129, 0.12); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25);"
+									style="background: var(--pill-success-bg); color: var(--pill-success-text); border: 1px solid var(--pill-success-border);"
 								>
 									<Icon name="check" size={12} />
 									<span>Aman (0)</span>
@@ -187,64 +187,64 @@
 							{:else}
 								<span
 									class="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded"
-									style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35);"
+									style="background: var(--pill-danger-bg); color: var(--pill-danger-text); border: 1px solid var(--pill-danger-border);"
 									title="Bahan kritis: {out.critical_stock_item}"
 								>
 									<Icon name="exclamation-triangle" size={12} />
 									<span>{out.critical_stock_count} Kritis</span>
 								</span>
-								<div class="text-[10px] text-danger font-medium mt-0.5 truncate max-w-[90px]">
+								<div class="text-[10px] font-medium mt-1 truncate max-w-[95px]" style="color: var(--pill-danger-text);">
 									{out.critical_stock_item}
 								</div>
 							{/if}
 						</td>
 
 						<!-- 4. Kecepatan Saji KDS (Warna + Ikon) -->
-						<td class="py-3 px-3">
+						<td>
 							<div class="flex items-center gap-1.5 font-bold font-mono text-xs">
 								{#if out.kds_status === 'success'}
 									<Icon name="bolt" size={13} class="text-success" />
-									<span style="color: #34d399;">{out.kds_avg_minutes} mnt</span>
+									<span style="color: var(--pill-success-text);">{out.kds_avg_minutes} mnt</span>
 								{:else}
 									<Icon name="clock" size={13} class="text-warning" />
-									<span style="color: #fbbf24;">{out.kds_avg_minutes} mnt</span>
+									<span style="color: var(--pill-warning-text);">{out.kds_avg_minutes} mnt</span>
 								{/if}
 							</div>
-							<div class="text-[10px]" style="color: var(--text-muted);">
+							<div class="metric-subtext">
 								{out.kds_status === 'success' ? 'Cepat' : 'Perhatian'}
 							</div>
 						</td>
 
 						<!-- 5. Kas Kecil (Warna + Ikon) -->
-						<td class="py-3 px-3 font-mono">
+						<td class="font-mono">
 							<div class="flex items-center gap-1 text-[11.5px] font-bold">
 								{#if out.petty_cash_status === 'warning'}
 									<Icon name="exclamation-circle" size={12} class="text-warning" />
-									<span style="color: #fbbf24;">{out.petty_cash_pct}%</span>
+									<span style="color: var(--pill-warning-text);">{out.petty_cash_pct}%</span>
 								{:else}
 									<Icon name="check" size={12} class="text-success" />
 									<span style="color: var(--text-main);">{out.petty_cash_pct}%</span>
 								{/if}
 							</div>
-							<div class="text-[10px]" style="color: var(--text-muted);">
+							<div class="metric-subtext">
 								{formatRupiah(out.petty_cash_spent)}
 							</div>
 						</td>
 
 						<!-- 6. Status Sinkronisasi POS (Warna + Ikon) -->
-						<td class="py-3 px-3 text-center">
+						<td class="text-center">
 							{#if out.sync_status === 'online'}
 								<span
 									class="inline-flex items-center gap-1 text-[10.5px] font-semibold px-2 py-0.5 rounded-full"
-									style="background: rgba(16, 185, 129, 0.12); color: #34d399;"
+									style="background: var(--pill-success-bg); color: var(--pill-success-text); border: 1px solid var(--pill-success-border);"
 								>
-									<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+									<span class="w-1.5 h-1.5 rounded-full" style="background: var(--color-success, #10b981);"></span>
 									{out.sync_last_seen}
 								</span>
 							{:else}
 								<span
 									class="inline-flex items-center gap-1 text-[10.5px] font-bold px-2 py-0.5 rounded-full animate-pulse"
-									style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);"
+									style="background: var(--pill-warning-bg); color: var(--pill-warning-text); border: 1px solid var(--pill-warning-border);"
 								>
 									<Icon name="exclamation-circle" size={11} />
 									{out.sync_last_seen}
@@ -252,17 +252,19 @@
 							{/if}
 						</td>
 
-						<!-- 7. Tombol Aksi Detail -->
-						<td class="py-3 px-2 text-right">
+						<!-- 7. Tombol Aksi Tunggal (Golden Rule 13: Lihat .btn-view-direct) -->
+						<td class="text-right">
 							<button
 								type="button"
-								class="text-xs text-primary font-bold hover:underline p-1"
+								class="btn-view-direct"
 								onclick={(e) => {
 									e.stopPropagation();
 									onSelectOutlet?.(out);
 								}}
+								title="Buka rincian operasional gerai {out.name}"
 							>
-								Detail &rarr;
+								<Icon name="eye" size={12} />
+								<span>Lihat</span>
 							</button>
 						</td>
 					</tr>
@@ -272,8 +274,83 @@
 	</div>
 
 	<!-- Ringkasan Cepat di Footer Card -->
-	<div class="flex items-center justify-between pt-2.5 mt-2 border-t text-xs text-muted flex-wrap gap-2" style="border-color: var(--border-panel);">
-		<span>Total Omzet Brand Terkonsolidasi: <strong style="color: var(--text-main);">Rp 8.450.000</strong></span>
-		<span>Waktu Saji Rata-rata Brand: <strong style="color: #34d399;">5.3 menit</strong> (Target: &le; 6.0 mnt)</span>
+	<div class="table-footer-divider flex items-center justify-between pt-3 mt-3 text-xs flex-wrap gap-2">
+		<span style="color: var(--text-muted);">Total Omzet Brand Terkonsolidasi: <strong style="color: var(--text-main);">Rp 8.450.000</strong></span>
+		<span style="color: var(--text-muted);">Waktu Saji Rata-rata Brand: <strong style="color: var(--pill-success-text);">5.3 menit</strong> (Target: &le; 6.0 mnt)</span>
 	</div>
 </DashboardCardFrame>
+
+<style>
+	.health-matrix-container {
+		background: var(--bg-panel-sub);
+		border: 1px solid var(--border-panel);
+		border-radius: var(--radius-lg, 10px);
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.health-matrix-table {
+		width: 100%;
+		text-align: left;
+		font-size: 12px;
+		border-collapse: collapse;
+	}
+
+	.health-matrix-table thead tr {
+		background: var(--bg-panel-sub);
+	}
+
+	.health-matrix-table th {
+		padding: 12px 16px;
+		font-size: 11px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+		color: var(--text-muted);
+		border-bottom: 1px solid var(--border-panel);
+		white-space: nowrap;
+	}
+
+	.health-matrix-table tbody tr {
+		cursor: pointer;
+		transition: background-color 0.15s ease;
+	}
+
+	.health-matrix-table tbody tr:hover {
+		background-color: var(--bg-panel-hover);
+	}
+
+	.health-matrix-table td {
+		padding: 14px 16px;
+		border-bottom: 1px solid var(--border-subtle);
+		vertical-align: middle;
+		color: var(--text-main);
+	}
+
+	.health-matrix-table tbody tr:last-child td {
+		border-bottom: none;
+	}
+
+	.outlet-title {
+		font-weight: 600;
+		font-size: 13px;
+		color: var(--text-main);
+		line-height: 1.3;
+	}
+
+	.outlet-subtitle {
+		font-size: 11px;
+		color: var(--text-muted);
+		margin-top: 3px;
+	}
+
+	.metric-subtext {
+		font-size: 11px;
+		color: var(--text-muted);
+		margin-top: 3px;
+	}
+
+	.table-footer-divider {
+		border-top: 1px solid var(--border-subtle);
+	}
+</style>

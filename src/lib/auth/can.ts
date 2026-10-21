@@ -149,6 +149,31 @@ export const ROLE_DEFAULT_PERMISSIONS: Record<UserRole, string[]> = {
 		'settings:audit_log'
 	],
 
+	// Brand Manager: Operasional multi-outlet brand, kurasi menu lokal, transfer stok gerai, otorisasi kas kecil
+	brand_manager: [
+		'dashboard:view',
+		'approvals:read',
+		'approvals:curate_menu',
+		'reports:read',
+		'org:read',
+		'catalog:read',
+		'catalog:propose_menu',
+		'inventory:read',
+		'inventory:transfer',
+		'inventory:count',
+		'inventory:approve_count',
+		'inventory:record_waste',
+		'procurement:read',
+		'procurement:create_po',
+		'procurement:receive_goods',
+		'procurement:input_invoice',
+		'payables:read',
+		'petty_cash:read',
+		'petty_cash:spend',
+		'petty_cash:approve',
+		'eod:view_summary'
+	],
+
 	// Manajer Cabang (Store Manager): Operasional toko, kas kecil toko, dan tutup hari
 	store_manager: [
 		'dashboard:view',

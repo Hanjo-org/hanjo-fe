@@ -20,15 +20,26 @@
 	let showNotifications = $state(false);
 	let notifications = $state<NotificationItem[]>([]);
 
-	// Cek apakah user saat ini dibatasi (Store Manager / Kasir)
+	// Cek apakah user saat ini dibatasi (Store Manager / Brand Manager / Kasir)
 	const isStoreManager = $derived(session.currentRole === 'store_manager' || session.currentRole === 'cashier');
+	const isBrandManager = $derived(session.currentRole === 'brand_manager');
+	const isRestrictedScope = $derived(isStoreManager || isBrandManager);
+
+	const roleDisplayMap: Record<string, string> = {
+		owner: 'Owner & Pimpinan',
+		hq_admin: 'Admin Pusat (HQ)',
+		finance: 'Finance & Akuntansi',
+		brand_manager: 'Brand Manager',
+		store_manager: 'Store Manager',
+		cashier: 'Kasir POS'
+	};
 
 	// Daftar organisasi & outlet yang boleh dipilih user
 	const accessibleOrgs = $derived(session.accessibleOrganizations);
 	const accessibleOutletIds = $derived(session.accessibleOutlets);
 
 	const availableOutlets = $derived.by(() => {
-		if (!isStoreManager) {
+		if (!isRestrictedScope) {
 			return DEMO_OUTLETS;
 		}
 		return DEMO_OUTLETS.filter((o) => accessibleOutletIds.includes(o.id));
@@ -36,7 +47,7 @@
 
 	// Label organisasi yang sedang aktif
 	const currentOrgLabel = $derived.by(() => {
-		if (isStoreManager) {
+		if (isRestrictedScope) {
 			const org = DEMO_ORGANIZATIONS.find((o) => o.id === (session.currentUser?.organization_id || 'org-jodi'));
 			return org ? org.name : 'Seduhan Kopi Jodi';
 		}
@@ -50,7 +61,7 @@
 	// Label outlet yang sedang aktif
 	const currentOutletLabel = $derived.by(() => {
 		if (session.activeOutletId === 'all' || session.activeOutletId === '*') {
-			return 'Semua Outlet';
+			return isBrandManager ? 'Semua Gerai Brand' : 'Semua Outlet';
 		}
 		const found = DEMO_OUTLETS.find((o) => o.id === session.activeOutletId);
 		return found ? found.name : (availableOutlets[0]?.name || 'Pilih Outlet');
@@ -69,8 +80,36 @@
 		}
 	}
 
+	// Realtime WIB Clock & Format Hari Bisnis
+	let currentTimeWib = $state('21:00');
+
+	const formattedBusinessDate = $derived.by(() => {
+		if (!session.businessDate) return '13 Okt 2026';
+		const parts = session.businessDate.split('-');
+		if (parts.length === 3) {
+			const day = parts[2];
+			const monthIdx = parseInt(parts[1], 10) - 1;
+			const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+			const month = months[monthIdx] || parts[1];
+			const year = parts[0];
+			return `${day} ${month} ${year}`;
+		}
+		return session.businessDate;
+	});
+
 	onMount(() => {
 		loadNotifications();
+
+		// Realtime WIB clock updater
+		const updateWibTime = () => {
+			const now = new Date();
+			const wibHours = String((now.getUTCHours() + 7) % 24).padStart(2, '0');
+			const wibMinutes = String(now.getUTCMinutes()).padStart(2, '0');
+			currentTimeWib = `${wibHours}:${wibMinutes}`;
+		};
+		updateWibTime();
+		const timer = setInterval(updateWibTime, 20000);
+		return () => clearInterval(timer);
 	});
 
 	function handleSelectGlobalAll() {
@@ -150,7 +189,25 @@
 
 <header class="app-header">
 	<div class="header-left">
-		<!-- Role-Scoped Organization & Outlet Hierarchical Picker -->
+		<!-- 1. Search Ctrl+K Button (Paling Kiri Sesuai Arahan) -->
+		{#if onOpenSearch}
+			<button
+				type="button"
+				class="search-trigger-btn"
+				onclick={onOpenSearch}
+				aria-label="Cari Cepat"
+				title="Cari menu, PO, nota (Ctrl+K)"
+			>
+				<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+					<circle cx="11" cy="11" r="8"></circle>
+					<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+				</svg>
+				<span class="search-label">Cari menu, PO, nota...</span>
+				<span class="kbd-shortcut">Ctrl+K</span>
+			</button>
+		{/if}
+
+		<!-- 2. Role-Scoped Organization & Outlet Hierarchical Picker (Di sebelah kanan pencarian) -->
 		<div id="header-outlet-picker" class="outlet-picker-wrapper">
 			<button
 				type="button"
@@ -172,12 +229,6 @@
 					<span class="org-name-sub">{currentOrgLabel}</span>
 					<span class="outlet-name">{currentOutletLabel}</span>
 				</div>
-
-				{#if !isLocked}
-					<svg class="chevron-icon" class:rotate={showOutletDropdown} viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-						<polyline points="6 9 12 15 18 9"></polyline>
-					</svg>
-				{/if}
 			</button>
 
 			{#if showOutletDropdown && !isLocked}
@@ -185,7 +236,7 @@
 					<div class="dropdown-header">PILIH ORGANISASI &amp; OUTLET</div>
 
 					<!-- 1. Opsi Konsolidasi Global (Khusus HQ: Owner, HQ Admin, Finance) -->
-					{#if !isStoreManager}
+					{#if !isRestrictedScope}
 						<button
 							type="button"
 							class="dropdown-item"
@@ -245,11 +296,11 @@
 							{/each}
 							<div class="dropdown-divider"></div>
 						{/each}
-					{:else}
-						<!-- 2. Tampilan Store Manager Multi-Outlet (mis. Sari mengelola Dago & Gubeng di Jodi) -->
+					{:else if isBrandManager}
+						<!-- 2. Tampilan Brand Manager Multi-Outlet (mis. Sari mengelola Brand Jodi) -->
 						<div class="org-section-header">
 							<span class="org-section-title">{currentOrgLabel}</span>
-							<span class="org-badge-code">Unit Tugas</span>
+							<span class="org-badge-code">Brand Anda</span>
 						</div>
 
 						{#if availableOutlets.length > 1}
@@ -260,8 +311,8 @@
 								onclick={() => session.setOutlet('*')}
 							>
 								<div class="item-text">
-									<span class="item-title">Semua Outlet Tugas Saya</span>
-									<span class="item-desc">Konsolidasi {availableOutlets.length} gerai yang Anda kelola</span>
+									<span class="item-title">Semua Gerai Brand (Konsolidasi)</span>
+									<span class="item-desc">Konsolidasi {availableOutlets.length} gerai di bawah naungan {currentOrgLabel}</span>
 								</div>
 								{#if session.activeOutletId === '*' || session.activeOutletId === 'all'}
 									<span class="check-mark">✓</span>
@@ -285,41 +336,43 @@
 								{/if}
 							</button>
 						{/each}
+					{:else}
+						<!-- 3. Tampilan Store Manager Single-Outlet (Terkunci pada Gerai Tugas) -->
+						<div class="org-section-header">
+							<span class="org-section-title">{currentOrgLabel}</span>
+							<span class="org-badge-code">Gerai Tugas</span>
+						</div>
+
+						{#each availableOutlets as outlet (outlet.id)}
+							<div class="dropdown-item is-child selected" style="cursor: default; opacity: 0.95;">
+								<div class="item-text">
+									<span class="item-title">{outlet.name}</span>
+									<span class="item-desc">{outlet.city} · {outlet.code} &bull; Terkunci untuk Store Manager</span>
+								</div>
+								<span class="check-mark">🔒</span>
+							</div>
+						{/each}
 					{/if}
 				</div>
 			{/if}
 		</div>
 
 
-		<!-- WIB Date Badge -->
-		<div class="wib-date-badge" title="Hari Bisnis Aktif (WIB)">
-			<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-				<circle cx="12" cy="12" r="10"></circle>
-				<polyline points="12 6 12 12 16 14"></polyline>
-			</svg>
-			<span>{session.businessDate} (WIB)</span>
-		</div>
 	</div>
 
 	<div class="header-right">
-		<!-- Search Ctrl+K Button -->
-		{#if onOpenSearch}
-			<button
-				type="button"
-				class="search-trigger-btn"
-				onclick={onOpenSearch}
-				aria-label="Cari Cepat"
-			>
-				<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
-					<circle cx="11" cy="11" r="8"></circle>
-					<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-				</svg>
-				<span class="search-label">Cari menu, PO, nota...</span>
-				<span class="kbd-shortcut">Ctrl+K</span>
-			</button>
-		{/if}
+		<!-- 1. Tanggal dan Jam (Dibuat kecil di sebelah kiri lonceng) -->
+		<div class="header-datetime-compact wib-date-badge" title="Hari Bisnis & Waktu Operasional (Asia/Jakarta WIB)">
+			<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" class="datetime-icon">
+				<circle cx="12" cy="12" r="10"></circle>
+				<polyline points="12 6 12 12 16 14"></polyline>
+			</svg>
+			<span class="datetime-date">{formattedBusinessDate}</span>
+			<span class="datetime-dot">&bull;</span>
+			<span class="datetime-time">{currentTimeWib} WIB</span>
+		</div>
 
-		<!-- Notification Bell Trigger & Dropdown (T-01.2) -->
+		<!-- 2. Notification Bell Trigger & Dropdown (T-01.2) -->
 		<div id="header-notification-menu" class="notification-menu-wrapper">
 			<button
 				type="button"
@@ -392,7 +445,7 @@
 
 					<div class="notif-footer">
 						<a href="/approvals" onclick={() => (showNotifications = false)}>
-							Lihat Semua Persetujuan →
+							Lihat Semua Persetujuan
 						</a>
 					</div>
 				</div>
@@ -431,6 +484,7 @@
 			<button
 				type="button"
 				class="user-profile-btn"
+				class:is-active={showUserMenu}
 				onclick={() => (showUserMenu = !showUserMenu)}
 				aria-expanded={showUserMenu}
 				aria-label="Menu Pengguna"
@@ -440,11 +494,8 @@
 				</div>
 				<div class="user-details-text">
 					<span class="name">{session.currentUser?.name || 'Pengguna'}</span>
-					<span class="role">{session.currentRole.toUpperCase()}</span>
+					<span class="role">{roleDisplayMap[session.currentRole] || session.currentRole}</span>
 				</div>
-				<svg class="chevron-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-					<polyline points="6 9 12 15 18 9"></polyline>
-				</svg>
 			</button>
 
 			{#if showUserMenu}
@@ -452,7 +503,7 @@
 					<div class="user-card-header">
 						<span class="full-name">{session.currentUser?.name}</span>
 						<span class="email-sub">{session.currentUser?.email}</span>
-						<span class="role-pill">{session.currentRole.toUpperCase()}</span>
+						<span class="role-pill">{roleDisplayMap[session.currentRole] || session.currentRole}</span>
 					</div>
 
 					<div class="dropdown-divider"></div>
@@ -469,7 +520,7 @@
 								<div class="demo-user-avatar">{demoUser.name.charAt(0)}</div>
 								<div class="demo-user-text">
 									<span class="demo-name">{demoUser.name}</span>
-									<span class="demo-role-tag">{demoUser.role}</span>
+									<span class="demo-role-tag">{roleDisplayMap[demoUser.role] || demoUser.role}</span>
 								</div>
 								{#if session.currentUser?.id === demoUser.id}
 									<span class="active-dot" aria-hidden="true">●</span>

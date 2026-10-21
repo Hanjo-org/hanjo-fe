@@ -20,6 +20,7 @@ export const DEMO_USERS_BY_ROLE: Record<UserRole, User> = {
 	owner: DEMO_USERS['usr-rina'],
 	hq_admin: DEMO_USERS['usr-dimas'],
 	finance: DEMO_USERS['usr-maya'],
+	brand_manager: DEMO_USERS['usr-sari'],
 	store_manager: DEMO_USERS['usr-budi'],
 	cashier: DEMO_USERS['usr-fajar']
 };
@@ -47,6 +48,14 @@ export function getCurrentMockUser(): User | null {
 		currentMockUser = getInitialMockUser();
 	}
 	return currentMockUser;
+}
+
+export function getCurrentFeatureFlags(): Record<string, boolean> {
+	return currentFlags;
+}
+
+export function setMockFeatureFlag(flag: string, value: boolean): void {
+	currentFlags[flag] = value;
 }
 
 export function setCurrentMockUser(user: User | null): void {

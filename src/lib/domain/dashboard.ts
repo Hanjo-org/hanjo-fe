@@ -43,13 +43,21 @@ export const ROLE_DASHBOARD_CARDS: Record<UserRole, DashboardCardKey[]> = {
 		'true_up_pending',
 		'outlet_eod_status'
 	],
-	store_manager: [
+	brand_manager: [
 		'action_center',
 		'sales_summary',
 		'gross_profit',
 		'outlet_comparison',
 		'stock_issues',
 		'petty_cash',
+		'outlet_ops_status',
+		'outlet_eod_status'
+	],
+	store_manager: [
+		'action_center',
+		'sales_summary',
+		'gross_profit',
+		'stock_issues',
 		'outlet_eod_status',
 		'sm_stock_min',
 		'sm_count_schedule',
@@ -63,12 +71,35 @@ export const ROLE_DASHBOARD_CARDS: Record<UserRole, DashboardCardKey[]> = {
 };
 
 /**
- * Memeriksa apakah sebuah peran berhak melihat kartu tertentu (AC-01.1)
+ * Pemetaan Kartu Dashboard ke Feature Flag opsional (AC-01.10)
  */
-export function canRoleAccessCard(role: UserRole, cardKey: DashboardCardKey): boolean {
+export const CARD_FEATURE_FLAG_MAP: Partial<Record<DashboardCardKey, string>> = {
+	petty_cash: 'petty_cash',
+	sm_petty_cash: 'petty_cash',
+	payment_reconciliation: 'midtrans_reconciliation',
+	true_up_pending: 'procurement',
+	hq_payables: 'payables'
+};
+
+/**
+ * Memeriksa apakah sebuah peran berhak melihat kartu tertentu (AC-01.1, AC-01.10)
+ */
+export function canRoleAccessCard(
+	role: UserRole,
+	cardKey: DashboardCardKey,
+	featureFlags?: Record<string, boolean>
+): boolean {
 	const allowedCards = ROLE_DASHBOARD_CARDS[role];
-	if (!allowedCards) return false;
-	return allowedCards.includes(cardKey);
+	if (!allowedCards || !allowedCards.includes(cardKey)) return false;
+
+	if (featureFlags) {
+		const flagKey = CARD_FEATURE_FLAG_MAP[cardKey];
+		if (flagKey && featureFlags[flagKey] === false) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 /**

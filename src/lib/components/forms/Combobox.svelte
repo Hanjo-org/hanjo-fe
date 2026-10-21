@@ -203,22 +203,32 @@
 	.form-control {
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
+		gap: 5px;
 		width: 100%;
 	}
 
 	.form-label {
-		font-size: 12.5px;
-		font-weight: 600;
-		color: var(--text-main, #0f172a);
+		font-size: 11.5px;
+		font-weight: 500;
+		color: var(--text-muted, #94a3b8);
 		display: flex;
 		align-items: center;
-		gap: 4px;
+		gap: 3px;
+		text-transform: none;
+		letter-spacing: 0.015em;
+		transition: color 0.15s ease;
+		user-select: none;
+	}
+
+	.form-control:focus-within .form-label {
+		color: var(--text-main, #f1f5f9);
 	}
 
 	.required-star {
 		color: var(--pill-danger-text, #dc2626);
-		font-weight: 700;
+		font-size: 11px;
+		font-weight: 500;
+		opacity: 0.85;
 	}
 
 	.combobox-container {
@@ -230,10 +240,16 @@
 		display: flex;
 		align-items: center;
 		background: var(--bg-input, #ffffff);
-		border: 1px solid var(--border-panel, #e2e8f0);
+		border: 1px solid var(--border-input, rgba(255, 255, 255, 0.12));
 		border-radius: var(--radius-md, 8px);
-		transition: all 0.15s ease-in-out;
+		transition: border-color 0.15s ease, box-shadow 0.15s ease;
 		overflow: hidden;
+		min-height: 40px;
+		box-sizing: border-box;
+	}
+
+	.input-wrapper:hover:not(:focus-within) {
+		border-color: var(--border-input-hover, rgba(255, 255, 255, 0.22));
 	}
 
 	.combobox-container.is-open .input-wrapper,
@@ -258,7 +274,7 @@
 		border: none;
 		outline: none;
 		background: transparent;
-		padding: 9px 12px;
+		padding: 9px 14px;
 		font-size: 13.5px;
 		color: var(--text-main, #0f172a);
 		font-family: var(--font-body);
@@ -323,7 +339,7 @@
 	}
 
 	.options-list {
-		padding: 4px 0;
+		padding: 6px 0;
 	}
 
 	.option-item {
@@ -331,7 +347,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 8px 12px;
+		padding: 9px 14px;
 		font-size: 13px;
 		color: var(--text-main, #0f172a);
 		text-align: left;

@@ -37,7 +37,7 @@
 		<div class="text-xs pb-2 flex flex-wrap items-center gap-x-2 gap-y-1" style="color: var(--text-muted);">
 			<span>Konteks:</span>
 			<span>Menahan HPP definitif senilai <strong class="mono" style="color: var(--text-main);">{formatRupiah(data?.provisional_total_value)}</strong></span>
-			<span class="dot-sep">•</span>
+			<span class="pulse-subtag">Dampak</span>
 			<span style="color: var(--pill-danger-text); font-weight: 600;">Potensi koreksi laba kotor: -2.6%</span>
 		</div>
 
@@ -49,9 +49,12 @@
 							<span class="font-bold text-sm mono" style="color: var(--text-main);">{item.receipt_number}</span>
 							<Badge variant="warning" text="{item.age_days} hari lalu" size="sm" />
 						</div>
-						<span class="text-xs" style="color: var(--text-subtle);">
-							{item.supplier_name} • {item.outlet_name}
-						</span>
+						<div class="text-xs flex items-center gap-1.5" style="color: var(--text-subtle);">
+							<span style="color: var(--text-muted); font-weight: 500;">{item.supplier_name}</span>
+							<span class="text-[11px] px-1.5 py-0.5 rounded" style="background: var(--bg-panel-sub); border: 1px solid var(--border-panel); color: var(--text-muted);">
+								{item.outlet_name}
+							</span>
+						</div>
 					</div>
 
 					<div class="flex flex-col items-end gap-0.5">

@@ -10,6 +10,7 @@
 	import DashboardCardFrame from './DashboardCardFrame.svelte';
 	import { formatRupiah } from '../../../utils/format.js';
 	import Icon from '../../../components/data/Icon.svelte';
+	import Badge from '../../../components/data/Badge.svelte';
 
 	let outletA = $state<string>('out-jkt-01'); // Senopati
 	let outletB = $state<string>('out-bdg-01'); // Dago
@@ -62,9 +63,9 @@
 			<!-- Tabel Komparasi Berdampingan -->
 			<div class="flex flex-col gap-1.5 pt-1 text-xs">
 				<div class="flex items-center justify-between py-1 border-b" style="border-color: var(--border-panel);">
-					<span class="font-mono font-bold" style="color: #60a5fa;">{formatRupiah(dataA.omzet)}</span>
+					<span class="font-mono font-bold" style="color: var(--brand-primary);">{formatRupiah(dataA.omzet)}</span>
 					<span class="text-[10.5px] text-muted">Omzet Hari Ini</span>
-					<span class="font-mono font-bold" style="color: #c084fc;">{formatRupiah(dataB.omzet)}</span>
+					<span class="font-mono font-bold" style="color: var(--pill-info-text);">{formatRupiah(dataB.omzet)}</span>
 				</div>
 				<div class="flex items-center justify-between py-1 border-b" style="border-color: var(--border-panel);">
 					<span class="font-mono font-semibold" style="color: var(--text-main);">{dataA.cups} cup</span>
@@ -72,9 +73,9 @@
 					<span class="font-mono font-semibold" style="color: var(--text-main);">{dataB.cups} cup</span>
 				</div>
 				<div class="flex items-center justify-between py-1 border-b" style="border-color: var(--border-panel);">
-					<span class="font-mono font-bold" style="color: #34d399;">{dataA.kds}</span>
+					<span class="font-mono font-bold" style="color: var(--pill-success-text);">{dataA.kds}</span>
 					<span class="text-[10.5px] text-muted">Waktu Saji Rata-rata</span>
-					<span class="font-mono font-bold" style="color: #fbbf24;">{dataB.kds}</span>
+					<span class="font-mono font-bold" style="color: var(--pill-warning-text);">{dataB.kds}</span>
 				</div>
 				<div class="flex items-center justify-between py-1 text-[11px]">
 					<span class="truncate max-w-[85px] font-medium" style="color: var(--text-muted);">{dataA.topMenu}</span>
@@ -85,13 +86,13 @@
 		</div>
 
 		<!-- 2. Status Tim & Shift Kerja Barista -->
-		<div class="dash-subbox p-2.5 flex flex-col gap-1.5" style="border-left: 3px solid #f59e0b;">
+		<div class="dash-subbox p-2.5 flex flex-col gap-1.5" style="border-left: 3px solid var(--color-warning, #f59e0b);">
 			<div class="flex items-center justify-between text-xs">
 				<span class="font-bold" style="color: var(--text-main);">Kecukupan Tim Barista &amp; Shift:</span>
-				<span class="text-[10px] font-semibold text-warning">1 Gerai Kurang Orang</span>
+				<Badge variant="warning" text="1 Gerai Kurang Orang" size="sm" />
 			</div>
 			<div class="text-[11px] leading-relaxed" style="color: var(--text-muted);">
-				<strong>Jodi Gubeng:</strong> 1 kasir shift sore izin sakit (sementara digantikan oleh SM Dimas). Senopati (8/8) &amp; Dago (6/6) kapasitas penuh.
+				<strong>Jodi Gubeng:</strong> 1 kasir shift sore izin sakit (sementara didukung SM Dimas). Senopati (8/8) &amp; Dago (6/6) beroperasi kapasitas penuh.
 			</div>
 		</div>
 	</div>

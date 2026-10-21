@@ -139,10 +139,10 @@
 	flex: 1;
 	overflow-y: auto;
 	overflow-x: hidden;
-	padding: 12px 10px;
+	padding: 14px 12px;
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
+	gap: 18px;
 }
 
 .sidebar.collapsed .nav-container {
@@ -156,11 +156,11 @@
 }
 
 .nav-section-title {
-	font-size: 10px;
-	font-weight: 800;
-	letter-spacing: 0.8px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
 	color: var(--text-muted, #94a3b8);
-	padding: 4px 10px;
+	padding: 6px 12px 3px;
 	margin-bottom: 2px;
 	text-transform: uppercase;
 }
@@ -231,8 +231,10 @@
 }
 
 .accordion-chevron {
-	font-size: 11px;
-	transition: transform 0.2s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 	color: var(--text-muted, #94a3b8);
 }
 
@@ -376,11 +378,44 @@
 
 /* Sidebar Footer */
 .sidebar-footer {
-	padding: 12px 10px;
-	border-top: 1px solid var(--border-subtle, #f1f5f9);
+	padding: 12px 14px;
+	border-top: 1px solid var(--border-panel, #e2e8f0);
 	background: var(--bg-sidebar, #ffffff);
 	flex-shrink: 0;
 	z-index: 20;
+}
+
+.system-status-pill {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 7px 12px;
+	border-radius: var(--radius-md, 8px);
+	background: var(--bg-panel-sub, #f8fafc);
+	border: 1px solid var(--border-panel, #e2e8f0);
+}
+
+.system-status-label {
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--text-muted, #64748b);
+}
+
+.system-status-indicator {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 11px;
+	font-weight: 700;
+	color: var(--brand-primary, #059669);
+}
+
+.status-pulse-dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--brand-primary, #059669);
+	display: inline-block;
 }
 
 .user-pill {
@@ -512,7 +547,25 @@
 
 [data-theme='dark'] .sidebar-footer {
 	background-color: #0d1118;
-	border-top-color: #171f2c;
+	border-top-color: #1d2535;
+}
+
+[data-theme='dark'] .system-status-pill {
+	background: #161c28;
+	border-color: #1d2535;
+}
+
+[data-theme='dark'] .system-status-label {
+	color: #94a3b8;
+}
+
+[data-theme='dark'] .system-status-indicator {
+	color: #34d399;
+}
+
+[data-theme='dark'] .status-pulse-dot {
+	background: #10b981;
+	box-shadow: 0 0 6px rgba(16, 185, 129, 0.45);
 }
 
 [data-theme='dark'] .user-pill {

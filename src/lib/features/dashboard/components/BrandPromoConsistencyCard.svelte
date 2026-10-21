@@ -41,14 +41,14 @@
 			<span class="text-xs font-bold" style="color: var(--text-main);">Voucher &amp; Promo Aktif Hari Ini:</span>
 			<div class="flex flex-col gap-1.5">
 				{#each activePromos as p}
-					<div class="flex items-center justify-between text-[11px] p-1.5 rounded" style="background: rgba(0,0,0,0.12);">
+					<div class="flex items-center justify-between text-[11px] p-2 rounded-lg" style="background: var(--bg-panel-sub); border: 1px solid var(--border-panel);">
 						<div>
 							<div class="font-bold text-xs" style="color: var(--text-main);">{p.promoName}</div>
 							<div class="text-[10px]" style="color: var(--text-muted);">{p.outlet} &bull; {p.claims} klaim</div>
 						</div>
 						<span
 							class="text-[10px] font-bold px-1.5 py-0.5 rounded"
-							style="background: rgba(16, 185, 129, 0.12); color: #34d399;"
+							style="background: var(--pill-success-bg); color: var(--pill-success-text); border: 1px solid var(--pill-success-border);"
 						>
 							{p.lift}
 						</span>
@@ -68,17 +68,17 @@
 				{#each consistencyMetrics as m}
 					<div
 						class="flex items-center justify-between text-xs p-1.5 rounded"
-						style="background: {m.isDeviant ? 'rgba(245, 158, 11, 0.08)' : 'transparent'}; border-left: {m.isDeviant ? '2px solid #f59e0b' : 'none'};"
+						style="background: {m.isDeviant ? 'var(--pill-warning-bg)' : 'transparent'}; border-left: {m.isDeviant ? '2px solid var(--color-warning, #f59e0b)' : 'none'};"
 					>
 						<div>
 							<div class="font-semibold text-[11.5px]" style="color: var(--text-main);">{m.outlet}</div>
 							<div class="text-[10px]" style="color: var(--text-muted);">Waste: {m.wastePct} (Avg Brand: 1.1%)</div>
 						</div>
 						<div class="text-right font-mono">
-							<div class="font-bold text-xs" style="color: {m.isDeviant ? '#fbbf24' : '#34d399'};">
+							<div class="font-bold text-xs" style="color: {m.isDeviant ? 'var(--pill-warning-text)' : 'var(--pill-success-text)'};">
 								{m.avgKds}
 							</div>
-							<div class="text-[9.5px] font-bold" style="color: {m.isDeviant ? '#f87171' : '#34d399'};">
+							<div class="text-[9.5px] font-bold" style="color: {m.isDeviant ? 'var(--pill-danger-text)' : 'var(--pill-success-text)'};">
 								{m.kdsDiff} {m.isDeviant ? '(Menyimpang)' : '(Aman)'}
 							</div>
 						</div>

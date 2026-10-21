@@ -446,7 +446,10 @@
 	.modal-footer {
 		display: flex;
 		justify-content: flex-end;
-		gap: 10px;
+		gap: 12px;
+		margin-top: 24px;
+		padding-top: 20px;
+		border-top: 1px solid var(--border-panel);
 	}
 
 	.text-subtle {

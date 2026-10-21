@@ -42,6 +42,10 @@ export const Endpoints = {
 
 	// Organisasi & Outlet (MS-02)
 	ORG: {
+		ORGANIZATIONS: '/api/v1/organizations',
+		ORGANIZATION_DETAIL: (id: string) => `/api/v1/organizations/${id}`,
+		ORGANIZATION_ACTIVATE: (id: string) => `/api/v1/organizations/${id}/actions/activate`,
+		ORGANIZATION_DEACTIVATE: (id: string) => `/api/v1/organizations/${id}/actions/deactivate`,
 		OUTLETS: '/api/v1/outlets',
 		OUTLET_DETAIL: (id: string) => `/api/v1/outlets/${id}`,
 		OUTLET_ACTIVATE: (id: string) => `/api/v1/outlets/${id}/actions/activate`,

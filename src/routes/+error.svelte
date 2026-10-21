@@ -1,33 +1,38 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import ComingSoon from '#lib/components/feedback/ComingSoon.svelte';
 </script>
 
 <div class="error-page-wrapper">
-	<div class="error-card">
-		<div class="status-code">{page.status || 404}</div>
-		<h1 class="error-title">
-			{#if page.status === 404}
-				Halaman Tidak Ditemukan
-			{:else}
+	{#if page.status === 404}
+		<ComingSoon
+			title="Modul Segera Hadir"
+			milestone="Tahap Milestone Lanjutan"
+			targetModule={page.url.pathname.replace(/^\//, '') || 'Fitur ERP'}
+			description="Halaman atau fitur ini sedang dalam persiapan pengembangan pada siklus milestone berikutnya. Konteks filter Anda tetap tersimpan."
+			backUrl="/"
+		/>
+	{:else}
+		<div class="error-card">
+			<div class="status-code">{page.status || 500}</div>
+			<h1 class="error-title">
 				Terjadi Kesalahan pada Sistem
-			{/if}
-		</h1>
-		<p class="error-desc">
-			{#if page.error?.message}
-				{page.error.message}
-			{:else if page.status === 404}
-				Halaman atau entitas yang Anda cari tidak tersedia, telah dihapus, atau berada di luar cakupan outlet penugasan Anda.
-			{:else}
-				Terjadi gangguan internal saat memproses permintaan Anda. Silakan coba beberapa saat lagi.
-			{/if}
-		</p>
+			</h1>
+			<p class="error-desc">
+				{#if page.error?.message}
+					{page.error.message}
+				{:else}
+					Terjadi gangguan internal saat memproses permintaan Anda. Silakan coba beberapa saat lagi.
+				{/if}
+			</p>
 
-		<div class="actions">
-			<a href="/" class="btn-home">
-				Kembali ke Beranda
-			</a>
+			<div class="actions">
+				<a href="/" class="btn-home">
+					Kembali ke Beranda
+				</a>
+			</div>
 		</div>
-	</div>
+	{/if}
 </div>
 
 <style>

@@ -121,16 +121,16 @@
 
 		<!-- Batch Payment Action Bar -->
 		{#if selectedBillIds.length > 0}
-			<div class="p-3.5 rounded-xl flex items-center justify-between flex-wrap gap-3 text-xs border" style="background: rgba(37, 99, 235, 0.08); border-color: rgba(37, 99, 235, 0.25);">
+			<div class="p-3.5 rounded-xl flex items-center justify-between flex-wrap gap-3 text-xs border" style="background: var(--pill-info-bg); border-color: var(--pill-info-border);">
 				<div class="flex items-center gap-2.5">
-					<span class="font-bold text-sm" style="color: #1e40af;">{selectedBillIds.length} faktur dipilih</span>
-					<span class="dot-sep">•</span>
-					<span>Total: <strong class="mono font-bold text-sm" style="color: #1e3a8a;">{formatRupiah(selectedTotalAmount)}</strong></span>
+					<span class="font-bold text-sm" style="color: var(--pill-info-text);">{selectedBillIds.length} faktur dipilih</span>
+					<span class="pulse-subtag">Total</span>
+					<span><strong class="mono font-bold text-sm" style="color: var(--text-main);">{formatRupiah(selectedTotalAmount)}</strong></span>
 				</div>
 				<button
 					type="button"
 					class="px-4 py-2 font-semibold text-white rounded-lg shadow-sm transition-all flex items-center gap-2 text-xs"
-					style="background: #2563eb;"
+					style="background: var(--brand-primary);"
 					onclick={handleProcessBatchPayment}
 				>
 					<Icon name="check" size={14} />
@@ -204,14 +204,13 @@
 								<td class="text-center">
 									<a
 										href="/payables?inv={bill.invoice_number}"
-										class="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1.5 rounded-md transition-all whitespace-nowrap"
+										class="inline-flex items-center justify-center text-xs font-semibold px-3 py-1.5 rounded-md transition-all whitespace-nowrap"
 										style={isUrgent
 											? 'color: #ffffff; background: #dc2626; border: 1px solid #b91c1c; box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25);'
 											: 'color: var(--text-main); background: var(--bg-panel-sub); border: 1px solid var(--border-panel);'}
 										title="Catat pembayaran untuk faktur {bill.invoice_number}"
 									>
 										<span>{isUrgent ? 'Bayar Segera (H-1)' : 'Catat Pembayaran'}</span>
-										<Icon name="arrow-right" size={12} />
 									</a>
 								</td>
 							</tr>

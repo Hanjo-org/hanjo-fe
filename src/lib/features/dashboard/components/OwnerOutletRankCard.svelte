@@ -31,10 +31,10 @@
 >
 	<div class="flex flex-col gap-2">
 		{#each outletRanking as r, idx}
-			<div class="dash-subbox p-2.5 flex flex-col gap-1">
+			<div class="dash-subbox p-2.5 flex flex-col gap-1.5">
 				<div class="flex items-center justify-between text-xs">
 					<div class="flex items-center gap-2">
-						<span class="text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center font-mono" style="background: rgba(255,255,255,0.08); color: var(--text-main);">
+						<span class="rank-badge rank-{idx + 1}">
 							{idx + 1}
 						</span>
 						<div>
@@ -42,9 +42,9 @@
 							<div class="text-[10px]" style="color: var(--text-muted);">{r.city} &bull; {r.cups} cup</div>
 						</div>
 					</div>
-					<div class="text-right font-mono">
-						<div class="font-bold text-xs" style="color: var(--text-main);">{formatRupiah(r.omzet)}</div>
-						<div class="text-[10px] font-bold" style="color: {r.deltaHigher ? '#10b981' : '#f87171'};">
+					<div class="text-right">
+						<div class="font-bold text-xs" style="color: var(--text-main); font-variant-numeric: tabular-nums;">{formatRupiah(r.omzet)}</div>
+						<div class="text-[10px] font-bold" style="color: {r.deltaHigher ? 'var(--pill-success-text)' : 'var(--pill-danger-text)'}; font-variant-numeric: tabular-nums;">
 							{r.delta}
 						</div>
 					</div>
@@ -55,7 +55,7 @@
 					<div class="mini-leaderboard-bar-bg flex-1" title="{r.pct}% kontribusi terhadap total omzet">
 						<div class="mini-leaderboard-bar-fill" style="width: {r.pct}%;"></div>
 					</div>
-					<span class="text-[10px] font-mono font-semibold" style="color: var(--text-muted); min-width: 28px; text-align: right;">{r.pct}%</span>
+					<span class="text-[10px] font-semibold" style="color: var(--text-muted); min-width: 32px; text-align: right; font-variant-numeric: tabular-nums;">{r.pct}%</span>
 				</div>
 			</div>
 		{/each}

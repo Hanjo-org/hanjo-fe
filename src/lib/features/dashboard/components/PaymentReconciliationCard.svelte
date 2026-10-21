@@ -60,7 +60,7 @@
 			</div>
 			<Badge
 				variant={isMatched ? 'success' : 'danger'}
-				text={isMatched ? 'Selisih Rp 0 • 0 Pending' : `Selisih ${formatRupiah(currentDiscrepancy)} • ${pendingCount} Pending`}
+				text={isMatched ? 'Selisih Rp 0 (Klir)' : `Selisih ${formatRupiah(currentDiscrepancy)} (${pendingCount} Pending)`}
 				size="md"
 			/>
 		</div>
@@ -69,9 +69,9 @@
 		<div class="text-xs pb-1 flex flex-wrap items-center gap-x-2.5 gap-y-1.5" style="color: var(--text-muted);">
 			<span>Transaksi Hari Ini (13 Okt):</span>
 			<span>POS Kasir <strong class="mono" style="color: var(--text-main);">{formatRupiah(data.erp_non_cash_total)}</strong></span>
-			<span class="dot-sep">•</span>
-			<span>Est. Cair Gateway <strong class="mono" style="color: var(--brand-primary);">{formatRupiah(data.midtrans_settlement_total)}</strong></span>
-			<span class="dot-sep">•</span>
+			<span class="pulse-subtag">Cair</span>
+			<span>Est. Gateway <strong class="mono" style="color: var(--brand-primary);">{formatRupiah(data.midtrans_settlement_total)}</strong></span>
+			<span class="pulse-subtag">Delta</span>
 			<span>Selisih <strong class="mono font-bold" style="color: {isMatched ? 'var(--text-main)' : 'var(--pill-danger-text)'};">{formatRupiah(currentDiscrepancy)}</strong></span>
 		</div>
 
@@ -96,7 +96,7 @@
 			</div>
 		</div>
 
-		<!-- Riwayat Settlement 3 Hari Terakhir (Mengisi Ruang Kosong dengan Nilai Tambah) -->
+		<!-- Riwayat Settlement 3 Hari Terakhir -->
 		<div class="dash-subbox p-4 rounded-xl flex flex-col gap-3">
 			<div class="flex items-center justify-between flex-wrap gap-1">
 				<span class="text-xs font-bold" style="color: var(--text-main);">Riwayat Settlement Payment Gateway (3 Hari Terakhir)</span>
@@ -116,7 +116,7 @@
 				</thead>
 				<tbody>
 					{#each settlementHistory as hist}
-						<tr style="border-bottom: 1px solid rgba(148, 163, 184, 0.1);">
+						<tr style="border-bottom: 1px solid var(--border-subtle, var(--border-panel));">
 							<td class="py-2.5 px-3 font-medium" style="color: var(--text-main);">{hist.date}</td>
 							<td class="py-2.5 px-3 mono" style="color: var(--text-muted);">{formatRupiah(hist.pos)}</td>
 							<td class="py-2.5 px-3 mono font-semibold text-right" style="color: var(--brand-primary);">{formatRupiah(hist.payout)}</td>

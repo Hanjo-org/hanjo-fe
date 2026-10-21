@@ -43,7 +43,7 @@ function getInitialOrg(user: User | null): string {
 			return saved === 'all' ? '*' : saved;
 		}
 	}
-	if (user?.role === 'store_manager') {
+	if (user?.role === 'brand_manager' || user?.role === 'store_manager' || user?.role === 'cashier') {
 		return user.organization_id || 'org-jodi';
 	}
 	return '*';
@@ -56,7 +56,7 @@ function getInitialOutlet(user: User | null): string {
 			return saved === 'all' ? '*' : saved;
 		}
 	}
-	if (user?.role === 'store_manager' && user.outlet_ids?.length) {
+	if ((user?.role === 'store_manager' || user?.role === 'cashier') && user.outlet_ids?.length) {
 		return user.outlet_ids[0];
 	}
 	return '*';
@@ -79,6 +79,7 @@ class SessionState {
 	currentUser = $derived(this.user);
 	currentRole = $derived<UserRole>(this.user?.role ?? 'owner');
 	isStoreManager = $derived(this.user?.role === 'store_manager');
+	isBrandManager = $derived(this.user?.role === 'brand_manager');
 
 	// Hirarki Organisasi & Outlet yang boleh diakses pengguna aktif
 	accessibleOrganizations = $derived<Organization[]>(getAccessibleOrganizations(this.user));
@@ -218,7 +219,7 @@ class SessionState {
 
 				if (savedOrg && isOrgInScope(this.user, savedOrg)) {
 					this.activeOrganizationId = savedOrg === 'all' ? '*' : savedOrg;
-				} else if (this.user.role === 'store_manager') {
+				} else if (this.user.role === 'brand_manager' || this.user.role === 'store_manager' || this.user.role === 'cashier') {
 					this.activeOrganizationId = this.user.organization_id || 'org-jodi';
 				} else {
 					this.activeOrganizationId = '*';
@@ -227,8 +228,8 @@ class SessionState {
 				if (savedOutlet && isInScope(this.user, savedOutlet)) {
 					this.activeOutletId = savedOutlet === 'all' ? '*' : savedOutlet;
 				} else {
-					// Jika SM, otomatis pilih outlet tugas pertamanya atau biarkan '*' jika multi-outlet
-					if (this.user.role === 'store_manager' && this.user.outlet_ids?.length) {
+					// Jika Store Manager atau Kasir, otomatis kunci ke outlet tugasnya. Jika Brand Manager, default ke '*' (konsolidasi brand)
+					if ((this.user.role === 'store_manager' || this.user.role === 'cashier') && this.user.outlet_ids?.length) {
 						this.activeOutletId = this.user.outlet_ids[0];
 					} else {
 						this.activeOutletId = '*';

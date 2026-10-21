@@ -57,12 +57,12 @@ export const DEMO_USERS: Record<string, User> = {
 	'usr-sari': {
 		id: 'usr-sari',
 		name: 'Sari Dewi',
-		email: 'sari.sm@hanjo.coffee',
-		role: 'store_manager',
+		email: 'sari.bm@hanjo.coffee',
+		role: 'brand_manager',
 		avatar_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=128&auto=format&fit=crop&q=80',
 		organization_id: 'org-jodi',
 		organization_ids: ['org-jodi'],
-		outlet_ids: ['out-bdg-01', 'out-sub-01'], // 1 manager menjalankan beberapa outlet di Seduhan Kopi Jodi (Jodi Dago & Jodi Gubeng)
+		outlet_ids: ['out-jkt-01', 'out-bdg-01', 'out-sub-01'], // Brand Manager mengelola seluruh gerai brand Seduhan Kopi Jodi
 		created_at: '2026-01-01T00:00:00Z'
 	},
 	'usr-fajar': {
@@ -84,6 +84,7 @@ export const DEMO_USERS_BY_ROLE: Record<UserRole, User> = {
 	owner: DEMO_USERS['usr-rina'],
 	hq_admin: DEMO_USERS['usr-dimas'],
 	finance: DEMO_USERS['usr-maya'],
+	brand_manager: DEMO_USERS['usr-sari'],
 	store_manager: DEMO_USERS['usr-budi'],
 	cashier: DEMO_USERS['usr-fajar']
 };

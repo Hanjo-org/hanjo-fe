@@ -119,7 +119,12 @@ export class ApiClient {
 		const res = await this.request<T>(req);
 		if (res.status >= 400 || ('error' in res.body && res.body.error)) {
 			const err = (res.body as any).error;
-			throw new AppError(err?.code || 'server_error', err?.message || 'Permintaan gagal', err?.details);
+			const appErr = new AppError(err?.code || 'server_error', err?.message || 'Permintaan gagal', err?.details);
+			if (err?.blocking_documents) {
+				(appErr as any).blocking_documents = err.blocking_documents;
+				(appErr.envelope.error as any).blocking_documents = err.blocking_documents;
+			}
+			throw appErr;
 		}
 
 		return (res.body as any).data as T;

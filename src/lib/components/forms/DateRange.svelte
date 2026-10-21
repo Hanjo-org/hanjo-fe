@@ -161,17 +161,27 @@
 	}
 
 	.form-label {
-		font-size: 12.5px;
-		font-weight: 600;
-		color: var(--text-main, #0f172a);
+		font-size: 11.5px;
+		font-weight: 500;
+		color: var(--text-muted, #94a3b8);
 		display: flex;
 		align-items: center;
-		gap: 4px;
+		gap: 3px;
+		text-transform: none;
+		letter-spacing: 0.015em;
+		transition: color 0.15s ease;
+		user-select: none;
+	}
+
+	.form-control:focus-within .form-label {
+		color: var(--text-main, #f1f5f9);
 	}
 
 	.required-star {
 		color: var(--pill-danger-text, #dc2626);
-		font-weight: 700;
+		font-size: 11px;
+		font-weight: 500;
+		opacity: 0.85;
 	}
 
 	.preset-badges {
@@ -201,10 +211,16 @@
 		align-items: center;
 		gap: 8px;
 		background: var(--bg-input, #ffffff);
-		border: 1px solid var(--border-panel, #e2e8f0);
+		border: 1px solid var(--border-input, rgba(255, 255, 255, 0.12));
 		border-radius: var(--radius-md, 8px);
 		padding: 4px 8px;
-		transition: all 0.15s ease-in-out;
+		transition: border-color 0.15s ease, box-shadow 0.15s ease;
+		min-height: 38px;
+		box-sizing: border-box;
+	}
+
+	.range-inputs-container:hover:not(:focus-within) {
+		border-color: var(--border-input-hover, rgba(255, 255, 255, 0.22));
 	}
 
 	.range-inputs-container:focus-within {

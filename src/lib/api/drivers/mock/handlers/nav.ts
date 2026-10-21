@@ -53,6 +53,17 @@ export function registerNavHandlers(): void {
 		const role = (ctx.req.query?.role as string) || 'owner';
 
 		// Lencana angka per peran (PRD 8.4)
+		if (role === 'brand_manager') {
+			const bmBadges: NavBadges = {
+				'approvals.pending_for_me': 3,
+				'inventory.below_min': 3,
+				'procurement.invoices_waiting': 2,
+				'petty_cash.pending_verification': 1,
+				'catalog.proposals_pending': 2
+			};
+			return { data: bmBadges };
+		}
+
 		if (role === 'store_manager') {
 			const smBadges: NavBadges = {
 				'approvals.pending_for_me': 1,
@@ -152,6 +163,12 @@ export function registerNavHandlers(): void {
 			if (role === 'store_manager') {
 				const smOutlet = outletId || 'out-jkt-01';
 				if (entity.outlet_id && entity.outlet_id !== smOutlet) {
+					return false;
+				}
+			}
+			if (role === 'brand_manager') {
+				const bmOutlets = ['out-jkt-01', 'out-bdg-01', 'out-sub-01'];
+				if (entity.outlet_id && !bmOutlets.includes(entity.outlet_id)) {
 					return false;
 				}
 			}

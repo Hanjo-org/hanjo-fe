@@ -184,13 +184,7 @@ export const NAVIGATION_CONFIG: NavSection[] = [
 				title: 'Outlet & Mitra',
 				href: '/outlets',
 				icon: 'outlets',
-				permission: 'org:read',
-				subItems: [
-					{ title: 'Daftar Outlet', href: '/outlets', permission: 'org:read' },
-					{ title: 'Pemilik & Investor', href: '/outlets#owners', permission: 'org:view_owners', featureFlag: 'partner_ownership' },
-					{ title: 'Grup Outlet', href: '/outlets#groups', permission: 'org:view_owners' },
-					{ title: 'Penugasan Pengguna', href: '/outlets#users', permission: 'org:manage' }
-				]
+				permission: 'org:read'
 			}
 		]
 	},

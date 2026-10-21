@@ -141,7 +141,18 @@
 											{badgeCount}
 										</span>
 									{/if}
-									<span class="accordion-chevron" class:rotate={isOpen}>▾</span>
+									<svg
+										class="accordion-chevron"
+										class:rotate={isOpen}
+										viewBox="0 0 24 24"
+										width="13"
+										height="13"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+									>
+										<polyline points="6 9 12 15 18 9"></polyline>
+									</svg>
 								{:else if badgeCount > 0}
 									<span
 										class="collapsed-badge-dot badge-{item.badgeVariant || 'warning'}"
@@ -193,6 +204,8 @@
 									<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
 								{:else if item.icon === 'approvals'}
 									<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+								{:else if item.icon === 'outlets'}
+									<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
 								{:else}
 									<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
 								{/if}
@@ -220,15 +233,15 @@
 
 	<!-- Footer Sistem & Status (Terisolasi dari scroll navigasi) -->
 	<div class="sidebar-footer">
-		<div class="system-status-pill flex items-center justify-between px-2 py-1.5 rounded-md" style="background: rgba(255, 255, 255, 0.03);">
+		<div class="system-status-pill">
 			{#if !isCollapsed}
-				<span class="text-xs font-semibold" style="color: var(--text-muted);">Hanjō ERP &bull; v1.0</span>
-				<span class="inline-flex items-center gap-1.5 text-xs font-bold" style="color: var(--brand-primary);">
-					<span class="w-2 h-2 rounded-full" style="background: var(--brand-primary); display: inline-block;"></span>
+				<span class="system-status-label">Hanjō ERP &bull; v1.0</span>
+				<span class="system-status-indicator">
+					<span class="status-pulse-dot"></span>
 					Online
 				</span>
 			{:else}
-				<span class="w-2.5 h-2.5 rounded-full mx-auto" style="background: var(--brand-primary);" title="Sistem Online (WIB)"></span>
+				<span class="status-pulse-dot" title="Sistem Online (WIB)"></span>
 			{/if}
 		</div>
 	</div>

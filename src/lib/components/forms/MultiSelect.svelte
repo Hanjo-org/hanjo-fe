@@ -209,22 +209,32 @@
 	.form-control {
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
+		gap: 5px;
 		width: 100%;
 	}
 
 	.form-label {
-		font-size: 12.5px;
-		font-weight: 600;
-		color: var(--text-main, #0f172a);
+		font-size: 11.5px;
+		font-weight: 500;
+		color: var(--text-muted, #94a3b8);
 		display: flex;
 		align-items: center;
-		gap: 4px;
+		gap: 3px;
+		text-transform: none;
+		letter-spacing: 0.015em;
+		transition: color 0.15s ease;
+		user-select: none;
+	}
+
+	.form-control:focus-within .form-label {
+		color: var(--text-main, #f1f5f9);
 	}
 
 	.required-star {
 		color: var(--pill-danger-text, #dc2626);
-		font-weight: 700;
+		font-size: 11px;
+		font-weight: 500;
+		opacity: 0.85;
 	}
 
 	.multiselect-container {
@@ -237,13 +247,17 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 5px 10px;
+		padding: 6px 14px;
 		background: var(--bg-input, #ffffff);
-		border: 1px solid var(--border-panel, #e2e8f0);
+		border: 1px solid var(--border-input, rgba(255, 255, 255, 0.12));
 		border-radius: var(--radius-md, 8px);
 		cursor: pointer;
-		transition: all 0.15s ease-in-out;
+		transition: border-color 0.15s ease, box-shadow 0.15s ease;
 		gap: 8px;
+	}
+
+	.multiselect-trigger:hover:not(:disabled) {
+		border-color: var(--border-input-hover, rgba(255, 255, 255, 0.22));
 	}
 
 	.multiselect-container.is-open .multiselect-trigger,
@@ -348,16 +362,16 @@
 	}
 
 	.search-box {
-		padding: 8px;
+		padding: 10px 14px;
 		border-bottom: 1px solid var(--border-panel, #e2e8f0);
 	}
 
 	.search-input {
 		width: 100%;
-		padding: 6px 10px;
+		padding: 8px 12px;
 		font-size: 12.5px;
 		border: 1px solid var(--border-panel, #e2e8f0);
-		border-radius: 4px;
+		border-radius: 6px;
 		outline: none;
 	}
 
@@ -367,8 +381,8 @@
 
 	.options-list {
 		overflow-y: auto;
-		padding: 4px 0;
-		max-height: 180px;
+		padding: 6px 0;
+		max-height: 200px;
 	}
 
 	.option-item {
@@ -376,7 +390,7 @@
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		padding: 8px 12px;
+		padding: 9px 14px;
 		font-size: 13px;
 		color: var(--text-main, #0f172a);
 		text-align: left;

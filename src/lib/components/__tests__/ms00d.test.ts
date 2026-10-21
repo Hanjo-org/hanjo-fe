@@ -90,7 +90,7 @@ async function runTests() {
 
 	const navNoPartner = getNavigationForUser('owner', { partner_ownership: false });
 	const outletSub = navNoPartner.find((s) => s.id === 'master_data')?.items.find((i) => i.id === 'outlets')?.subItems;
-	const hasOwnersTab = outletSub?.some((s) => s.href.includes('#owners'));
+	const hasOwnersTab = outletSub?.some((s) => s.href.includes('#owners')) ?? false;
 	assert(hasOwnersTab === false, 'Mematikan flag partner_ownership menyembunyikan submenu Pemilik & Investor');
 
 	// -------------------------------------------------------------------------

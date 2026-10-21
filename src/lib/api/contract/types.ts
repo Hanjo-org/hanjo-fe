@@ -176,29 +176,81 @@ export interface Versioned {
 }
 
 // ---------------------------------------------------------------------------
-// Organisasi & Outlet (§MS-00, §MS-02)
+// Organisasi, Multi-Outlet, Grup & Mitra (§MS-00, §MS-02)
 // ---------------------------------------------------------------------------
 
-/** Entitas Organisasi (Di atas Outlet: 1 Organisasi mengelola beberapa Outlet) */
+/** Entitas Organisasi Induk (Di atas Outlet: 1 Organisasi mengelola beberapa Outlet) */
 export interface Organization {
   id: string;
   code: string;
   name: string;
   description?: string;
+  tax_id?: string; // NPWP Entitas Bisnis
+  address?: string;
+  status?: 'active' | 'inactive';
   active?: boolean;
+  outlet_count?: number;
   created_at?: string;
 }
 
-/** Entitas Outlet / Gerai (Berada di bawah Organisasi) */
+/** Entitas Outlet / Gerai (Wajib memiliki relasi ke Organisasi Induk) */
 export interface Outlet {
   id: string;
   organization_id: string;
   code: string;
   name: string;
   city: string;
+  address?: string;
+  phone?: string;
+  tax_rate?: number; // PBJT Daerah (mis. 0.10)
+  service_charge?: number; // Service charge restoran (mis. 0.05)
+  petty_cash_limit?: string; // Batas kas kecil harian (desimal string)
+  group_id?: string;
   owner_type?: 'own_company' | 'partner';
+  status?: 'active' | 'inactive';
   active?: boolean;
   created_at?: string;
+}
+
+/** Grup Outlet untuk Pelaporan & Aturan Persetujuan (T-02.8) */
+export interface OutletGroup {
+  id: string;
+  organization_id?: string;
+  code: string;
+  name: string;
+  description?: string;
+  outlet_ids: string[];
+  created_at?: string;
+}
+
+/** Entitas Kepemilikan Mitra / Investor per Outlet (T-02.5, Flag: partner_ownership) */
+export interface OutletOwnership {
+  id: string;
+  outlet_id: string;
+  owner_name: string;
+  owner_email?: string;
+  owner_phone?: string;
+  share_pct?: number | string | null; // Persentase kepemilikan (bisa null/kosong jika belum disepakati)
+  effective_from: string; // YYYY-MM-DD
+  effective_to?: string | null; // YYYY-MM-DD
+  notes?: string;
+  created_at?: string;
+}
+
+/** Dokumen Penghalang saat Percobaan Deaktivasi (AC-02.2) */
+export interface BlockingDocument {
+  id: string;
+  doc_type: 'purchase_order' | 'supplier_invoice' | 'active_outlet';
+  ref_number: string;
+  title: string;
+  reason: string;
+}
+
+/** Respons Konflik saat Deaktivasi Gagal */
+export interface DeactivationConflictData {
+  can_deactivate: boolean;
+  message: string;
+  blocking_documents: BlockingDocument[];
 }
 
 // ---------------------------------------------------------------------------
@@ -206,7 +258,7 @@ export interface Outlet {
 // ---------------------------------------------------------------------------
 
 /** Peran Pengguna Baku */
-export type UserRole = 'owner' | 'hq_admin' | 'finance' | 'store_manager' | 'cashier';
+export type UserRole = 'owner' | 'hq_admin' | 'finance' | 'brand_manager' | 'store_manager' | 'cashier';
 
 /** Profil Pengguna */
 export interface User {

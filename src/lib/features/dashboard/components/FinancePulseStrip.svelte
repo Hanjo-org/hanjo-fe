@@ -48,7 +48,7 @@
 </script>
 
 <div class="owner-pulse-grid col-12">
-	<!-- 1. Status Kliring QRIS & EDC (Status di Depan) -->
+	<!-- 1. Kliring QRIS & EDC -->
 	<div class="pulse-card">
 		<div class="pulse-top">
 			<div class="pulse-icon-badge {isMatched ? 'success' : 'warning'}">
@@ -56,27 +56,23 @@
 			</div>
 			<div class="pulse-trend-text {isMatched ? 'success' : 'warning'}">
 				<Icon name={isMatched ? 'check' : 'exclamation-triangle'} size={14} />
-				<span>{isMatched ? '100% Klir' : 'Selisih'}</span>
+				<span>{isMatched ? '100% Klir' : 'Ada Selisih'}</span>
 			</div>
 		</div>
 
 		<div class="pulse-content">
-			<span class="pulse-label">Status Kliring QRIS &amp; EDC</span>
+			<span class="pulse-label">Kliring QRIS &amp; EDC</span>
 			<div class="pulse-main-val" style="display: flex; align-items: center; gap: 8px; font-size: 22px; color: {isMatched ? 'var(--pill-success-text)' : 'var(--pill-danger-text)'};">
-				<Icon name={isMatched ? 'check-circle' : 'exclamation-triangle'} size={22} />
 				<span>{isMatched ? 'Kliring Cocok' : 'Ada Selisih'}</span>
 			</div>
 			<div class="pulse-subtext">
 				<span style="color: {isMatched ? 'var(--pill-success-text)' : 'var(--pill-danger-text)'}; font-weight: 600;">Selisih: Rp 0</span>
-				<span class="dot-sep">•</span>
-				<span>{recon?.unsettled_transactions_count || 0} pending</span>
-				<span class="dot-sep">•</span>
-				<span>POS {recon ? formatRupiah(recon.erp_non_cash_total) : 'Rp 0'} vs Cair {recon ? formatRupiah(recon.midtrans_settlement_total) : 'Rp 0'}</span>
+				<span class="pulse-subtag">{recon?.unsettled_transactions_count || 0} Pending</span>
 			</div>
 		</div>
 	</div>
 
-	<!-- 2. Hutang Supplier Jatuh Tempo (Konteks Pembanding Tegas) -->
+	<!-- 2. Hutang Supplier Jatuh Tempo -->
 	<div class="pulse-card">
 		<div class="pulse-top">
 			<div class="pulse-icon-badge {dueSoonNum > 0 ? 'warning' : 'success'}">
@@ -89,17 +85,18 @@
 		</div>
 
 		<div class="pulse-content">
-			<span class="pulse-label">Hutang Jatuh Tempo (7 Hari)</span>
-			<div class="pulse-main-val">
+			<span class="pulse-label">Hutang Jatuh Tempo</span>
+			<div class="pulse-main-val font-variant-numeric: tabular-nums">
 				{payables ? formatRupiah(payables.due_soon_amount) : 'Rp 0'}
 			</div>
 			<div class="pulse-subtext">
-				<span>Perlu dibayar: <strong>{payables ? formatRupiah(payables.due_soon_amount) : 'Rp 0'}</strong> dari total <strong>{payables ? formatRupiah(payables.total_balance) : 'Rp 0'}</strong> ({payables && parseFloat(payables.total_balance) > 0 ? Math.round((parseFloat(payables.due_soon_amount) / parseFloat(payables.total_balance)) * 100) : 0}%)</span>
+				<span>Total Hutang: <strong>{payables ? formatRupiah(payables.total_balance) : 'Rp 0'}</strong></span>
+				<span class="pulse-subtag">{payables?.due_soon_count || 4} Nota</span>
 			</div>
 		</div>
 	</div>
 
-	<!-- 3. Saldo Kas Kecil Jaringan (Pembanding terhadap Plafon Imprest) -->
+	<!-- 3. Kas Kecil Jaringan -->
 	<div class="pulse-card">
 		<div class="pulse-top">
 			<div class="pulse-icon-badge success">
@@ -112,17 +109,18 @@
 		</div>
 
 		<div class="pulse-content">
-			<span class="pulse-label">Saldo Kas Kecil Imprest</span>
-			<div class="pulse-main-val">
+			<span class="pulse-label">Kas Kecil Jaringan</span>
+			<div class="pulse-main-val font-variant-numeric: tabular-nums">
 				{petty ? formatRupiah(petty.total_balance) : 'Rp 0'}
 			</div>
 			<div class="pulse-subtext">
-				<span>Saldo imprest: <strong>{petty ? formatRupiah(petty.total_balance) : 'Rp 0'}</strong> / <strong>{formatRupiah(totalPettyPlafon)}</strong> ({pettyPlafonRatio}% aman)</span>
+				<span>Plafon: <strong>{formatRupiah(totalPettyPlafon)}</strong></span>
+				<span class="pulse-subtag">{pettyPlafonRatio}% Aman</span>
 			</div>
 		</div>
 	</div>
 
-	<!-- 4. Closing Gerai Harian EOD (Fokus Murni Operasional Kasir Harian) -->
+	<!-- 4. Closing Gerai (EOD) -->
 	<div class="pulse-card">
 		<div class="pulse-top">
 			<div class="pulse-icon-badge {eod && eod.completed_count === eod.total_count ? 'success' : 'brand'}">
@@ -130,20 +128,19 @@
 			</div>
 			<div class="pulse-trend-text {eod && eod.completed_count === eod.total_count ? 'success' : 'brand'}">
 				<Icon name="clock" size={14} />
-				<span>{eod && eod.completed_count === eod.total_count ? 'Semua Tutup' : `${(eod?.total_count || 5) - (eod?.completed_count || 0)} Gerai Buka`}</span>
+				<span>{eod && eod.completed_count === eod.total_count ? 'Semua Tutup' : `${(eod?.total_count || 5) - (eod?.completed_count || 0)} Buka`}</span>
 			</div>
 		</div>
 
 		<div class="pulse-content">
-			<span class="pulse-label">Closing Gerai Harian (EOD)</span>
+			<span class="pulse-label">Closing Gerai (EOD)</span>
 			<div class="pulse-main-val" style="display: flex; align-items: baseline; gap: 8px;">
 				<span>{eod ? `${eod.completed_count}/${eod.total_count}` : '0/5'}</span>
-				<span style="font-size: 15px; font-weight: 700; color: var(--text-muted);">Gerai Selesai</span>
+				<span class="pulse-unit">Gerai Selesai</span>
 			</div>
 			<div class="pulse-subtext">
-				<span>Selisih fisik kasir: <strong>Rp 0</strong></span>
-				<span class="dot-sep">•</span>
-				<span>{(eod?.total_count || 5) - (eod?.completed_count || 0)} gerai masih aktif transaksi</span>
+				<span>Selisih Fisik: <strong>Rp 0</strong></span>
+				<span class="pulse-subtag">{(eod?.total_count || 5) - (eod?.completed_count || 0)} Gerai Aktif</span>
 			</div>
 		</div>
 	</div>

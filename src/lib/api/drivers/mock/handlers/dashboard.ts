@@ -43,10 +43,15 @@ export function registerDashboardHandlers(): void {
 		const date = (ctx.req.query?.date as string) || clock.businessDate();
 
 		// Pembatasan Cakupan Outlet (RBAC & Scope §7):
-		// Brand Manager tidak boleh mengakses kartu rekonsiliasi bank, hutang pusat, atau true-up nota supplier
-		if (role === 'store_manager') {
+		// Brand Manager & Store Manager tidak boleh mengakses kartu rekonsiliasi bank, hutang pusat, atau true-up nota supplier
+		if (role === 'brand_manager' || role === 'store_manager') {
 			if (key === 'payment_reconciliation' || key === 'true_up_pending' || key === 'hq_payables') {
-				throw ApiErrors.forbidden(`Kartu ${key} tidak diizinkan untuk peran Brand / Area Manager (khusus Finance)`);
+				throw ApiErrors.forbidden(`Kartu ${key} tidak diizinkan untuk peran Manager (khusus Finance)`);
+			}
+		}
+		if (role === 'store_manager') {
+			if (key === 'outlet_comparison' || key === 'petty_cash') {
+				throw ApiErrors.forbidden(`Kartu ${key} tidak diizinkan untuk Store Manager (Scope lock)`);
 			}
 		}
 
@@ -279,11 +284,7 @@ function generateActionCenterData(role: string, outletId: string, date: string):
 				badgeColor: 'info'
 			}
 		];
-	} else {
-		// store_manager
-		const activeOutlet = outletId && outletId !== '*' ? outletId : 'out-jkt-01';
-		const eodRecord = getOutletEodStatus(activeOutlet, date);
-
+	} else if (role === 'brand_manager') {
 		items = [
 			{
 				id: 'act-bm-1',
@@ -345,6 +346,46 @@ function generateActionCenterData(role: string, outletId: string, date: string):
 				outlet_name: 'Jodi Dago'
 			}
 		];
+	} else {
+		// store_manager (Single-Outlet operasional gerai tugas)
+		const activeOutlet = outletId && outletId !== '*' ? outletId : 'out-jkt-01';
+		const eodRecord = getOutletEodStatus(activeOutlet, date);
+
+		items = [
+			{
+				id: 'act-sm-1',
+				type: 'STOCK_BUFFER_ALERT',
+				title: 'Fresh Milk di Bawah Batas Minimum',
+				desc: 'Sisa stok fisik di gerai tinggal 2 Liter (buffer minimum 8 Liter). Segera ajukan PO pengadaan.',
+				actionUrl: '/procurement',
+				actionLabel: 'Buat PO Barang',
+				badge: 'Stok Kritis',
+				badgeColor: 'danger'
+			},
+			{
+				id: 'act-sm-2',
+				type: 'PETTY_CASH_RECEIPT',
+				title: '1 Bukti Pengeluaran Kas Belum Diunggah',
+				desc: 'Pembelian pembersih mesin kopi (Rp 45.000) shift siang belum melampirkan foto struk fisik.',
+				actionUrl: '/petty-cash',
+				actionLabel: 'Unggah Bukti Struk',
+				badge: 'Kas Kecil',
+				badgeColor: 'warning'
+			}
+		];
+
+		if (eodRecord && !eodRecord.is_completed) {
+			items.unshift({
+				id: 'act-sm-eod',
+				type: 'EOD_PENDING',
+				title: 'Tutup Hari (EOD) Belum Selesai',
+				desc: 'Checklist tutup kas laci shift malam dan pencatatan waste belum diselesaikan.',
+				actionUrl: '#eod-checklist',
+				actionLabel: 'Selesaikan Tutup Hari',
+				badge: 'Tutup Hari',
+				badgeColor: 'danger'
+			});
+		}
 	}
 
 	return {

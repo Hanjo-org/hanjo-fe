@@ -31,13 +31,10 @@
 >
 	<div class="flex flex-col gap-2">
 		{#each topProducts as prod, idx}
-			<div class="dash-subbox p-2.5 flex flex-col gap-1">
+			<div class="dash-subbox p-2.5 flex flex-col gap-1.5">
 				<div class="flex items-center justify-between text-xs">
 					<div class="flex items-center gap-2">
-						<span
-							class="text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center font-mono"
-							style="background: rgba(255,255,255,0.08); color: var(--text-main);"
-						>
+						<span class="rank-badge rank-{idx + 1}">
 							{idx + 1}
 						</span>
 						<div>
@@ -48,11 +45,11 @@
 						</div>
 					</div>
 
-					<div class="text-right font-mono">
-						<div class="font-bold text-xs" style="color: var(--text-main);">{formatRupiah(prod.omzet)}</div>
+					<div class="text-right">
+						<div class="font-bold text-xs" style="color: var(--text-main); font-variant-numeric: tabular-nums;">{formatRupiah(prod.omzet)}</div>
 						<span
-							class="text-[9.5px] font-bold px-1.5 py-0.2 rounded"
-							style="background: rgba(16, 185, 129, 0.12); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25);"
+							class="text-[9.5px] font-semibold px-1.5 py-0.5 rounded"
+							style="background: var(--pill-success-bg); color: var(--pill-success-text); border: 1px solid var(--pill-success-border);"
 							title="Margin Laba Kotor Produk"
 						>
 							Margin {prod.margin}%
@@ -65,10 +62,10 @@
 					<div class="mini-leaderboard-bar-bg flex-1" title="{prod.pct}% dari total omzet hari ini">
 						<div
 							class="mini-leaderboard-bar-fill"
-							style="width: {prod.pct}%; background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);"
+							style="width: {prod.pct}%;"
 						></div>
 					</div>
-					<span class="text-[10px] font-mono font-semibold" style="color: var(--text-muted); min-width: 28px; text-align: right;">
+					<span class="text-[10px] font-semibold" style="color: var(--text-muted); min-width: 32px; text-align: right; font-variant-numeric: tabular-nums;">
 						{prod.pct}%
 					</span>
 				</div>

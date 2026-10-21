@@ -114,6 +114,49 @@
         - Nilai headline metrik menyesuaikan ukuran font (`20px–22px`) agar tidak terpotong.
         - Elemen horizontal lebar (tabel data, grafik batang jam-per-jam) **WAJIB** dibungkus kontainer scroll sentuh (`overflow-x: auto; -webkit-overflow-scrolling: touch;`) sehingga tidak gepeng dan **DILARANG KERAS** menyebabkan layar utama meluap secara horizontal (*zero page-level horizontal overflow*).
 
+13. **Prinsip Tampilan Dashboard: Simple Tapi Informatif & Progressive Disclosure (Anti-Overclutter / Anti-Sesak)**:
+    - **Anti-Overclutter / Dilarang Menumpuk Detail & Aksi di Depan**:
+      - Seluruh kartu ringkasan dashboard (antrean persetujuan, alert stok bahan kritis, radar operasional, notifikasi tugas) **DILARANG KERAS** menumpuk teks detail bertele-tele (deskripsi panjang, kutipan alasan berparagraf, catatan audit) atau menjejalkan banyak tombol aksi langsung (seperti Setujui + Tolak + Buat PO + Hubungi SM + Menu titik tiga) langsung pada baris kartu di muka (*upfront*).
+      - Menjejalkan semua data dan tombol aksi sekaligus di depan membuat dashboard terasa penuh, sesak, berat, sulit dipindai (*unscannable*), dan membingungkan pengguna.
+    - **Dibuat Simple Tapi Informatif**:
+      - Setiap baris antrean kartu dashboard **hanya menampilkan informasi esensial/inti**:
+        - **Entitas Utama**: Judul pengajuan, nama dokumen, atau nama bahan/item.
+        - **Konteks Kritis**: Pemohon, nama gerai, nominal ringkas (jika ada), atau status kritis (seperti sisa hari persediaan).
+      - **Aksi Tunggal yang Bersih & Konsisten**: Pada baris kartu dashboard, **hanya gunakan satu tombol aksi utama yang ringkas**, yaitu **`Lihat`** (`.btn-view-direct`).
+    - **Kewajiban Pola Progressive Disclosure**:
+      - Seluruh rincian teks mendalam, alasan pengajuan, formulir persetujuan bertingkat, konfirmasi otorisasi risiko tinggi, penerbitan PO pengadaan, maupun opsi kontak komunikasi (WhatsApp / Telepon) **WAJIB diakses melalui Modal Dialog, Drawer, atau Halaman Lengkap** saat tombol `Lihat` diklik.
+      - Dengan pola ini, dashboard tetap bersih, lega, bernapas (*breathable*), dan berkelas tanpa mengorbankan kelengkapan fitur ERP.
+
+14. **Kewajiban Padding Proporsional & Anti-Sesak (Generous Padding & Breathing Room Rule)**:
+    - **DILARANG KERAS** membuat elemen antarmuka yang kekurangan padding sehingga terasa sesak, sempit (*cramped*), atau teks mepet pada garis batas (border).
+    - **Standar Padding Komponen Form (Form Controls $\ge$ 40px min-height)**:
+      - `Input`, `TextField`, `CurrencyInput`, `DatePicker`, `Combobox`, `Select`: `padding: 9px 14px; min-height: 40px; border-radius: 8px;` (horizontal padding minimal 12–14px).
+      - `Textarea`: `padding: 12px 14px; min-height: 80px;`.
+      - Opsi Dropdown (`.select-option-item`, `.option-item`): `padding: 9px 14px;` dengan gap `4px`.
+      - Trigger Icon / Arrow: diberi padding samping minimal `12px-14px` agar tidak mepet ke tepi kanan.
+    - **Standar Padding Modal & Drawer**:
+      - `Modal Header`: `padding: 18px 24px;`
+      - `Modal Body`: `padding: 24px;`
+      - `Modal Footer`: `padding: 16px 24px;`
+      - **Wajib Gunakan Slot Footer Terdedikasi (`{#snippet footer()}`)**: Tombol penutup atau aksi modal harus diletakkan pada slot footer terdedikasi agar selalu sticky/tetap di bagian bawah modal dan tidak terpotong atau hilang saat isi modal di-scroll.
+    - **Standar Padding Kartu & Subbox**:
+      - Kartu Hero & Section Kontainer: `padding: 18px 20px; gap: 14px;`
+      - Sub-box metrik & timeline item: `padding: 14px 16px;`
+    - **Standar Padding Badge, Status Pill & Code Badge**:
+      - Komponen `Badge` / `.badge` / `.pill-badge`: `padding: 4px 12px; font-size: 11.5px; border-radius: 9999px; white-space: nowrap;`. Dilarang keras teks badge terbungkus / wrap ke 2 baris.
+      - Code Badge (`.outlet-hero-code-badge`, `.outlet-code-badge`): minimal `height: 44px; min-width: 68px; padding: 0 16px; white-space: nowrap;` untuk badge hero dan `padding: 3.5px 10px; border-radius: 6px; white-space: nowrap;` untuk inline code badge. Dilarang keras menggunakan fixed square kecil seperti `w-12 h-12` yang menyebabkan teks kode seperti `JKT-01` terlipat menjadi 2 baris (`JKT-` dan `01`).
+      - Kotak Notifikasi / Callout (`.detail-notice-callout`): `padding: 14px 18px; border-radius: 10px; gap: 12px; font-size: 12.5px; line-height: 1.55;`. Dilarang keras menggunakan padding minimalis seperti `p-2.5` (10px).
+    - **Standar Pemisah Garis & Tombol Aksi (Action Bar & Separator Line Spacing)**:
+      - Jarak antara konten atas dengan garis pemisah (`border-top`): `margin-top: 22px–24px`.
+      - Jarak antara garis pemisah dengan tombol aksi di bawahnya: `padding-top: 18px–20px` (min 18px).
+      - Jarak antar tombol aksi horizontal: `gap: 12px`.
+      - Wajib gunakan kelas terstandar `.form-action-bar` atau `.section-footer-action`.
+      - **DILARANG KERAS** menempelkan tombol mepet garis hanya dengan `pt-1` / `pt-2` / `pt-3` (12px) tanpa margin atas yang membuat tombol tampak terhimpit garis.
+
+15. **Penempatan Aksi Kontekstual pada Halaman Ber-Tab (Contextual Actions Below Tabs)**:
+    - Tombol aksi pembuatan entitas spesifik tab (contoh: **Tambah Outlet Baru**, **Tambah Organisasi Induk**, **Buat Grup Baru**) **WAJIB diletakkan di bawah navigasi tab** (pada toolbar filter atau sub-header area kerja tab terkait), **BUKAN di header global paling atas halaman**.
+    - Meletakkan tombol aksi di header atas sebelum navigasi tab merusak hierarki UX karena tombol tersebut terputus dari konteks tab yang sedang aktif dan membingungkan pengguna saat berpindah-pindah tab.
+
 ---
 
 ## 2. Struktur Folder Baku (`frontend/src/lib/`)

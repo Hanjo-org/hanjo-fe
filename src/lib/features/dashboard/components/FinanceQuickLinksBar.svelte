@@ -55,31 +55,27 @@
 		<button type="button" class="quick-link-btn" onclick={handleExport}>
 			<Icon name="document-text" size={15} />
 			<span>Ekspor Laporan (Excel)</span>
-			<Icon name="arrow-right" size={13} class="opacity-60" />
 		</button>
 
 		<button type="button" class="quick-link-btn" onclick={() => (showClosePeriodModal = true)}>
 			<Icon name="lock-closed" size={15} />
 			<span>Tutup Buku September</span>
-			<Icon name="arrow-right" size={13} class="opacity-60" />
 		</button>
 
 		<button type="button" class="quick-link-btn" onclick={scrollToPayables}>
 			<Icon name="credit-card" size={15} />
 			<span>Batch Bayar Hutang</span>
-			<Icon name="arrow-right" size={13} class="opacity-60" />
 		</button>
 
 		<a href="/petty-cash" class="quick-link-btn">
 			<Icon name="wallet" size={15} />
 			<span>Audit Kas &amp; True-Up</span>
-			<Icon name="arrow-right" size={13} class="opacity-60" />
 		</a>
 	</div>
 </div>
 
 {#if exportStatus}
-	<div class="col-12 p-3.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 border" style="background: rgba(37, 99, 235, 0.08); border-color: rgba(37, 99, 235, 0.25); color: #1e40af;">
+	<div class="col-12 p-3.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 border" style="background: var(--pill-info-bg); border-color: var(--pill-info-border); color: var(--pill-info-text);">
 		<Icon name="check-circle" size={18} />
 		<span>{exportStatus}</span>
 	</div>
@@ -125,10 +121,10 @@
 				<strong>Perhatian:</strong> Menutup periode fiskal akan mengunci seluruh posting jurnal September 2026. Anda disarankan menyelesaikan 3 nota True-Up terlebih dahulu agar HPP definitif terkunci.
 			</p>
 
-			<div class="flex items-center justify-end gap-2.5 pt-3 border-t" style="border-color: var(--border-panel);">
+			<div class="section-footer-action">
 				<button
 					type="button"
-					class="px-4 py-2.5 text-xs font-semibold rounded-lg transition-colors"
+					class="px-4 py-2.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
 					style="background: var(--bg-panel-sub); color: var(--text-muted); border: 1px solid var(--border-panel);"
 					onclick={() => (showClosePeriodModal = false)}
 				>

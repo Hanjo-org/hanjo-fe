@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { session } from '#lib/auth/session.svelte.js';
 	import { dashboardStore } from '#lib/features/dashboard/stores/dashboard.svelte.js';
-	import { DEMO_ORGANIZATIONS, DEMO_OUTLETS } from '#lib/auth/scope.js';
+	import { DEMO_OUTLETS } from '#lib/auth/scope.js';
 	import '#lib/features/dashboard/dashboard.css';
 
 	// Kartu-kartu Proyeksi Dashboard (Component-First)
@@ -22,6 +22,7 @@
 	import SmPettyCashCard from '#lib/features/dashboard/components/SmPettyCashCard.svelte';
 	import SmProposalsCard from '#lib/features/dashboard/components/SmProposalsCard.svelte';
 	import SmEodStatusCard from '#lib/features/dashboard/components/SmEodStatusCard.svelte';
+	import SmQuickLinksBar from '#lib/features/dashboard/components/SmQuickLinksBar.svelte';
 
 	// Komponen Khusus Cockpit Ringkasan Owner & HQ Admin
 	import OwnerPulseStrip from '#lib/features/dashboard/components/OwnerPulseStrip.svelte';
@@ -44,6 +45,7 @@
 	import BrandPromoConsistencyCard from '#lib/features/dashboard/components/BrandPromoConsistencyCard.svelte';
 	import BrandOutletComparisonCard from '#lib/features/dashboard/components/BrandOutletComparisonCard.svelte';
 	import BrandOutletDetailModal from '#lib/features/dashboard/components/BrandOutletDetailModal.svelte';
+	import BrandQuickLinksBar from '#lib/features/dashboard/components/BrandQuickLinksBar.svelte';
 
 	import Icon from '#lib/components/data/Icon.svelte';
 
@@ -52,7 +54,8 @@
 		owner: 'Owner & Pimpinan',
 		hq_admin: 'Admin Pusat (HQ)',
 		finance: 'Finance & Akuntansi',
-		store_manager: 'Brand & Organisasi Manager',
+		brand_manager: 'Brand & Organisasi Manager',
+		store_manager: 'Store Manager (Gerai)',
 		cashier: 'Kasir POS'
 	};
 
@@ -64,20 +67,7 @@
 
 	const isStoreManager = $derived(session.role === 'store_manager' || session.role === 'cashier');
 
-	const currentScopeDisplay = $derived.by(() => {
-		if (session.activeOutletId && session.activeOutletId !== '*' && session.activeOutletId !== 'all') {
-			const outlet = DEMO_OUTLETS.find((o) => o.id === session.activeOutletId);
-			return outlet ? `Gerai ${outlet.name}` : 'Gerai Terpilih';
-		}
-		if (session.activeOrganizationId && session.activeOrganizationId !== '*' && session.activeOrganizationId !== 'all') {
-			const org = DEMO_ORGANIZATIONS.find((o) => o.id === session.activeOrganizationId);
-			return org ? `Brand ${org.name} (Konsolidasi Gerai)` : 'Brand Terpilih';
-		}
-		if (currentRole === 'store_manager') {
-			return 'Brand Seduhan Kopi Jodi (Konsolidasi 3 Gerai)';
-		}
-		return 'Seluruh Organisasi & Gerai (Konsolidasi Global)';
-	});
+
 
 	function normalizeScope(id: string | null | undefined): string {
 		if (!id || id === 'all') return '*';
@@ -195,40 +185,6 @@
 			</div>
 		</header>
 
-		<!-- Global Sync & Reference Date Bar (Menggantikan footer berulang 8x di tiap kartu) -->
-		<div class="col-12 flex items-center justify-between flex-wrap gap-3 px-5 py-3 rounded-xl border mb-3" style="background: var(--bg-panel); border-color: var(--border-panel);">
-			<div class="flex items-center gap-3">
-				<span class="inline-flex items-center gap-2 font-bold text-[13px]" style="color: var(--text-main);">
-					<Icon name="clock" size={16} class="text-primary" />
-					<span>Data per: <strong>Selasa, 13 Okt 2026 &bull; 21:00 WIB</strong></span>
-				</span>
-				<span class="dot-sep">•</span>
-				<span class="text-xs" style="color: var(--text-muted); font-weight: 500;">
-					Cakupan: <strong style="color: #60a5fa;">{currentScopeDisplay}</strong>
-				</span>
-				<span class="dot-sep">•</span>
-				<span class="text-xs" style="color: var(--text-muted); font-weight: 500;">
-					Filter: <strong style="color: var(--text-main);">{dashboardStore.dateRange === 'today' ? 'Hari Ini (13 Okt)' : dashboardStore.dateRange === '7days' ? '7 Hari Terakhir' : 'Bulan Ini (Okt 2026)'}</strong>
-				</span>
-			</div>
-
-			<!-- Status Konektivitas Jaringan & Gateway (Lebih Besar & Kontras Tinggi) -->
-			<div class="flex items-center gap-3 text-xs flex-wrap">
-				<span class="inline-flex items-center gap-1.5 font-semibold px-2.5 py-1 rounded-md" style="background: rgba(16, 185, 129, 0.12); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25);">
-					<span class="w-2 h-2 rounded-full" style="background: #10b981; display: inline-block;"></span>
-					POS Kasir: Realtime (5/5)
-				</span>
-				<span class="inline-flex items-center gap-1.5 font-semibold px-2.5 py-1 rounded-md" style="background: rgba(59, 130, 246, 0.12); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.25);">
-					<span class="w-2 h-2 rounded-full" style="background: #3b82f6; display: inline-block;"></span>
-					Gateway QRIS: T+1 Klir
-				</span>
-				<span class="inline-flex items-center gap-1.5 font-semibold px-2.5 py-1 rounded-md" style="background: rgba(168, 85, 247, 0.12); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.25);">
-					<span class="w-2 h-2 rounded-full" style="background: #a855f7; display: inline-block;"></span>
-					Bank: BCA &amp; Mandiri
-				</span>
-			</div>
-		</div>
-
 		<!-- Fluid Responsive Card Grid (T-01.5: Tablet ≥ 768px hingga Desktop) -->
 		<main class="dashboard-grid" id="dashboard-cards-container">
 		{#if currentRole === 'owner' || currentRole === 'hq_admin'}
@@ -259,7 +215,7 @@
 			<TrueUpPendingCard />
 			<FinanceQuickLinksBar />
 
-		{:else if currentRole === 'store_manager'}
+		{:else if currentRole === 'brand_manager'}
 			<!-- 3. DASHBOARD BRAND & ORGANISASI MANAGER (Multi-Outlet Cockpit) -->
 			<!-- Row 1: KPI Brand (Omzet Brand LFL, Outlet Butuh Perhatian, Estimasi Food Cost %, Kas Gabungan) -->
 			<BrandPulseStrip
@@ -298,6 +254,30 @@
 			<BrandMenuPerformanceCard />
 			<BrandPromoConsistencyCard />
 			<BrandOutletComparisonCard />
+
+			<!-- Row 4: Aksi Eksekutif & Alat Kendali Brand Manager -->
+			<BrandQuickLinksBar />
+
+		{:else if currentRole === 'store_manager'}
+			<!-- 4. DASHBOARD STORE MANAGER (Single-Outlet Operational Cockpit) -->
+			<!-- Row 1: Penjualan Gerai & Tindakan Mendesak -->
+			<SalesSummaryCard />
+			<ActionCenterCard colSpan="col-12 col-lg-4" />
+
+			<!-- Row 2: Stok Kritis & Kas Kecil Gerai -->
+			<SmStockMinCard />
+			<SmPettyCashCard />
+
+			<!-- Row 3: Tutup Hari (EOD) & Stock Opname Gerai -->
+			<SmEodStatusCard />
+			<SmCountScheduleCard />
+
+			<!-- Row 4: Usulan Menu Lokal & Status Konektivitas POS Gerai -->
+			<SmProposalsCard />
+			<OutletOpsStatusCard />
+
+			<!-- Row 5: Pintasan Operasional Store Manager -->
+			<SmQuickLinksBar />
 
 		{:else}
 			<!-- Fallback Kasir / Default -->

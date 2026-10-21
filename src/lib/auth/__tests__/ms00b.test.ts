@@ -52,7 +52,7 @@ async function runTests() {
 	assert(switchBudi.user.role === 'store_manager' && switchBudi.user.name === 'Budi Santoso', 'Berhasil beralih ke Budi (SM Outlet A)');
 
 	const switchSari = await apiClient.post<any>(Endpoints.AUTH.DEV_SWITCH_ROLE, { userId: 'usr-sari' });
-	assert(switchSari.user.role === 'store_manager' && switchSari.user.outlet_ids?.length === 2, 'Berhasil beralih ke Sari (SM Outlet B & C)');
+	assert(switchSari.user.role === 'brand_manager' && switchSari.user.name === 'Sari Dewi', 'Berhasil beralih ke Sari (Brand Manager Jodi)');
 
 	// -------------------------------------------------------------------------
 	// 3. Uji Otorisasi RBAC can() untuk 4 Peran (AC-00.3)

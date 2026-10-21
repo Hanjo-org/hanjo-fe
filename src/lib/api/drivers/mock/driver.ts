@@ -14,13 +14,7 @@ import { registerDevHandlers } from './handlers/dev.js';
 import { registerNavHandlers } from './handlers/nav.js';
 import { registerDashboardHandlers } from './handlers/dashboard.js';
 import { registerEodHandlers } from './handlers/eod.js';
-
-// Registrasi handler awal
-registerAuthHandlers();
-registerDevHandlers();
-registerNavHandlers();
-registerDashboardHandlers();
-registerEodHandlers();
+import { registerOrganizationHandlers } from './handlers/organization.js';
 
 export class MockDriver implements DataDriver {
 	async request<T>(req: ApiRequest): Promise<ApiResponse<T>> {
@@ -73,3 +67,11 @@ export class MockDriver implements DataDriver {
 }
 
 export const mockDriver = new MockDriver();
+
+// Registrasi handler awal
+registerAuthHandlers();
+registerDevHandlers();
+registerNavHandlers();
+registerDashboardHandlers();
+registerEodHandlers();
+registerOrganizationHandlers();

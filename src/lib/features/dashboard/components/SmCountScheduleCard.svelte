@@ -40,9 +40,14 @@
 			</div>
 
 			<div>
-				<Button variant="secondary" size="md" href="/inventory">
-					Mulai Hitung Fisik
-				</Button>
+				<a
+					href="/inventory"
+					class="btn-approve-direct text-xs py-2 px-3.5 font-semibold flex items-center gap-1.5"
+					style="background: var(--bg-panel-sub); border: 1px solid var(--border-panel); color: var(--text-main);"
+				>
+					<Icon name="clipboard-document-check" size={14} />
+					<span>Mulai Hitung Fisik</span>
+				</a>
 			</div>
 		</div>
 
