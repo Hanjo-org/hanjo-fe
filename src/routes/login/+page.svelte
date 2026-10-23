@@ -150,7 +150,7 @@
 		max-width: 460px;
 		background: #ffffff;
 		border: 1px solid #e2e8f0;
-		border-radius: 16px;
+		border-radius: var(--radius-xl, 12px);
 		box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
 		padding: 32px 28px;
 		display: flex;

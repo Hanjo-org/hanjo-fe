@@ -105,7 +105,7 @@
 	.coming-soon-card {
 		background: var(--bg-panel);
 		border: 1px solid var(--border-panel);
-		border-radius: var(--radius-xl, 16px);
+		border-radius: var(--radius-xl, 12px);
 		box-shadow: var(--shadow-card);
 		max-width: 560px;
 		width: 100%;

@@ -69,9 +69,10 @@
 	.checkbox-wrapper {
 		display: inline-flex;
 		align-items: flex-start;
-		gap: 10px;
+		gap: 12px;
 		cursor: pointer;
 		user-select: none;
+		width: 100%;
 	}
 
 	.checkbox-box-container {
@@ -79,6 +80,7 @@
 		display: flex;
 		align-items: center;
 		margin-top: 2px;
+		flex-shrink: 0;
 	}
 
 	.hidden-input {
@@ -90,8 +92,8 @@
 	}
 
 	.custom-checkbox {
-		width: 18px;
-		height: 18px;
+		width: 19px;
+		height: 19px;
 		background: var(--bg-input);
 		border: 1.5px solid var(--border-panel);
 		border-radius: var(--radius-sm);
@@ -100,6 +102,7 @@
 		justify-content: center;
 		color: #ffffff;
 		transition: all 0.15s ease-in-out;
+		flex-shrink: 0;
 	}
 
 	.hidden-input:focus-visible + .custom-checkbox {
@@ -121,13 +124,15 @@
 	.checkbox-labels {
 		display: flex;
 		flex-direction: column;
-		gap: 2px;
+		gap: 4px;
+		flex: 1;
 	}
 
 	.checkbox-title {
-		font-size: 13px;
+		font-size: 13.5px;
 		font-weight: 600;
 		color: var(--text-main);
+		line-height: 1.4;
 	}
 
 	.checkbox-title.is-disabled {
@@ -136,8 +141,8 @@
 	}
 
 	.checkbox-desc {
-		font-size: 11.5px;
+		font-size: 12px;
 		color: var(--text-muted);
-		line-height: 1.35;
+		line-height: 1.5;
 	}
 </style>

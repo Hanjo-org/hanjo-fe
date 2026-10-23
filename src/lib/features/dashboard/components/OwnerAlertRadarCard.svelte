@@ -183,8 +183,8 @@
 				<div class="flex flex-col gap-2">
 					{#each actionItems as item}
 						<div
-							class="dash-subbox flex items-center justify-between gap-3 p-2.5"
-							style={item.type === 'PERIOD_REOPEN' ? 'border-left: 3px solid #ef4444;' : ''}
+							class="dash-subbox flex items-center justify-between gap-3 py-3 px-3.5"
+							style={item.type === 'PERIOD_REOPEN' ? 'border-left: 3px solid #ef4444; background: rgba(239, 68, 68, 0.05);' : ''}
 						>
 							<div class="flex flex-col gap-0.5 min-w-0 flex-1">
 								<div
@@ -225,8 +225,8 @@
 				<div class="flex flex-col gap-2">
 					{#each stockItems as itm}
 						<div
-							class="dash-subbox flex items-center justify-between gap-3 p-2.5"
-							style="border-left: 3px solid #ef4444;"
+							class="dash-subbox flex items-center justify-between gap-3 py-3 px-3.5"
+							style="border-left: 3px solid #ef4444; background: rgba(239, 68, 68, 0.04);"
 						>
 							<div class="flex flex-col gap-0.5 min-w-0 flex-1">
 								<div class="flex items-center gap-2 flex-wrap">

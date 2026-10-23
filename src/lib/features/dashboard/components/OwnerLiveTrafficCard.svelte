@@ -451,52 +451,46 @@
 			{/if}
 		</div>
 
-		<!-- Insight Singkat Puncak & Dips (Dinamis Sesuai Mode Grafik) -->
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+		<!-- Ringkasan Perbandingan (Teks Bersih Tanpa Kotak) -->
+		<div class="flex items-center justify-between flex-wrap gap-3 py-2 px-1 text-xs mt-1">
 			{#if chartMode === 'hourly'}
-				<div class="dash-banner dash-banner-info flex items-center justify-between py-2 px-3">
-					<div class="flex items-center gap-2">
-						<Icon name="banknotes" size={15} />
-						<span class="text-[12px]">
-							<span style="color: var(--text-muted);">Pendapatan Sekarang:</span>
-							<strong style="color: var(--text-main); font-size: 13px;" class="ml-1">{data ? formatRupiah(data.omzet) : 'Rp 0'}</strong>
-						</span>
-					</div>
+				<div class="flex items-center gap-2">
+					<Icon name="banknotes" size={14} class="text-muted" />
+					<span>
+						<span class="text-muted">Pendapatan Sekarang:</span>
+						<strong class="text-main font-bold ml-1">{data ? formatRupiah(data.omzet) : 'Rp 0'}</strong>
+					</span>
 				</div>
-				<div class="dash-banner flex items-center justify-between py-2 px-3" style="background: {isHigher ? 'var(--pill-success-bg)' : 'var(--pill-danger-bg)'}; border: 1px solid {isHigher ? 'var(--pill-success-border)' : 'var(--pill-danger-border)'};">
-					<div class="flex items-center gap-2 text-[12px]" style="color: {isHigher ? 'var(--pill-success-text)' : 'var(--pill-danger-text)'};">
-						<Icon name={isHigher ? 'trending-up' : 'trending-down'} size={15} />
-						<span>
-							<span style="color: var(--text-muted);">Pendapatan Kemarin:</span>
-							<strong style="color: var(--text-main); font-size: 13px;" class="ml-1">{data?.yesterday_omzet ? formatRupiah(data.yesterday_omzet) : 'Rp 0'}</strong>
-							<span class="font-bold ml-1.5" style="color: {isHigher ? 'var(--pill-success-text)' : 'var(--pill-danger-text)'}; font-variant-numeric: tabular-nums;">
-								({diffOmzet >= 0 ? '+' : '-'}{formatRupiah(Math.abs(diffOmzet))} &bull; {diffOmzet >= 0 ? '+' : ''}{diffPct}%)
-							</span>
+				<div class="flex items-center gap-2">
+					<Icon name={isHigher ? 'trending-up' : 'trending-down'} size={14} class={isHigher ? 'text-emerald-500' : 'text-rose-500'} />
+					<span>
+						<span class="text-muted">Pendapatan Kemarin:</span>
+						<strong class="text-main font-bold ml-1">{data?.yesterday_omzet ? formatRupiah(data.yesterday_omzet) : 'Rp 0'}</strong>
+						<span class="font-bold ml-1.5 {isHigher ? 'text-emerald-500' : 'text-rose-500'}" style="font-variant-numeric: tabular-nums;">
+							({diffOmzet >= 0 ? '+' : '-'}{formatRupiah(Math.abs(diffOmzet))} &bull; {diffOmzet >= 0 ? '+' : ''}{diffPct}%)
 						</span>
-					</div>
+					</span>
 				</div>
 			{:else}
 				{#if peakDay}
-					<div class="dash-banner dash-banner-info flex items-center justify-between py-1.5 px-2.5">
-						<div class="flex items-center gap-1.5">
-							<Icon name="bolt" size={14} />
-							<span class="text-[11.5px]">
-								<strong>Puncak Mingguan (Weekend):</strong> <strong>{formatDate(peakDay.date)} ({getIndonesianDayName(peakDay.date)})</strong> &bull; <strong>{formatRupiah(peakDay.omzet)}</strong> ({peakDay.cup_count} cup).
-							</span>
-						</div>
+					<div class="flex items-center gap-2">
+						<Icon name="bolt" size={14} class="text-amber-500" />
+						<span class="text-xs">
+							<span class="text-muted">Puncak Mingguan:</span> <strong class="text-main">{formatDate(peakDay.date)} ({getIndonesianDayName(peakDay.date)})</strong> &bull; <strong class="text-main">{formatRupiah(peakDay.omzet)}</strong> ({peakDay.cup_count} cup)
+						</span>
 					</div>
 				{/if}
-				<div class="dash-banner flex items-center justify-between py-1.5 px-2.5" style="background: var(--pill-success-bg); border: 1px solid var(--pill-success-border);">
-					<div class="flex items-center gap-1.5 text-[11.5px]" style="color: var(--pill-success-text);">
-						<span class="font-bold">Rata-rata 7 Hari:</span>
-						<span style="color: var(--text-main);">~Rp {formatNumber(avg7DaysOmzet / 1000000, 1, 1)} jt/hari &bull; Total Mingguan: <strong>Rp {formatNumber(total7DaysOmzet / 1000000, 1, 1)} jt</strong></span>
-					</div>
+				<div class="flex items-center gap-2 text-xs">
+					<span class="text-muted">Rata-rata 7 Hari:</span>
+					<strong class="text-main">~Rp {formatNumber(avg7DaysOmzet / 1000000, 1, 1)} jt/hari</strong>
+					<span class="text-muted">&bull; Total:</span>
+					<strong class="text-main">Rp {formatNumber(total7DaysOmzet / 1000000, 1, 1)} jt</strong>
 				</div>
 			{/if}
 		</div>
 
-		<!-- Komposisi Pembayaran & AOV (Full-Width Sesuai Arahan) -->
-		<div class="dash-subbox p-3 flex flex-col justify-between mt-2.5">
+		<!-- Komposisi Pembayaran & AOV (Pembatas Garis Tipis Sederhana) -->
+		<div class="pt-3.5 mt-2 border-t flex flex-col justify-between" style="border-color: rgba(255, 255, 255, 0.06);">
 			<div class="flex items-center justify-between text-xs mb-1.5 flex-wrap gap-2">
 				<div class="flex items-center gap-2">
 					<span class="font-bold text-[13px]" style="color: var(--text-main);">Metode Pembayaran</span>
@@ -520,7 +514,7 @@
 					</span>
 				</div>
 				<!-- Split visual bar -->
-				<div class="w-full h-2 rounded-full overflow-hidden flex" style="background: var(--bg-panel-sub); border: 1px solid var(--border-panel);">
+				<div class="w-full h-2 rounded-full overflow-hidden flex" style="background: var(--bg-panel-sub); border: 1px solid var(--border-subtle);">
 					<div style="width: {data.non_cash_percentage || '74'}%; background: #3b82f6;" title="QRIS 74%"></div>
 					<div style="width: {data.cash_percentage || '26'}%; background: var(--brand-primary, #10b981);" title="Tunai 26%"></div>
 				</div>

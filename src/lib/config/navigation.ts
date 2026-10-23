@@ -177,14 +177,7 @@ export const NAVIGATION_CONFIG: NavSection[] = [
 				icon: 'catalog',
 				permission: 'catalog:read',
 				badgeKey: 'catalog.proposals_pending',
-				badgeVariant: 'info',
-				subItems: [
-					{ title: 'Bahan Baku & Item Stok', href: '/catalog#items', permission: 'catalog:read' },
-					{ title: 'Kategori & Satuan (UOM)', href: '/catalog#units', permission: 'catalog:read' },
-					{ title: 'Menu, Varian & Resep', href: '/catalog#recipes', permission: 'catalog:read' },
-					{ title: 'Daftar Harga & Saluran', href: '/catalog#pricing', permission: 'catalog:read' },
-					{ title: 'Usulan Menu Baru', href: '/catalog#proposals', permission: 'catalog:read', badgeKey: 'catalog.proposals_pending', badgeVariant: 'info' }
-				]
+				badgeVariant: 'info'
 			},
 			{
 				id: 'outlets',

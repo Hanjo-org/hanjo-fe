@@ -1,4 +1,6 @@
 <script lang="ts">
+	import DatePicker from './DatePicker.svelte';
+
 	interface Props {
 		id?: string;
 		label?: string;
@@ -71,16 +73,16 @@
 		onchange?.({ startDate, endDate });
 	}
 
-	function handleStartChange(e: Event & { currentTarget: HTMLInputElement }) {
-		startDate = e.currentTarget.value;
+	function handleStartChange(val: string) {
+		startDate = val;
 		if (endDate && startDate > endDate) {
 			endDate = startDate;
 		}
 		onchange?.({ startDate, endDate });
 	}
 
-	function handleEndChange(e: Event & { currentTarget: HTMLInputElement }) {
-		endDate = e.currentTarget.value;
+	function handleEndChange(val: string) {
+		endDate = val;
 		if (startDate && endDate < startDate) {
 			startDate = endDate;
 		}
@@ -89,14 +91,16 @@
 </script>
 
 <div class="form-control {className}">
-	{#if label}
+	{#if label || !disabled}
 		<div class="label-row">
-			<label for="{rangeId}-start" class="form-label">
-				{label}
-				{#if required}
-					<span class="required-star" aria-hidden="true">*</span>
-				{/if}
-			</label>
+			{#if label}
+				<label for="{rangeId}-start" class="form-label">
+					{label}
+					{#if required}
+						<span class="required-star" aria-hidden="true">*</span>
+					{/if}
+				</label>
+			{/if}
 
 			<div class="preset-badges">
 				<button type="button" class="preset-btn" onclick={() => applyPreset('today')}>Hari Ini</button>
@@ -108,30 +112,28 @@
 	{/if}
 
 	<div class="range-inputs-container" class:has-error={!!error} class:is-disabled={disabled}>
-		<div class="date-input-wrap">
-			<input
+		<div class="date-picker-wrap">
+			<DatePicker
 				id="{rangeId}-start"
-				type="date"
-				class="date-field"
-				value={startDate}
+				bind:value={startDate}
+				max={endDate}
 				{disabled}
 				{required}
-				aria-label="Tanggal Mulai"
+				placeholder="Tanggal Mulai"
 				onchange={handleStartChange}
 			/>
 		</div>
 
 		<span class="range-separator">s/d</span>
 
-		<div class="date-input-wrap">
-			<input
+		<div class="date-picker-wrap">
+			<DatePicker
 				id="{rangeId}-end"
-				type="date"
-				class="date-field"
-				value={endDate}
+				bind:value={endDate}
+				min={startDate}
 				{disabled}
 				{required}
-				aria-label="Tanggal Akhir"
+				placeholder="Tanggal Akhir"
 				onchange={handleEndChange}
 			/>
 		</div>
@@ -167,101 +169,59 @@
 		display: flex;
 		align-items: center;
 		gap: 3px;
-		text-transform: none;
 		letter-spacing: 0.015em;
-		transition: color 0.15s ease;
 		user-select: none;
 	}
 
-	.form-control:focus-within .form-label {
-		color: var(--text-main, #f1f5f9);
-	}
-
 	.required-star {
-		color: var(--pill-danger-text, #dc2626);
+		color: var(--pill-danger-text, #ef4444);
 		font-size: 11px;
 		font-weight: 500;
-		opacity: 0.85;
 	}
 
 	.preset-badges {
 		display: flex;
-		gap: 4px;
+		gap: 6px;
+		flex-wrap: wrap;
 	}
 
 	.preset-btn {
 		font-size: 11px;
 		font-weight: 600;
-		padding: 2px 7px;
-		background: #f1f5f9;
-		color: #475569;
-		border-radius: 4px;
-		border: 1px solid #e2e8f0;
+		padding: 3px 9px;
+		background: var(--bg-panel-sub);
+		color: var(--text-muted);
+		border-radius: var(--radius-sm, 6px);
+		border: 1px solid var(--border-panel);
 		cursor: pointer;
-		transition: all 0.15s;
+		transition: all 0.15s ease;
 	}
 
 	.preset-btn:hover {
-		background: #e2e8f0;
-		color: #0f172a;
+		background: var(--bg-panel-hover);
+		color: var(--text-main);
+		border-color: var(--border-focus);
 	}
 
 	.range-inputs-container {
 		display: flex;
 		align-items: center;
-		gap: 8px;
-		background: var(--bg-input, #ffffff);
-		border: 1px solid var(--border-input, rgba(255, 255, 255, 0.12));
-		border-radius: var(--radius-md, 8px);
-		padding: 4px 8px;
-		transition: border-color 0.15s ease, box-shadow 0.15s ease;
-		min-height: 38px;
+		gap: 12px;
+		width: 100%;
 		box-sizing: border-box;
 	}
 
-	.range-inputs-container:hover:not(:focus-within) {
-		border-color: var(--border-input-hover, rgba(255, 255, 255, 0.22));
-	}
-
-	.range-inputs-container:focus-within {
-		border-color: var(--brand-primary, #059669);
-		box-shadow: 0 0 0 3px var(--brand-primary-dim, rgba(5, 150, 105, 0.1));
-	}
-
-	.range-inputs-container.has-error {
-		border-color: var(--pill-danger-text, #dc2626);
-		background-color: var(--pill-danger-bg, #fef2f2);
-	}
-
-	.range-inputs-container.is-disabled {
-		background-color: var(--bg-panel-sub, #f1f5f9);
-		opacity: 0.65;
-		cursor: not-allowed;
-	}
-
-	.date-input-wrap {
+	.date-picker-wrap {
 		flex: 1;
-	}
-
-	.date-field {
-		width: 100%;
-		border: none;
-		outline: none;
-		background: transparent;
-		padding: 5px 4px;
-		font-size: 13px;
-		color: var(--text-main, #0f172a);
-		font-family: var(--font-body);
-	}
-
-	.date-field:disabled {
-		cursor: not-allowed;
+		min-width: 0;
 	}
 
 	.range-separator {
-		font-size: 11.5px;
-		font-weight: 600;
-		color: var(--text-muted, #94a3b8);
+		font-size: 12px;
+		font-weight: 700;
+		color: var(--text-muted);
+		flex-shrink: 0;
+		user-select: none;
 	}
 
 	.form-feedback {
@@ -270,11 +230,11 @@
 	}
 
 	.form-feedback.error {
-		color: var(--pill-danger-text, #dc2626);
+		color: var(--pill-danger-text, #ef4444);
 		font-weight: 500;
 	}
 
 	.form-feedback.helper {
-		color: var(--text-muted, #64748b);
+		color: var(--text-muted);
 	}
 </style>

@@ -63,11 +63,11 @@
 	--text-subtle: #64748b;
 	--text-dark: #020617;
 
-	/* Radii */
+	/* Radii (Standardized to rounded-xl: 12px) */
 	--radius-sm: 6px;
-	--radius-md: 10px;
-	--radius-lg: 14px;
-	--radius-xl: 18px;
+	--radius-md: 8px;
+	--radius-lg: 10px;
+	--radius-xl: 12px;
 	--radius-full: 9999px;
 
 	/* Fonts: Seragamkan seluruh font menggunakan Verdana */
@@ -220,7 +220,7 @@ samp {
 .panel-card {
 	background-color: var(--bg-panel);
 	border: 1px solid var(--border-panel);
-	border-radius: var(--radius-lg);
+	border-radius: var(--radius-xl);
 	box-shadow: var(--shadow-card);
 	transition: border-color 0.2s, background-color 0.2s;
 }

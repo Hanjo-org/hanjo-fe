@@ -9,6 +9,7 @@
 		target?: string;
 		disabled?: boolean;
 		loading?: boolean;
+		form?: string;
 		onclick?: (event: MouseEvent) => void;
 		children?: Snippet;
 		class?: string;
@@ -22,6 +23,7 @@
 		target,
 		disabled = false,
 		loading = false,
+		form,
 		onclick,
 		children,
 		class: className = ''
@@ -45,6 +47,7 @@
 {:else}
 	<button
 		{type}
+		{form}
 		class="btn btn-{variant} size-{size} {className}"
 		disabled={disabled || loading}
 		{onclick}

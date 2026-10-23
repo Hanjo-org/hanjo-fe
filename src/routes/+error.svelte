@@ -48,7 +48,7 @@
 		max-width: 480px;
 		background: #ffffff;
 		border: 1px solid #e2e8f0;
-		border-radius: 16px;
+		border-radius: var(--radius-xl, 12px);
 		padding: 40px 32px;
 		text-align: center;
 		box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);

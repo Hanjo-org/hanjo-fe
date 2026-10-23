@@ -271,7 +271,7 @@
 .outlet-item-card {
 	background: var(--bg-panel, #ffffff);
 	border: 1px solid var(--border-panel, #e2e8f0);
-	border-radius: 14px;
+	border-radius: var(--radius-xl, 12px);
 	padding: 20px;
 	display: flex;
 	flex-direction: column;
@@ -543,7 +543,7 @@
 .outlet-hero-card {
 	background: var(--bg-panel-sub, #161c28);
 	border: 1px solid var(--border-panel, #1d2535);
-	border-radius: 14px;
+	border-radius: var(--radius-xl, 12px);
 	padding: 18px 20px;
 	display: flex;
 	align-items: center;
@@ -586,7 +586,7 @@
 .detail-section {
 	background: var(--bg-panel-sub, #161c28);
 	border: 1px solid var(--border-panel, #1d2535);
-	border-radius: 14px;
+	border-radius: var(--radius-xl, 12px);
 	padding: 18px 20px;
 	display: flex;
 	flex-direction: column;
@@ -617,6 +617,25 @@
 
 @media (max-width: 720px) {
 	.detail-grid-2col {
+		grid-template-columns: 1fr;
+	}
+}
+
+.outlet-master-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+	align-items: stretch;
+}
+
+.master-column {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+@media (max-width: 900px) {
+	.outlet-master-grid {
 		grid-template-columns: 1fr;
 	}
 }

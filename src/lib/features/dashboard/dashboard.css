@@ -22,11 +22,11 @@
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
-	background: var(--bg-panel);
-	border: 1px solid var(--border-panel);
-	border-radius: var(--radius-xl, 14px);
-	padding: 14px 20px;
-	box-shadow: var(--shadow-card);
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	padding: 4px 0 8px 0;
+	box-shadow: none;
 	width: 100%;
 	box-sizing: border-box;
 }
@@ -38,7 +38,7 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: 20px;
-		padding: 14px 24px;
+		padding: 4px 0 10px 0;
 	}
 }
 
@@ -311,7 +311,7 @@
 .dash-card {
 	background: var(--bg-panel);
 	border: 1px solid var(--border-panel);
-	border-radius: var(--radius-xl, 14px);
+	border-radius: var(--radius-xl, 12px);
 	padding: 24px 24px;
 	display: flex;
 	flex-direction: column;
@@ -319,6 +319,14 @@
 	box-shadow: var(--shadow-card);
 	transition: box-shadow 0.2s, border-color 0.2s;
 	min-height: 220px;
+}
+
+:global([data-theme='dark']) .dash-card {
+	border-color: rgba(255, 255, 255, 0.05);
+}
+
+:global([data-theme='light']) .dash-card {
+	border-color: rgba(0, 0, 0, 0.06);
 }
 
 .dash-card:hover {
@@ -335,6 +343,10 @@
 	padding-bottom: 16px;
 }
 
+:global([data-theme='dark']) .card-top {
+	border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
 .card-title-group {
 	display: flex;
 	align-items: center;
@@ -345,8 +357,8 @@
 	width: 32px;
 	height: 32px;
 	border-radius: 8px;
-	background: var(--bg-panel-sub);
-	border: 1px solid var(--border-panel);
+	background: rgba(16, 185, 129, 0.1);
+	border: none;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -926,7 +938,7 @@
 .pulse-card {
 	background: var(--bg-panel);
 	border: 1px solid var(--border-panel);
-	border-radius: var(--radius-xl, 14px);
+	border-radius: var(--radius-xl, 12px);
 	padding: 20px 22px;
 	box-shadow: var(--shadow-card);
 	display: flex;
@@ -935,6 +947,14 @@
 	transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 	min-width: 0;
 	box-sizing: border-box;
+}
+
+:global([data-theme='dark']) .pulse-card {
+	border-color: rgba(255, 255, 255, 0.05);
+}
+
+:global([data-theme='light']) .pulse-card {
+	border-color: rgba(0, 0, 0, 0.06);
 }
 
 @media (min-width: 1600px) {
@@ -977,30 +997,31 @@
 	justify-content: center;
 	flex-shrink: 0;
 	aspect-ratio: 1;
+	border: none;
 }
 
 .pulse-icon-badge.brand {
-	background: rgba(5, 150, 105, 0.12);
+	background: rgba(16, 185, 129, 0.1);
 	color: var(--brand-primary);
-	border: 1px solid rgba(5, 150, 105, 0.2);
+	border: none;
 }
 
 .pulse-icon-badge.info {
-	background: var(--pill-info-bg);
-	color: var(--pill-info-text);
-	border: 1px solid var(--pill-info-border);
+	background: rgba(59, 130, 246, 0.1);
+	color: #60a5fa;
+	border: none;
 }
 
 .pulse-icon-badge.success {
-	background: var(--pill-success-bg);
-	color: var(--pill-success-text);
-	border: 1px solid var(--pill-success-border);
+	background: rgba(16, 185, 129, 0.1);
+	color: var(--brand-primary);
+	border: none;
 }
 
 .pulse-icon-badge.warning {
-	background: var(--pill-warning-bg);
-	color: var(--pill-warning-text);
-	border: 1px solid var(--pill-warning-border);
+	background: rgba(245, 158, 11, 0.1);
+	color: #fbbf24;
+	border: none;
 }
 
 /* Trend Text: Tanpa Pill (Cukup teks tebal non-transparan di pojok kanan atas) */
@@ -1127,10 +1148,9 @@
 .hourly-chart-box {
 	position: relative;
 	width: 100%;
-	padding: 14px 12px 12px 12px;
-	background: var(--bg-panel-sub);
-	border: 1px solid var(--border-panel);
-	border-radius: var(--radius-lg, 10px);
+	padding: 10px 0;
+	background: transparent;
+	border: none;
 	box-sizing: border-box;
 }
 
@@ -1818,7 +1838,7 @@
 .owner-quick-links-bar {
 	background: var(--bg-panel);
 	border: 1px solid var(--border-panel);
-	border-radius: var(--radius-xl, 14px);
+	border-radius: var(--radius-xl, 12px);
 	padding: 18px 24px;
 	display: flex;
 	flex-direction: column;
@@ -2009,8 +2029,8 @@
 	font-size: 11.5px;
 	font-weight: 600;
 	color: var(--text-main);
-	background: var(--bg-panel-sub);
-	border: 1px solid var(--border-panel);
+	background: rgba(255, 255, 255, 0.06);
+	border: none;
 	border-radius: 6px;
 	cursor: pointer;
 	text-decoration: none;
@@ -2018,11 +2038,52 @@
 	white-space: nowrap;
 }
 
+:global([data-theme='light']) .btn-view-direct {
+	background: rgba(0, 0, 0, 0.05);
+}
+
 .btn-view-direct:hover {
-	background: var(--bg-panel-hover);
+	background: rgba(255, 255, 255, 0.12);
 	color: var(--brand-primary, #34d399);
-	border-color: var(--brand-primary, #34d399);
 	transform: translateY(-1px);
+}
+
+:global([data-theme='light']) .btn-view-direct:hover {
+	background: rgba(0, 0, 0, 0.09);
+}
+
+/* Tab Underline Bar & Flat Alert Items */
+.tab-underline-btn {
+	background: transparent;
+	border: none;
+	padding: 0 0 8px 0;
+	color: var(--text-muted);
+}
+
+.tab-underline-btn:hover {
+	color: var(--text-main);
+}
+
+.tab-indicator {
+	position: absolute;
+	bottom: -9px;
+	left: 0;
+	right: 0;
+	height: 2px;
+	background: var(--brand-primary);
+	border-radius: 1px;
+}
+
+.flat-alert-item {
+	transition: background-color 0.15s ease;
+}
+
+.flat-alert-item:hover {
+	background-color: rgba(255, 255, 255, 0.03);
+}
+
+:global([data-theme='light']) .flat-alert-item:hover {
+	background-color: rgba(0, 0, 0, 0.02);
 }
 
 /* Scrollable Container for Action Items */
@@ -2089,7 +2150,7 @@
 	width: 100%;
 	background: var(--bg-panel);
 	border: 1px solid var(--border-panel);
-	border-radius: var(--radius-xl, 14px);
+	border-radius: var(--radius-xl, 12px);
 	box-shadow: 0 24px 50px rgba(0, 0, 0, 0.55);
 	overflow: hidden;
 	padding: 24px 26px;

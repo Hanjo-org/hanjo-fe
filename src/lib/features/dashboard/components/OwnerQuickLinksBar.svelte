@@ -7,6 +7,7 @@
 	 * aksi eksekutif riil dan wawasan cepat yang langsung berguna.
 	 */
 	import Icon from '../../../components/data/Icon.svelte';
+	import Badge from '../../../components/data/Badge.svelte';
 
 	let actionToast = $state<string | null>(null);
 
@@ -49,9 +50,9 @@
 
 		<!-- 2. Audit Void & Pembatalan Transaksi -->
 		<a href="/reports#sales" class="quick-link-btn" title="Audit 1 pembatalan transaksi di Jodi Senopati">
-			<span style="color: #f59e0b; display: inline-flex;"><Icon name="exclamation-circle" size={15} /></span>
+			<span style="color: var(--pill-warning-text); display: inline-flex;"><Icon name="exclamation-circle" size={15} /></span>
 			<span>Audit Void &amp; Diskon (1 Kasus)</span>
-			<span class="text-[10px] px-1.5 py-0.2 rounded font-bold" style="background: rgba(245, 158, 11, 0.15); color: #fcd34d;">Rp 38.500</span>
+			<Badge variant="warning" size="sm">Rp 38.500</Badge>
 		</a>
 
 		<!-- 3. Broadcast Memo ke Mesin Kasir -->
@@ -66,7 +67,7 @@
 
 		<!-- 4. Target Omzet Harian -->
 		<a href="/reports#pnl" class="quick-link-btn" title="Pencapaian target omzet hari ini">
-			<span style="color: #3b82f6; display: inline-flex;"><Icon name="trophy" size={15} /></span>
+			<span style="color: var(--pill-info-text); display: inline-flex;"><Icon name="trophy" size={15} /></span>
 			<span>Target Omzet: <strong>96.7%</strong></span>
 			<span class="text-[10px] text-muted">(Rp 14,5 jt / 15 jt)</span>
 		</a>

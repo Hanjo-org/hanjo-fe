@@ -283,7 +283,7 @@
 			<!-- Fallback Kasir / Workspace POS -->
 			<ActionCenterCard />
 			<div class="col-12 p-8 text-center rounded-xl flex flex-col items-center justify-center gap-4" style="background: var(--bg-panel); border: 1px solid var(--border-panel); min-height: 240px;">
-				<div class="w-14 h-14 rounded-2xl flex items-center justify-center text-emerald-500" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25);">
+				<div class="w-14 h-14 rounded-xl flex items-center justify-center text-emerald-500" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25);">
 					<Icon name="device-tablet" size={28} />
 				</div>
 				<div class="max-w-md">

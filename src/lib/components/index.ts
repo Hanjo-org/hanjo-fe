@@ -34,6 +34,7 @@ export { default as StatusBadge } from './data/StatusBadge.svelte';
 export { default as MetricCard } from './data/MetricCard.svelte';
 export { default as StatCard } from './data/MetricCard.svelte'; // Alias kompatibilitas
 export { default as Table } from './data/Table.svelte';
+export { default as Pagination } from './data/Pagination.svelte';
 export { default as FilterBar } from './data/FilterBar.svelte';
 export { default as DiffViewer } from './data/DiffViewer.svelte';
 export { default as Timeline } from './data/Timeline.svelte';

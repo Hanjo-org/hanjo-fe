@@ -91,7 +91,7 @@
 <!-- Modal Konfirmasi Tutup Periode Fiskal September 2026 -->
 {#if showClosePeriodModal}
 	<div class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px);">
-		<div class="modal-box w-full max-w-md p-6 rounded-2xl flex flex-col gap-5 shadow-2xl border" style="background: var(--bg-panel); border-color: var(--border-panel);">
+		<div class="modal-box w-full max-w-md p-6 rounded-xl flex flex-col gap-5 shadow-xl border" style="background: var(--bg-panel); border-color: var(--border-panel);">
 			<div class="flex items-center gap-3">
 				<div class="p-2.5 rounded-xl" style="background: rgba(245, 158, 11, 0.12); color: var(--pill-warning-text);">
 					<Icon name="lock-closed" size={24} />

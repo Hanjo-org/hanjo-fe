@@ -685,5 +685,163 @@ export interface CompleteEodRequest {
   notes?: string;
 }
 
+// ============================================================================
+// MS-03: Katalog Bahan, Satuan, Konversi & Pemasok (§MS-03)
+// ============================================================================
+
+/** Kategori Item Bahan Baku */
+export interface ItemCategory {
+  id: string;
+  name: string;
+  code: string;
+  description?: string;
+  item_count?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Satuan Ukuran / UOM */
+export interface Unit {
+  id: string;
+  name: string;
+  symbol: string;
+  type: 'volume' | 'weight' | 'count' | 'other';
+  is_system?: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Konversi Satuan Ukuran */
+export interface UnitConversion {
+  id: string;
+  item_id?: string; // Optional: spesifik untuk bahan tertentu
+  from_unit_id: string;
+  from_unit_symbol: string;
+  to_unit_id: string;
+  to_unit_symbol: string;
+  factor: DecimalString; // misal "1000.0000" (1 Liter = 1000 ml)
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Master Bahan Baku (Stock Item) */
+export interface StockItem {
+  id: string;
+  name: string;
+  code: string;
+  category_id: string;
+  category_name?: string;
+  base_unit_id: string;
+  base_unit_symbol: string;
+  is_producible: boolean; // Olahan outlet (sirup gula aren, cold brew batch)
+  can_buy_external: boolean; // true = boleh beli luar, false = hanya dari gudang pusat HQ
+  hq_ref_code?: string; // Murni referensi pusat
+  hq_ref_price?: DecimalString; // Murni referensi harga pusat
+  status: 'active' | 'archived';
+  description?: string;
+  storage_temperature?: 'ambient' | 'chilled' | 'frozen';
+  current_stock?: DecimalString; // Total konsolidasi
+  stock_by_outlet?: Record<string, {
+    current: DecimalString;
+    min: DecimalString;
+    unit_cost?: DecimalString;
+    last_purchased_price?: DecimalString;
+  }>;
+  conversions?: UnitConversion[];
+  recipes_using_count?: number; // Jumlah resep aktif yang menggunakan bahan ini
+  has_stock_movements?: boolean; // Jika true, base_unit dikunci permanen (409 conflict)
+  created_at: string;
+  updated_at: string;
+}
+
+/** Riwayat Harga Pembelian Bahan per Outlet */
+export interface StockItemCostEntry {
+  date: string;
+  invoice_number: string;
+  supplier_id: string;
+  supplier_name: string;
+  unit_price: DecimalString;
+  qty: DecimalString;
+  unit: string;
+}
+
+export interface StockItemCostHistory {
+  item_id: string;
+  outlet_id: string;
+  outlet_name: string;
+  last_purchased_price: DecimalString;
+  last_purchased_at: string;
+  average_unit_cost: DecimalString;
+  history: StockItemCostEntry[];
+}
+
+/** Override Batas Stok Minimum per Outlet */
+export interface StockItemMinStockOverride {
+  item_id: string;
+  outlet_id: string;
+  min_stock: DecimalString;
+  updated_at: string;
+}
+
+/** Master Pemasok (Supplier) */
+export interface Supplier {
+  id: string;
+  name: string;
+  code: string;
+  type: 'hq_warehouse' | 'external';
+  contact_person?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  city?: string;
+  payment_terms_days: number; // 0 = Tunai/COD, 7, 14, 30 hari tempo
+  status: 'active' | 'inactive';
+  notes?: string;
+  has_transactions?: boolean; // Jika true, tidak boleh dihapus fisik (409 conflict)
+  created_at: string;
+  updated_at: string;
+}
+
+/** Hasil Validasi & Pratinjau Impor CSV Bahan */
+export interface CsvImportRowError {
+  row_number: number;
+  code: string;
+  field: string;
+  message: string;
+  raw_data: Record<string, string>;
+}
+
+export interface CsvImportPreview {
+  total_rows: number;
+  valid_rows: number;
+  error_rows: number;
+  items_to_create: Array<{
+    row_number: number;
+    name: string;
+    code: string;
+    category: string;
+    base_unit: string;
+    hq_ref_price: DecimalString;
+    can_buy_external: boolean;
+  }>;
+  items_to_update: Array<{
+    row_number: number;
+    id: string;
+    name: string;
+    code: string;
+    changes: string;
+  }>;
+  errors: CsvImportRowError[];
+}
+
+export interface CsvImportCommitResult {
+  success: boolean;
+  created_count: number;
+  updated_count: number;
+  skipped_count: number;
+  message: string;
+}
+
 
 
