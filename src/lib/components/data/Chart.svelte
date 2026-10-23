@@ -165,7 +165,7 @@
 					text-anchor="middle"
 					font-size="11"
 					fill="var(--text-muted, #64748b)"
-					font-family="sans-serif"
+					font-family="var(--font-body, 'Plus Jakarta Sans', sans-serif)"
 				>
 					{item.label}
 				</text>
@@ -224,6 +224,8 @@
 	.hovered-value {
 		color: var(--pill-success-text, #065f46);
 		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+		font-feature-settings: 'tnum' on, 'lnum' on;
 	}
 
 	.svg-wrap {

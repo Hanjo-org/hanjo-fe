@@ -24,7 +24,9 @@ export class CatalogStore {
 	// =========================================================================
 	// State Navigasi Tab
 	// =========================================================================
-	activeTab = $state<'items' | 'categories' | 'units' | 'suppliers'>('items');
+	activeTab = $state<
+		'items' | 'menus' | 'recipes' | 'modifiers' | 'pricing' | 'availability' | 'categories' | 'units' | 'suppliers'
+	>('items');
 
 	// =========================================================================
 	// State Bahan Baku (Stock Items)

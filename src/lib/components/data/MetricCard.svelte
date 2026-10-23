@@ -124,8 +124,9 @@
 		font-weight: 800;
 		color: var(--text-main);
 		line-height: 1.15;
-		font-family: var(--font-mono, inherit);
-		letter-spacing: -0.02em;
+		font-family: var(--font-body, inherit);
+		letter-spacing: -0.025em;
+		font-variant-numeric: tabular-nums;
 	}
 
 	.card-sub-row {

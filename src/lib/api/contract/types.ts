@@ -843,5 +843,287 @@ export interface CsvImportCommitResult {
   message: string;
 }
 
+// ---------------------------------------------------------------------------
+// Katalog Menu, Varian, Modifier, Resep, Harga & Channel (MS-04)
+// ---------------------------------------------------------------------------
+
+/** Kategori Menu Siap Jual (Beverage, Food, Pastry, dll.) */
+export interface MenuCategory {
+  id: string;
+  name: string;
+  code: string;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Entitas Utama Menu Siap Jual */
+export interface MenuItem {
+  id: string;
+  name: string;
+  code: string; // e.g. "MNU-LAT-01"
+  category_id: string;
+  category_name?: string;
+  description?: string;
+  image_url?: string;
+  status: 'active' | 'archived' | 'draft';
+  scope_type: 'all_outlets' | 'outlet_set';
+  target_outlet_ids?: string[]; // Jika scope_type === 'outlet_set'
+  is_time_limited?: boolean;
+  available_from?: string; // YYYY-MM-DD atau ISO
+  available_until?: string; // YYYY-MM-DD atau ISO
+  variants: MenuVariant[];
+  modifier_group_ids: string[];
+  created_at: string;
+  updated_at: string;
+  version: number;
+}
+
+/** Varian Spesifik dari Menu (misal Hot / Iced, Regular / Large) */
+export interface MenuVariant {
+  id: string;
+  menu_item_id: string;
+  name: string; // misal "Iced", "Hot", "Large"
+  code: string; // e.g. "VAR-AREN-ICED"
+  sku: string;
+  is_active: boolean;
+  base_price: DecimalString; // Format "28000.00"
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Efek Opsi Modifier pada Bahan Resep (§6.3) */
+export interface RecipeEffect {
+  id?: string;
+  type: 'replace' | 'add' | 'multiply';
+  target_stock_item_id: string; // Bahan sasaran yang dimodifikasi
+  target_stock_item_name?: string;
+  replacement_stock_item_id?: string; // Bahan pengganti (untuk 'replace')
+  replacement_stock_item_name?: string;
+  ratio?: DecimalString; // Rasio konversi untuk 'replace', mis. "1.0000"
+  added_quantity?: DecimalString; // Tambahan kuantitas untuk 'add' dalam satuan pakai, mis. "18.0000"
+  multiplier?: DecimalString; // Pengali untuk 'multiply', mis. "0.5000" (less ice 50%)
+  serving_unit?: string; // e.g. "g", "ml", "pcs"
+}
+
+/** Opsi Pilihan dalam Grup Modifier */
+export interface ModifierOption {
+  id: string;
+  group_id: string;
+  name: string; // misal "Susu Oat", "Extra Shot", "Less Ice"
+  code: string;
+  price_delta: DecimalString; // Tambahan harga dasar, misal "3000.00"
+  is_default: boolean;
+  sort_order: number;
+  recipe_effects: RecipeEffect[]; // Efek ke formula resep (§6.3)
+}
+
+/** Grup Modifier (Ukuran, Level Gula, Es, Tambahan, Jenis Susu, Topping) */
+export interface ModifierGroup {
+  id: string;
+  name: string; // e.g. "Jenis Susu", "Level Es", "Extra Add-on"
+  code: string;
+  description?: string;
+  min_select: number; // e.g. 1 untuk pilihan wajib
+  max_select: number; // e.g. 1 untuk single choice, > 1 untuk multi select
+  is_required: boolean;
+  options: ModifierOption[];
+  version: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Bahan Baku dalam Resep / BOM (Bill of Materials) */
+export interface RecipeIngredient {
+  id: string;
+  stock_item_id: string;
+  stock_item_name: string;
+  stock_item_code: string;
+  quantity: DecimalString; // Kuantitas dalam satuan pakai, mis. "18.0000"
+  serving_unit: string; // e.g. "g", "ml", "pcs"
+  waste_pct: DecimalString; // Estimasi waste (0-100), mis. "0.00"
+  notes?: string;
+}
+
+/** Bahan Hasil Resolusi & Efek Modifier */
+export interface EffectiveIngredient {
+  stock_item_id: string;
+  stock_item_name: string;
+  stock_item_code: string;
+  quantity: DecimalString;
+  serving_unit: string;
+  waste_pct: DecimalString;
+  gross_quantity: DecimalString; // quantity × (1 + waste_pct / 100)
+  source_effect?: string; // Catatan efek (misal "Ditambahkan oleh Extra Shot")
+}
+
+/** Resep Berversi untuk Varian Menu Siap Jual (§6.2, §6.4) */
+export interface Recipe {
+  id: string;
+  variant_id: string;
+  variant_name?: string;
+  menu_item_id?: string;
+  menu_item_name?: string;
+  version_number: number; // v1, v2, dst
+  effective_from: ISODateTime;
+  effective_until?: ISODateTime; // null = masih aktif berjalan
+  is_active: boolean;
+  scope_type: 'standard' | 'outlet_override';
+  outlet_id?: string; // Terisi jika scope_type === 'outlet_override'
+  outlet_name?: string;
+  ingredients: RecipeIngredient[];
+  notes?: string;
+  created_by?: string;
+  created_at: string;
+  version: number;
+}
+
+/** Resep Produksi Bahan Olahan (Flag 'production') */
+export interface ProductionRecipe {
+  id: string;
+  output_stock_item_id: string;
+  output_stock_item_name: string;
+  output_quantity: DecimalString; // mis. "5.0000" (5 Liter sirup gula aren)
+  output_unit: string;
+  ingredients: RecipeIngredient[];
+  standard_duration_minutes: number;
+  instructions?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Aturan Pembulatan Harga Channel (§6.1) */
+export interface PricingRoundingRule {
+  mode: 'nearest' | 'up' | 'down';
+  step: 100 | 500 | 1000;
+}
+
+/** Channel Penjualan (POS Kasir, App Konsumen, Marketplace/Aggregator) */
+export interface SalesChannel {
+  id: string;
+  code: 'pos' | 'app' | 'marketplace' | string;
+  name: string;
+  is_active: boolean;
+  default_markup_pct: DecimalString; // e.g. "5.00" untuk App (5%), "0.00" untuk POS
+  rounding_mode: 'nearest' | 'up' | 'down';
+  rounding_step: 100 | 500 | 1000;
+  markups: ChannelMarkup[];
+  created_at: string;
+  updated_at: string;
+}
+
+/** Markup Berjangka Waktu per Channel */
+export interface ChannelMarkup {
+  id: string;
+  channel_code: string;
+  markup_pct: DecimalString;
+  effective_from: ISODateTime;
+  effective_until?: ISODateTime;
+  status: 'active' | 'retired';
+  notes?: string;
+}
+
+/** Harga Dasar Varian Menu */
+export interface BasePrice {
+  id: string;
+  variant_id: string;
+  price: DecimalString;
+  currency: 'IDR';
+  effective_from: ISODateTime;
+  effective_until?: ISODateTime;
+  created_at: string;
+}
+
+/** Override Harga Khusus Outlet Tertentu (Berjangka Waktu) */
+export interface PriceOverride {
+  id: string;
+  variant_id: string;
+  outlet_id: string;
+  outlet_name?: string;
+  price: DecimalString;
+  effective_from: ISODateTime;
+  effective_until?: ISODateTime;
+  reason?: string;
+  created_at: string;
+}
+
+/** Matriks Ketersediaan Menu per Outlet & Channel */
+export interface MenuAvailability {
+  id: string;
+  menu_item_id: string;
+  menu_item_name?: string;
+  variant_id?: string;
+  outlet_id: string;
+  channel_code: string;
+  is_available: boolean;
+  sold_out_reason?: string;
+  sold_out_at?: string;
+  updated_at: string;
+}
+
+/** Permintaan Simulasi Kalkulator Harga Channel (§6.1) */
+export interface PricingPreviewRequest {
+  variant_id: string;
+  outlet_id?: string;
+  channel_code: string;
+  option_ids?: string[]; // Opsi modifier yang dipilih
+}
+
+/** Hasil Simulasi Kalkulator Harga Channel (§6.1) */
+export interface PricingPreviewResponse {
+  variant_id: string;
+  outlet_id?: string;
+  channel_code: string;
+  channel_name: string;
+  base_price: DecimalString; // Harga dasar sebelum modifier
+  price_override_applied: boolean;
+  modifier_price_delta: DecimalString; // Total delta modifier
+  subtotal_before_markup: DecimalString; // (base + delta)
+  markup_pct: DecimalString; // e.g. "5.00"
+  markup_amount: DecimalString; // Hasil markup sebelum pembulatan
+  rounding_mode: 'nearest' | 'up' | 'down';
+  rounding_step: number;
+  final_price: DecimalString; // Hasil pembulatan resmi
+  calculation_formula: string; // Teks formula untuk audit & penjelasan di UI
+}
+
+/** Komponen Rincian Biaya per Bahan dalam Pratinjau HPP */
+export interface HppIngredientCostBreakdown {
+  stock_item_id: string;
+  stock_item_name: string;
+  stock_item_code: string;
+  serving_unit: string;
+  quantity: DecimalString;
+  waste_pct: DecimalString;
+  gross_quantity: DecimalString;
+  unit_cost: DecimalString; // Biaya per satuan pakai
+  cost_source: 'outlet_avg_cost' | 'last_purchase_price' | 'none';
+  subtotal_cost: DecimalString;
+  is_cost_missing: boolean;
+  effect_note?: string;
+}
+
+/** Hasil Pratinjau Kalkulasi HPP Varian Dinamis (§6.4) */
+export interface HppPreviewResponse {
+  variant_id: string;
+  variant_name: string;
+  outlet_id: string;
+  outlet_name: string;
+  recipe_version_number: number;
+  recipe_scope: 'standard' | 'outlet_override';
+  is_complete: boolean; // Jika false, tampilkan lencana "HPP tidak lengkap" (AC-04.9)
+  missing_cost_items: string[];
+  total_hpp: DecimalString; // e.g. "9140.00"
+  selling_price: DecimalString; // e.g. "28000.00"
+  gross_margin_amount: DecimalString; // e.g. "18860.00"
+  gross_margin_pct: DecimalString; // e.g. "67.4"
+  breakdown: HppIngredientCostBreakdown[];
+  warnings: string[];
+}
+
+
 
 

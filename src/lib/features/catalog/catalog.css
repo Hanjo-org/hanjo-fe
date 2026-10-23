@@ -338,7 +338,9 @@
 .item-code-badge {
 	display: inline-flex;
 	align-items: center;
-	padding: 3.5px 10px;
+	justify-content: center;
+	min-width: 68px;
+	padding: 4px 12px;
 	border-radius: 6px;
 	font-family: monospace;
 	font-size: 11.5px;
@@ -516,6 +518,69 @@
 
 .data-table tr:hover td {
 	background: var(--bg-panel-hover, rgba(255, 255, 255, 0.02));
+}
+
+/* Baris Tabel: Status Stok Berwarna Lembut (Soft Backgrounds) */
+.data-table tr.row-low-stock td {
+	background: rgba(245, 158, 11, 0.08) !important;
+}
+.data-table tr.row-low-stock:hover td {
+	background: rgba(245, 158, 11, 0.14) !important;
+}
+.data-table tr.row-low-stock td:first-child {
+	border-left: 3.5px solid #f59e0b;
+}
+
+.data-table tr.row-out-of-stock td {
+	background: rgba(239, 68, 68, 0.085) !important;
+}
+.data-table tr.row-out-of-stock:hover td {
+	background: rgba(239, 68, 68, 0.14) !important;
+}
+.data-table tr.row-out-of-stock td:first-child {
+	border-left: 3.5px solid #ef4444;
+}
+
+/* Light Mode Overrides for Crisp Contrast */
+[data-theme='light'] .data-table tr.row-low-stock td {
+	background: #fffbeb !important;
+}
+[data-theme='light'] .data-table tr.row-low-stock:hover td {
+	background: #fef3c7 !important;
+}
+[data-theme='light'] .data-table tr.row-out-of-stock td {
+	background: #fef2f2 !important;
+}
+[data-theme='light'] .data-table tr.row-out-of-stock:hover td {
+	background: #fee2e2 !important;
+}
+
+/* Kartu Grid: Status Stok Berwarna Lembut */
+.item-card.card-low-stock {
+	background: rgba(245, 158, 11, 0.05);
+	border-color: rgba(245, 158, 11, 0.3);
+}
+.item-card.card-low-stock:hover {
+	border-color: rgba(245, 158, 11, 0.6);
+	box-shadow: 0 4px 16px rgba(245, 158, 11, 0.12);
+}
+
+.item-card.card-out-of-stock {
+	background: rgba(239, 68, 68, 0.05);
+	border-color: rgba(239, 68, 68, 0.3);
+}
+.item-card.card-out-of-stock:hover {
+	border-color: rgba(239, 68, 68, 0.6);
+	box-shadow: 0 4px 16px rgba(239, 68, 68, 0.12);
+}
+
+[data-theme='light'] .item-card.card-low-stock {
+	background: #fffdf5;
+	border-color: #fde68a;
+}
+[data-theme='light'] .item-card.card-out-of-stock {
+	background: #fff8f8;
+	border-color: #fecaca;
 }
 
 /* Pill Badges */

@@ -70,10 +70,10 @@
 	--radius-xl: 12px;
 	--radius-full: 9999px;
 
-	/* Fonts: Seragamkan seluruh font menggunakan Verdana */
-	--font-heading: Verdana, Geneva, Tahoma, sans-serif;
-	--font-body: Verdana, Geneva, Tahoma, sans-serif;
-	--font-mono: Verdana, Geneva, Tahoma, sans-serif;
+	/* Fonts: Plus Jakarta Sans (Modern Premium Aesthetics) */
+	--font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+	--font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+	--font-mono: 'JetBrains Mono', 'Plus Jakarta Sans', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
 	/* Shadows */
 	--shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
@@ -161,24 +161,25 @@
 	box-sizing: border-box;
 	margin: 0;
 	padding: 0;
-	font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 body {
 	background-color: var(--bg-body);
 	color: var(--text-main);
-	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-family: var(--font-body);
 	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: optimizeLegibility;
 	min-height: 100vh;
 	line-height: 1.5;
 	overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
-	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-family: var(--font-heading);
 	font-weight: 700;
 	color: var(--text-main);
-	letter-spacing: -0.01em;
+	letter-spacing: -0.02em;
 }
 
 a {
@@ -187,17 +188,75 @@ a {
 }
 
 button, input, select, textarea {
-	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-family: var(--font-body);
 }
 
-/* Seragamkan font-mono agar tetap menggunakan font yang sama (Verdana) dengan angka tabular */
+/* ==========================================================================
+   Tips Implementasi Penting Typography Modern (Tampil "Mahal" & Rapi)
+   1. Aktifkan antialiased di <body>: garis huruf tajam & tipis bebas bleeding di dark mode
+   2. Rapatkan letter spacing untuk angka besar (tracking-tight: -0.025em)
+   3. Kunci lebar angka (tabular-nums) agar posisi teks di sebelahnya tidak bergeser
+   ========================================================================== */
+
+/* 1. Antialiased Utility (Sharp letterforms in Dark Mode) */
+.antialiased {
+	-webkit-font-smoothing: antialiased !important;
+	-moz-osx-font-smoothing: grayscale !important;
+	text-rendering: optimizeLegibility !important;
+}
+
+/* 2. Rapatkan Letter Spacing untuk Angka Besar (tracking-tight) */
+.tracking-tight,
+.text-2xl,
+.text-3xl,
+.text-4xl,
+.text-5xl,
+.headline-val,
+.card-value,
+.stat-box-val,
+.stat-box-value,
+.hpp-kpi-val,
+.metric-val-lg,
+.kpi-number,
+.stat-number,
+.metric-card-val {
+	letter-spacing: -0.025em !important;
+}
+
+/* 3. Kunci Lebar Angka (tabular-nums) pada harga, jam grafik, & persentase */
+.tabular-nums,
+.font-mono,
+.mono,
+.price,
+.currency-val,
+.headline-val,
+.card-value,
+.stat-box-val,
+.stat-box-value,
+.hpp-kpi-val,
+.menu-variant-price,
+.sales-subitem-val,
+.trend-indicator,
+.trend-pill,
+.percentage,
+.metric-val,
+.item-code-badge,
+.menu-card-code,
+.item-metrics-subbox,
+code,
+pre,
+kbd,
+samp {
+	font-variant-numeric: tabular-nums !important;
+	font-feature-settings: "tnum" on, "lnum" on !important;
+}
+
 .font-mono,
 code,
 pre,
 kbd,
 samp {
-	font-family: Verdana, Geneva, Tahoma, sans-serif !important;
-	font-variant-numeric: tabular-nums;
+	font-family: var(--font-mono) !important;
 }
 
 /* Custom Scrollbar */

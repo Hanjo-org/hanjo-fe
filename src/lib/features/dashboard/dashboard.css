@@ -554,7 +554,7 @@
 	font-size: 28px;
 	font-weight: 800;
 	color: var(--text-main);
-	letter-spacing: -0.02em;
+	letter-spacing: -0.025em;
 	font-family: inherit;
 	font-variant-numeric: tabular-nums;
 }

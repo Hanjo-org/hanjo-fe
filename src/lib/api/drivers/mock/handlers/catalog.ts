@@ -365,9 +365,9 @@ export let mockStockItems: StockItem[] = [
 		status: 'active',
 		description: 'Notes jeruk citrus cerah dan madu liar, dipanggang medium-light',
 		storage_temperature: 'ambient',
-		current_stock: '14500.0000',
+		current_stock: '6500.0000',
 		stock_by_outlet: {
-			'out-ubud-01': { current: '9500.0000', min: '3000.0000', unit_cost: '330.00', last_purchased_price: '330.00' },
+			'out-ubud-01': { current: '1500.0000', min: '3000.0000', unit_cost: '330.00', last_purchased_price: '330.00' },
 			'out-plaga-01': { current: '5000.0000', min: '2000.0000', unit_cost: '330.00', last_purchased_price: '330.00' }
 		},
 		recipes_using_count: 5,
@@ -390,10 +390,10 @@ export let mockStockItems: StockItem[] = [
 		status: 'active',
 		description: 'Kopi tanpa kafein dengan proses Swiss Water alami tanpa pelarut kimia',
 		storage_temperature: 'ambient',
-		current_stock: '5200.0000',
+		current_stock: '0.0000',
 		stock_by_outlet: {
-			'out-jkt-01': { current: '3200.0000', min: '1000.0000', unit_cost: '380.00', last_purchased_price: '380.00' },
-			'out-bdg-01': { current: '2000.0000', min: '1000.0000', unit_cost: '380.00', last_purchased_price: '380.00' }
+			'out-jkt-01': { current: '0.0000', min: '1000.0000', unit_cost: '380.00', last_purchased_price: '380.00' },
+			'out-bdg-01': { current: '0.0000', min: '1000.0000', unit_cost: '380.00', last_purchased_price: '380.00' }
 		},
 		recipes_using_count: 2,
 		has_stock_movements: true,
@@ -443,9 +443,9 @@ export let mockStockItems: StockItem[] = [
 		status: 'active',
 		description: 'Susu segar pasteurisasi kemasan 1 Liter untuk latte art microfoam',
 		storage_temperature: 'chilled',
-		current_stock: '142000.0000',
+		current_stock: '102000.0000',
 		stock_by_outlet: {
-			'out-jkt-01': { current: '48000.0000', min: '20000.0000', unit_cost: '21.50', last_purchased_price: '21.50' },
+			'out-jkt-01': { current: '8000.0000', min: '20000.0000', unit_cost: '21.50', last_purchased_price: '21.50' },
 			'out-bdg-01': { current: '36000.0000', min: '15000.0000', unit_cost: '21.50', last_purchased_price: '21.50' },
 			'out-sby-01': { current: '34000.0000', min: '15000.0000', unit_cost: '22.00', last_purchased_price: '22.00' },
 			'out-ubud-01': { current: '24000.0000', min: '10000.0000', unit_cost: '23.00', last_purchased_price: '23.00' }
@@ -1339,9 +1339,9 @@ export let mockStockItems: StockItem[] = [
 		status: 'active',
 		description: 'Konsentrat ekstrak dingin hasil seduh biji Gayo selama 24 jam di suhu 4°C',
 		storage_temperature: 'chilled',
-		current_stock: '45.0000',
+		current_stock: '29.5000',
 		stock_by_outlet: {
-			'out-jkt-01': { current: '18.0000', min: '5.0000', unit_cost: '45000.00', last_purchased_price: '45000.00' },
+			'out-jkt-01': { current: '2.5000', min: '5.0000', unit_cost: '45000.00', last_purchased_price: '45000.00' },
 			'out-bdg-01': { current: '14.0000', min: '4.0000', unit_cost: '45000.00', last_purchased_price: '45000.00' },
 			'out-sby-01': { current: '13.0000', min: '4.0000', unit_cost: '46000.00', last_purchased_price: '46000.00' }
 		},
@@ -1365,10 +1365,10 @@ export let mockStockItems: StockItem[] = [
 		status: 'active',
 		description: 'Rebusan gula aren alami dengan daun pandan wangi segar dan sejumput garam laut',
 		storage_temperature: 'chilled',
-		current_stock: '38.0000',
+		current_stock: '27.5000',
 		stock_by_outlet: {
 			'out-jkt-01': { current: '16.0000', min: '4.0000', unit_cost: '32000.00', last_purchased_price: '32000.00' },
-			'out-bdg-01': { current: '12.0000', min: '3.0000', unit_cost: '32000.00', last_purchased_price: '32000.00' },
+			'out-bdg-01': { current: '1.5000', min: '3.0000', unit_cost: '32000.00', last_purchased_price: '32000.00' },
 			'out-sby-01': { current: '10.0000', min: '3.0000', unit_cost: '33000.00', last_purchased_price: '33000.00' }
 		},
 		recipes_using_count: 6,
@@ -1459,9 +1459,9 @@ export let mockStockItems: StockItem[] = [
 		status: 'active',
 		description: 'Cup plastik mini untuk pembagian tester promosi di acara festival kopi',
 		storage_temperature: 'ambient',
-		current_stock: '500.0000',
+		current_stock: '25.0000',
 		stock_by_outlet: {
-			'out-jkt-01': { current: '500.0000', min: '100.0000', unit_cost: '600.00', last_purchased_price: '600.00' }
+			'out-jkt-01': { current: '25.0000', min: '100.0000', unit_cost: '600.00', last_purchased_price: '600.00' }
 		},
 		recipes_using_count: 0,
 		has_stock_movements: true,

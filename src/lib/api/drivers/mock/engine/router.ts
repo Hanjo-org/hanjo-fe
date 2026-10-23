@@ -141,9 +141,16 @@ class MockRouter {
 		}
 
 		// 4. Bangun konteks
-		if (!req.query) {
+		const searchParams = new URLSearchParams(url.search);
+		if (req.query) {
+			for (const [key, val] of Object.entries(req.query)) {
+				if (val !== undefined && val !== null && !searchParams.has(key)) {
+					searchParams.set(key, String(val));
+				}
+			}
+		} else {
 			const queryObj: Record<string, string> = {};
-			url.searchParams.forEach((val, key) => {
+			searchParams.forEach((val, key) => {
 				queryObj[key] = val;
 			});
 			req.query = queryObj;
@@ -152,7 +159,7 @@ class MockRouter {
 		const ctx: RouteContext = {
 			req,
 			params,
-			query: url.searchParams,
+			query: searchParams,
 			state: {}
 		};
 

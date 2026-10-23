@@ -16,7 +16,7 @@ Dokumen ini berfungsi sebagai **papan kendali progres** bersama antara Developer
 | **MS-01** | Shell, Navigasi & Dashboard 4 Peran | MS-01A s/d MS-01D | 🟢 Selesai (100%) | [`MS-01.md`](file:///c:/PROJECT/WEBSITE/hanjo/frontend/docs/milestones/MS-01.md) |
 | **MS-02** | Master Organisasi, Multi-Outlet & Mitra | MS-02A s/d MS-02B | 🟢 Selesai (100%) | [`MS-02.md`](file:///c:/PROJECT/WEBSITE/hanjo/frontend/docs/milestones/MS-02.md) |
 | **MS-03** | Katalog: Bahan, Satuan, Konversi, Pemasok | MS-03A s/d MS-03B | 🟢 Selesai (100%) | [`MS-03.md`](file:///c:/PROJECT/WEBSITE/hanjo/frontend/docs/milestones/MS-03.md) |
-| **MS-04** | Katalog: Menu, Varian, Modifier, Resep & Pricing | MS-04A s/d MS-04B | ⚪ Belum Dimulai | [`MS-04.md`](file:///c:/PROJECT/WEBSITE/hanjo/frontend/docs/milestones/MS-04.md) |
+| **MS-04** | Katalog: Menu, Varian, Modifier, Resep & Pricing | MS-04A s/d MS-04B | 🟢 Selesai (100%) | [`MS-04.md`](file:///c:/PROJECT/WEBSITE/hanjo/frontend/docs/milestones/MS-04.md) |
 | **MS-05** | Mesin Persetujuan Multi-Tier & Inbox | MS-05A s/d MS-05B | ⚪ Belum Dimulai | [`MS-05.md`](file:///c:/PROJECT/WEBSITE/hanjo/frontend/docs/milestones/MS-05.md) |
 | **MS-06** | Inventaris: Ledger Stok, Opname & Waste | MS-06A s/d MS-06C | ⚪ Belum Dimulai | [`MS-06.md`](file:///c:/PROJECT/WEBSITE/hanjo/frontend/docs/milestones/MS-06.md) |
 | **MS-07** | Pengadaan: PO Tanpa Harga, Penerimaan & True-Up | MS-07A s/d MS-07C | ⚪ Belum Dimulai | [`MS-07.md`](file:///c:/PROJECT/WEBSITE/hanjo/frontend/docs/milestones/MS-07.md) |

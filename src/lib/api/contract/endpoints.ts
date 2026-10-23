@@ -76,16 +76,26 @@ export const Endpoints = {
 	MENU: {
 		ITEMS: '/api/v1/menu-items',
 		ITEM_DETAIL: (id: string) => `/api/v1/menu-items/${id}`,
+		CATEGORIES: '/api/v1/menu-categories',
 		VARIANTS: (id: string) => `/api/v1/menu-items/${id}/variants`,
 		MODIFIER_GROUPS: '/api/v1/modifier-groups',
+		MODIFIER_GROUP_DETAIL: (id: string) => `/api/v1/modifier-groups/${id}`,
+		MODIFIER_OPTIONS: (groupId: string) => `/api/v1/modifier-groups/${groupId}/options`,
+		MODIFIER_OPTION_DETAIL: (id: string) => `/api/v1/modifier-options/${id}`,
 		RECIPES: '/api/v1/recipes',
+		RECIPE_DETAIL: (id: string) => `/api/v1/recipes/${id}`,
 		RECIPE_RESOLVE: '/api/v1/recipes/resolve',
+		RECIPE_ACTION: (id: string, action: string) => `/api/v1/recipes/${id}/actions/${action}`,
 		HPP_PREVIEW: (variantId: string) => `/api/v1/menu-variants/${variantId}/hpp`,
 		BASE_PRICES: '/api/v1/base-prices',
 		PRICE_OVERRIDES: '/api/v1/price-overrides',
 		CHANNELS: '/api/v1/sales-channels',
+		CHANNEL_MARKUPS: (id: string) => `/api/v1/sales-channels/${id}/markups`,
 		PRICING_PREVIEW: '/api/v1/pricing/preview',
-		AVAILABILITY: '/api/v1/menu-availability'
+		AVAILABILITY: '/api/v1/menu-availability',
+		AVAILABILITY_ACTION: (id: string, action: string) => `/api/v1/menu-availability/${id}/actions/${action}`,
+		PRODUCTION_RECIPES: '/api/v1/production-recipes',
+		PRODUCTION_RECIPE_DETAIL: (id: string) => `/api/v1/production-recipes/${id}`
 	},
 
 	// Persetujuan (MS-05)
